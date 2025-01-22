@@ -1,19 +1,40 @@
-import Navbar from './components/Navbar';
-import Main from './pages/main';
-import { Box, Flex } from '@chakra-ui/react';
+import { createBrowserRouter, RouterProvider } from 'react-router';
+import Layout from './pages/layout';
+import Fallback from './pages/fallback';
+import Product from './pages/product';
+import { Dashboard } from './pages/dashboard';
+import addProduct from './pages/addProduct';
 
 function App() {
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      Component: Layout,
+      HydrateFallback: Fallback,
+      children: [
+        {
+          path: '/',
+          Component: Dashboard,
+          HydrateFallback: Fallback,
+        },
+        {
+          path: '/product',
+          Component: Product,
+          HydrateFallback: Fallback,
+        },
+        {
+          path: '/add-product',
+          Component: addProduct,
+          HydrateFallback: Fallback,
+        },
+      ],
+    },
+  ]);
+
   return (
-    <Box pt={10}>
-      <Flex>
-        <Box w={'20%'}>
-          <Navbar />
-        </Box>
-        <Box w={'60%'} p={6} bg={'blackAlpha.100'}>
-          <Main />
-        </Box>
-      </Flex>
-    </Box>
+    <div>
+      <RouterProvider router={router} />
+    </div>
   );
 }
 

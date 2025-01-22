@@ -2,19 +2,21 @@ import {
   Box,
   Button,
   Flex,
+  Icon,
   Image,
   Input,
-  Select,
   Stack,
-  Switch,
   Text,
 } from '@chakra-ui/react';
+import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from './ui/menu';
+import { Switch } from './ui/switch';
+import { BsArrowUp } from 'react-icons/bs';
 
 const ListProduct = () => {
   return (
     <Box>
       {/* ListProduct Content */}
-      <Box bg={'white'} p={3} borderRadius={'10'}>
+      <Box bg={'white'} p={3}>
         <Flex justify="space-between" align="center" mb="6">
           <Text fontSize="2xl" fontWeight="bold">
             Daftar Produk
@@ -24,18 +26,28 @@ const ListProduct = () => {
 
         <Flex mb="4" gap="4">
           <Input placeholder="Cari produk" />
-          <Select placeholder="Semua Kategori">
-            <option value="kategori1">Kategori 1</option>
-            <option value="kategori2">Kategori 2</option>
-          </Select>
-          <Select placeholder="Urutkan">
+          <MenuRoot>
+            <MenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                Semua Kategori{' '}
+                <Icon>
+                  <BsArrowUp />
+                </Icon>
+              </Button>
+            </MenuTrigger>
+            <MenuContent>
+              <MenuItem value="rename">Kategori 1</MenuItem>
+              <MenuItem value="export">Kategori 2</MenuItem>
+            </MenuContent>
+          </MenuRoot>
+          {/* <Select placeholder="Urutkan">
             <option value="harga">Harga</option>
             <option value="stok">Stok</option>
-          </Select>
+          </Select> */}
         </Flex>
 
         <Box border="1px" borderColor="gray.200" rounded="md" p="4">
-          <Stack spacing="4">
+          <Stack gap="4">
             {Array.from({ length: 5 }).map((_, i) => (
               <Flex
                 key={i}

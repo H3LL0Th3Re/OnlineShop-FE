@@ -1,6 +1,7 @@
-import { Flex, Text, Link } from '@chakra-ui/react';
+import { Flex, Text } from '@chakra-ui/react';
+import { Link } from 'react-router';
 
-const Navbar = () => {
+const Sidebar = () => {
   return (
     <Flex
       direction={'column'}
@@ -11,22 +12,22 @@ const Navbar = () => {
       align="center"
     >
       <Flex gap="4" direction={'column'} w={'70%'}>
-        <Link>
+        <Link to="/">
           <Text p={1} _hover={{ bgColor: 'grey' }} borderRadius={5}>
             Dashboard
           </Text>
         </Link>
-        <Link>
+        <Link to="/product">
           <Text p={1} _hover={{ bgColor: 'grey' }} borderRadius={5}>
             Produk
           </Text>
         </Link>
-        <Link>
+        <Link to="/pesanan">
           <Text p={1} _hover={{ bgColor: 'grey' }} borderRadius={5}>
             Pesanan
           </Text>
         </Link>
-        <Link>
+        <Link to="/pengaturan">
           <Text p={1} _hover={{ bgColor: 'grey' }} borderRadius={5}>
             Pengaturan
           </Text>
@@ -36,4 +37,4 @@ const Navbar = () => {
   );
 };
 
-export default Navbar;
+export default Sidebar;

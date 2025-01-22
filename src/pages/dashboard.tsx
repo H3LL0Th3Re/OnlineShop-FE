@@ -1,10 +1,9 @@
-import Navbar from '@/components/Navbar';
-import { Box } from '@chakra-ui/react';
+import { Box, Text } from '@chakra-ui/react';
 
 export function Dashboard() {
   return (
-    <Box>
-      <Navbar />
+    <Box pt={10}>
+      <Text>Dashboard</Text>
     </Box>
   );
 }
