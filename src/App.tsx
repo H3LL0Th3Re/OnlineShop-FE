@@ -7,6 +7,7 @@ import addProduct from './pages/addProduct';
 import Login from './pages/login';
 import Registration from './pages/registration';
 import { Order } from './pages/order';
+import { DetailOrder } from './pages/detail-order';
 
 function App() {
   const router = createBrowserRouter([
@@ -33,6 +34,11 @@ function App() {
         {
           path: '/order',
           Component: Order,
+          HydrateFallback: Fallback,
+        },
+        {
+          path: '/detail-order',
+          Component: DetailOrder,
           HydrateFallback: Fallback,
         },
         {
