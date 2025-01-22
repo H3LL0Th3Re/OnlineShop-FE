@@ -12,6 +12,9 @@ const Sidebar = () => {
       align="center"
     >
       <Flex gap="4" direction={'column'} w={'70%'}>
+        <Text color="#5F2EEA" fontWeight="900" fontSize="25px" mb="0">
+          LAKOE APP
+        </Text>
         <Link to="/">
           <Text p={1} _hover={{ bgColor: 'grey' }} borderRadius={5}>
             Dashboard
@@ -22,7 +25,7 @@ const Sidebar = () => {
             Produk
           </Text>
         </Link>
-        <Link to="/pesanan">
+        <Link to="/order">
           <Text p={1} _hover={{ bgColor: 'grey' }} borderRadius={5}>
             Pesanan
           </Text>

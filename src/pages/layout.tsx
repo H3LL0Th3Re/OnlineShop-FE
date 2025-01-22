@@ -1,16 +1,24 @@
 import Sidebar from '@/components/Sidebar';
 import { Box, Flex } from '@chakra-ui/react';
 import { Outlet } from 'react-router';
+import Navbar from './navbar';
 
 const Layout = () => {
   return (
-    <Box pt={10}>
+    <Box>
+      {/* <Navbar/> */}
       <Flex>
-        <Box w={'20%'}>
+        <Box w={'20%'} display="">
           <Sidebar />
         </Box>
-        <Box w={'60%'} p={6} bg={'blackAlpha.100'}>
-          <Outlet />
+
+        <Box w={'80%'} p={0} bg={'blackAlpha.100'}>
+          <Box>
+            <Navbar />
+          </Box>
+          <Box p={3}>
+            <Outlet />
+          </Box>
         </Box>
       </Flex>
     </Box>
