@@ -8,11 +8,11 @@ export default function Navbar() {
       m={0}
       p={3}
       bg={'white'}
-      dropShadow="1px 5px 15px 1px grey"
       display="flex"
       alignItems="center"
       w="full"
       justifyContent="center"
+      borderBottom="10000px"
     >
       <Flex w="full" justify="space-between" alignItems="center">
         <Box>
@@ -23,7 +23,7 @@ export default function Navbar() {
         <Box>
           <InputGroup flex="1" startElement={<LuSearch />} w="full">
             <Input
-              placeholder="Search contacts"
+              placeholder="Search products"
               w="500px"
               color="black"
               fontWeight="600"
