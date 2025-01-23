@@ -12,15 +12,25 @@ import { DetailOrder } from './pages/detail-order';
 function App() {
   const router = createBrowserRouter([
     {
+      path: '/login',
+      Component: Login,
+      HydrateFallback: Fallback,
+    },
+    {
+      path: '/register',
+      Component: Registration,
+      HydrateFallback: Fallback,
+    },
+    {
+      path: '/dashboard',
+      Component: Dashboard,
+      HydrateFallback: Fallback,
+    },
+    {
       path: '/',
       Component: Layout,
       HydrateFallback: Fallback,
       children: [
-        {
-          path: '/',
-          Component: Dashboard,
-          HydrateFallback: Fallback,
-        },
         {
           path: '/product',
           Component: Product,
@@ -39,16 +49,6 @@ function App() {
         {
           path: '/detail-order',
           Component: DetailOrder,
-          HydrateFallback: Fallback,
-        },
-        {
-          path: '/login',
-          Component: Login,
-          HydrateFallback: Fallback,
-        },
-        {
-          path: '/register',
-          Component: Registration,
           HydrateFallback: Fallback,
         },
       ],
