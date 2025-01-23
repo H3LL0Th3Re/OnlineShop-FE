@@ -16,6 +16,8 @@ import { Link } from 'react-router';
 import { LuFolder, LuSquareCheck, LuUser } from 'react-icons/lu';
 import { MdOutlineDelete } from 'react-icons/md';
 import { Checkbox } from './ui/checkbox';
+import { DialogUpdatePrice } from './dialog-update-price';
+import { DialogUpdateStock } from './dialog-update-stock';
 
 const ListProduct = () => {
   return (
@@ -155,10 +157,10 @@ const ListProduct = () => {
                         <Box>
                           <Flex gap={4}>
                             <Button size="xs" rounded={'full'} bg="blue.600">
-                              Ubah Harga
+                              <DialogUpdatePrice />
                             </Button>
                             <Button size="xs" rounded={'full'} bg="green.600">
-                              Ubah Stok
+                              <DialogUpdateStock />
                             </Button>
                             <Button size="xs" rounded={'full'} bg="gray.600">
                               Lihat Halaman

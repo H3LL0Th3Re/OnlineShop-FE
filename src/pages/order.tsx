@@ -140,7 +140,7 @@ export function Order() {
                       height={'7'}
                       textAlign={'center'}
                     >
-                      <Link to={'/call-center'}>Hubungi Admin</Link>
+                      <Link to={'/call-center'}>Hubungi Pembeli</Link>
                     </Box>
                   </Flex>
                   <Flex>
