@@ -14,6 +14,8 @@ import { Switch } from './ui/switch';
 import { BsArrowUp, BsSortAlphaUpAlt } from 'react-icons/bs';
 import { Link } from 'react-router';
 import { LuFolder, LuSquareCheck, LuUser } from 'react-icons/lu';
+import { MdOutlineDelete } from 'react-icons/md';
+import { Checkbox } from './ui/checkbox';
 
 const ListProduct = () => {
   return (
@@ -89,6 +91,41 @@ const ListProduct = () => {
           </Flex>
           <Tabs.Content value="semua">
             <Box border="1px" borderColor="gray.200" rounded="md">
+              <Flex align={'center'} justify={'space-between'}>
+                <Box>
+                  <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
+                    5 Product
+                  </Text>
+                </Box>
+                <Flex align={'center'} gap={3}>
+                  <Button w={3} bg={'white'}>
+                    <Box
+                      borderWidth={'1px'}
+                      borderColor={'black'}
+                      rounded={'full'}
+                      p={'1'}
+                    >
+                      <Icon size={'md'} color={'black'}>
+                        <MdOutlineDelete />
+                      </Icon>
+                    </Box>
+                  </Button>
+                  <Box>
+                    <Button
+                      borderWidth={'1px'}
+                      rounded={'full'}
+                      borderColor={'black'}
+                      bg={'white'}
+                      color={'black'}
+                    >
+                      Nonaktifkan Produk
+                    </Button>
+                  </Box>
+                  <Box>
+                    <Checkbox />
+                  </Box>
+                </Flex>
+              </Flex>
               <Stack gap="4">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Flex
