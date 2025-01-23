@@ -1,4 +1,13 @@
-import { Box, Button, Flex, Icon, Image, Strong, Text } from '@chakra-ui/react';
+import { TrackingShipment } from '@/components/dialog-tracking-shipment';
+import {
+  Box,
+  Collapsible,
+  Flex,
+  Icon,
+  Image,
+  Strong,
+  Text,
+} from '@chakra-ui/react';
 import { FaRegCalendarAlt, FaRegCopy, FaRegUserCircle } from 'react-icons/fa';
 import { HiOutlineTruck } from 'react-icons/hi';
 import {
@@ -10,7 +19,15 @@ import { IoWalletOutline } from 'react-icons/io5';
 import { PiInvoiceBold } from 'react-icons/pi';
 import { RiFileList2Line } from 'react-icons/ri';
 import { TbInbox } from 'react-icons/tb';
-import { Link } from 'react-router';
+import {
+  TimelineConnector,
+  TimelineContent,
+  TimelineDescription,
+  TimelineItem,
+  TimelineRoot,
+  TimelineTitle,
+} from '@/components/ui/timeline';
+import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
 
 export function DetailOrder() {
   return (
@@ -36,14 +53,62 @@ export function DetailOrder() {
             <Strong>30 Januari 2025 - 00:00 WIB</Strong>. Silakan tunggu sampai
             pembayaran terkonfirmasi sebelum mengirimkan barang.{' '}
           </Text>
-          <Link to={'/riwayat-pesanan'}>
-            <Text pl={10} pt={2} color={'blue.600'} fontWeight="semibold">
+          <Collapsible.Root>
+            <Collapsible.Trigger
+              cursor={'pointer'}
+              paddingY="3"
+              pl={10}
+              pt={2}
+              color={'blue.600'}
+              fontWeight="semibold"
+            >
               Lihat Riwayat Pesanan
               <Icon>
                 <IoIosArrowDown />
               </Icon>
-            </Text>
-          </Link>
+            </Collapsible.Trigger>
+            <Collapsible.Content>
+              <Box ml={10} padding="4" borderWidth="1px" rounded={'md'}>
+                <TimelineRoot maxW="400px">
+                  <TimelineItem>
+                    <TimelineConnector>
+                      <LuShip />
+                    </TimelineConnector>
+                    <TimelineContent>
+                      <TimelineTitle>Product Shipped</TimelineTitle>
+                      <TimelineDescription>13th May 2021</TimelineDescription>
+                    </TimelineContent>
+                  </TimelineItem>
+
+                  <TimelineItem>
+                    <TimelineConnector>
+                      <LuCheck />
+                    </TimelineConnector>
+                    <TimelineContent>
+                      <TimelineTitle textStyle="sm">
+                        Order Confirmed
+                      </TimelineTitle>
+                      <TimelineDescription>18th May 2021</TimelineDescription>
+                    </TimelineContent>
+                  </TimelineItem>
+
+                  <TimelineItem>
+                    <TimelineConnector>
+                      <LuPackage />
+                    </TimelineConnector>
+                    <TimelineContent>
+                      <TimelineTitle textStyle="sm">
+                        Order Delivered
+                      </TimelineTitle>
+                      <TimelineDescription>
+                        20th May 2021, 10:30am
+                      </TimelineDescription>
+                    </TimelineContent>
+                  </TimelineItem>
+                </TimelineRoot>
+              </Box>
+            </Collapsible.Content>
+          </Collapsible.Root>
         </Box>
         <Box bg={'white'} p={3} rounded={'md'} spaceY={5}>
           <Flex justify={'space-between'}>
@@ -124,9 +189,10 @@ export function DetailOrder() {
               <Text fontWeight={'medium'}>Detail Pengiriman</Text>
             </Flex>
             <Box>
-              <Button bg={'blue.600'} rounded={'full'} fontWeight="semibold">
+              {/* <Button bg={'blue.600'} rounded={'full'} fontWeight="semibold">
                 Lacak Pengiriman
-              </Button>
+              </Button> */}
+              <TrackingShipment />
             </Box>
           </Flex>
           <Flex>
