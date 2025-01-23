@@ -13,11 +13,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  Box,
+  Flex,
   Group,
   Input,
   InputAddon,
   Stack,
-  Strong,
   Text,
 } from '@chakra-ui/react';
 import { useState } from 'react';
@@ -30,31 +31,66 @@ export function DialogUpdatePrice() {
       lazyMount
       open={open}
       onOpenChange={(e) => setOpen(e.open)}
-      size={'xs'}
+      size={'lg'}
     >
       <DialogTrigger asChild>
         <Button size="xs" rounded={'full'} bg="blue.600">
-          Ubah Harga
+          Update Product
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle color={'blue.600'} fontWeight={'medium'}>
-            Update Price
+            Update Product
           </DialogTitle>
         </DialogHeader>
-        <DialogBody>
-          <Stack gap="4">
-            <Field>
-              <Text>
-                Ubah harga untuk produk <Strong>[nama produk]</Strong>
-              </Text>
-              <Group attached w={'full'}>
-                <InputAddon>Rp</InputAddon>
-                <Input borderLeftRadius="0" placeholder="55.000" />
-              </Group>
-            </Field>
-          </Stack>
+        <DialogBody spaceY={5}>
+          <Box spaceY={2}>
+            <Text fontWeight={'bold'}>Navy - M</Text>
+            <Flex gap={4}>
+              <Stack gap="4" w={'50%'}>
+                <Field>
+                  <Text>Price</Text>
+                  <Group attached w={'full'}>
+                    <InputAddon>Rp</InputAddon>
+                    <Input borderLeftRadius="0" placeholder="55.000" />
+                  </Group>
+                </Field>
+              </Stack>
+              <Stack gap="4" w={'50%'}>
+                <Field>
+                  <Text>Stock</Text>
+                  <Group attached w={'full'}>
+                    <InputAddon>Qty</InputAddon>
+                    <Input borderLeftRadius="0" placeholder="20" />
+                  </Group>
+                </Field>
+              </Stack>
+            </Flex>
+          </Box>
+          <Box spaceY={2}>
+            <Text fontWeight={'bold'}>Navy - L</Text>
+            <Flex gap={4}>
+              <Stack gap="4" w={'50%'}>
+                <Field>
+                  <Text>Price</Text>
+                  <Group attached w={'full'}>
+                    <InputAddon>Rp</InputAddon>
+                    <Input borderLeftRadius="0" placeholder="55.000" />
+                  </Group>
+                </Field>
+              </Stack>
+              <Stack gap="4" w={'50%'}>
+                <Field>
+                  <Text>Stock</Text>
+                  <Group attached w={'full'}>
+                    <InputAddon>Qty</InputAddon>
+                    <Input borderLeftRadius="0" placeholder="20" />
+                  </Group>
+                </Field>
+              </Stack>
+            </Flex>
+          </Box>
         </DialogBody>
         <DialogFooter>
           <DialogActionTrigger asChild>
