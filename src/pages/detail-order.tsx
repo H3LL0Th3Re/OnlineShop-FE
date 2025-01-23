@@ -47,11 +47,26 @@ export function DetailOrder() {
             <Box bg={'yellow.400'} borderRadius={'full'} width={'32'}>
               <Text textAlign={'center'}>Belum Dibayar</Text>
             </Box>
+            {/* <Box bg={'green.400'} borderRadius={'full'} width={'32'}>
+              <Text textAlign={'center'}>Pesanan Baru</Text>
+            </Box>
+            <Box bg={'blue.400'} borderRadius={'full'} width={'32'}>
+              <Text textAlign={'center'}>Siap Dikirim</Text>
+            </Box>
+            <Box bg={'orange.400'} borderRadius={'full'} width={'32'}>
+              <Text textAlign={'center'}>Dalam Pengiriman</Text>
+            </Box>
+            <Box bg={'gray.400'} borderRadius={'full'} width={'32'}>
+              <Text textAlign={'center'}>Pesanan Selesai</Text>
+            </Box>
+            <Box bg={'red.500'} borderRadius={'full'} width={'32'}>
+              <Text textAlign={'center'}>Dibatalkan</Text>
+            </Box> */}
           </Flex>
           <Text pl={10} pt={2}>
-            Pesanan akan dibatalkan bila pembayaran tidak dilakukan sampai{' '}
+            Pesanan akan dibatalkan bila pembayaran tidak dilakukan sampai
             <Strong>30 Januari 2025 - 00:00 WIB</Strong>. Silakan tunggu sampai
-            pembayaran terkonfirmasi sebelum mengirimkan barang.{' '}
+            pembayaran terkonfirmasi sebelum mengirimkan barang.
           </Text>
           <Collapsible.Root>
             <Collapsible.Trigger
