@@ -17,7 +17,6 @@ import { LuFolder, LuSquareCheck, LuUser } from 'react-icons/lu';
 import { MdOutlineDelete } from 'react-icons/md';
 import { Checkbox } from './ui/checkbox';
 import { DialogUpdatePrice } from './dialog-update-price';
-import { DialogUpdateStock } from './dialog-update-stock';
 
 const ListProduct = () => {
   return (
@@ -159,9 +158,9 @@ const ListProduct = () => {
                             <Button size="xs" rounded={'full'} bg="blue.600">
                               <DialogUpdatePrice />
                             </Button>
-                            <Button size="xs" rounded={'full'} bg="green.600">
+                            {/* <Button size="xs" rounded={'full'} bg="green.600">
                               <DialogUpdateStock />
-                            </Button>
+                            </Button> */}
                             <Button size="xs" rounded={'full'} bg="gray.600">
                               Lihat Halaman
                             </Button>
