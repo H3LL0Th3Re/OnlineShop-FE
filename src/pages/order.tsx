@@ -22,11 +22,12 @@ import { Link } from 'react-router';
 export function Order() {
   return (
     <Box>
-      <Tabs.Root defaultValue="semua" bg={'white'} p={3}>
+      <Tabs.Root defaultValue="semua" bg={'white'} p={3} pt={4}>
         <Text fontSize="2xl" fontWeight="bold" color="#5F2EEA">
           Daftar Pesanan
         </Text>
         <Tabs.List
+          pt={2}
           style={{
             display: 'flex',
             overflowX: 'auto',

@@ -20,7 +20,7 @@ const ListProduct = () => {
     <Box>
       {/* ListProduct Content */}
       <Box bg={'white'} p={3}>
-        <Flex justify="space-between" align="center" mb="6">
+        <Flex justify="space-between" align="center">
           <Text fontSize="2xl" fontWeight="bold" color="#5F2EEA">
             Daftar Produk
           </Text>

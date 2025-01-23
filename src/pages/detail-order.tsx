@@ -1,4 +1,4 @@
-import { Box, Flex, Icon, Image, Strong, Text } from '@chakra-ui/react';
+import { Box, Button, Flex, Icon, Image, Strong, Text } from '@chakra-ui/react';
 import { FaRegCalendarAlt, FaRegCopy, FaRegUserCircle } from 'react-icons/fa';
 import { HiOutlineTruck } from 'react-icons/hi';
 import {
@@ -15,11 +15,11 @@ import { Link } from 'react-router';
 export function DetailOrder() {
   return (
     <Box>
-      <Text color={'blue.600'} fontWeight="semibold">
-        Daftar Pesanan{' '}
+      <Text color={'blue.600'} fontSize="2xl" fontWeight="semibold">
+        Daftar Pesanan
         <Icon>
           <IoIosArrowForward />
-        </Icon>{' '}
+        </Icon>
       </Text>
       <Box spaceY={4}>
         <Box bg={'white'} p={3} rounded={'md'}>
@@ -116,11 +116,18 @@ export function DetailOrder() {
           </Flex>
         </Box>
         <Box bg={'white'} p={3} rounded={'md'}>
-          <Flex gap={2}>
-            <Icon size={'xl'} color={'blue.600'}>
-              <HiOutlineTruck />
-            </Icon>
-            <Text fontWeight={'medium'}>Detail Pengiriman</Text>
+          <Flex justify={'space-between'}>
+            <Flex gap={2}>
+              <Icon size={'xl'} color={'blue.600'}>
+                <HiOutlineTruck />
+              </Icon>
+              <Text fontWeight={'medium'}>Detail Pengiriman</Text>
+            </Flex>
+            <Box>
+              <Button bg={'blue.600'} rounded={'full'} fontWeight="semibold">
+                Lacak Pengiriman
+              </Button>
+            </Box>
           </Flex>
           <Flex>
             <Text pl={9} color={'grey'} w={'56'}>
