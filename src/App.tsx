@@ -48,7 +48,7 @@ function App() {
           HydrateFallback: Fallback,
         },
         {
-          path: '/detail-order',
+          path: '/detail-order/:orderId',
           Component: DetailOrder,
           HydrateFallback: Fallback,
         },
