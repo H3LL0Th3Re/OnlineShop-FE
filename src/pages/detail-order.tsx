@@ -154,6 +154,36 @@ export function DetailOrder() {
             </Icon>
             <Text fontWeight={'medium'}>Rincian Pembayaran</Text>
           </Flex>
+          <Flex gap={2} justify={'space-between'}>
+            <Text color={'gray.600'} pl={9}>
+              Total Harga (1 Barang)
+            </Text>
+            <Text>Rp180.000</Text>
+          </Flex>
+          <Flex gap={2} justify={'space-between'}>
+            <Text color={'gray.600'} pl={9}>
+              Total Ongkos Kirim (10Kg)
+            </Text>
+            <Text>Rp10.000</Text>
+          </Flex>
+          <Flex gap={2} justify={'space-between'}>
+            <Text color={'gray.600'} pl={9}>
+              Diskon
+            </Text>
+            <Text>Rp0</Text>
+          </Flex>
+          <Flex gap={2} justify={'space-between'}>
+            <Text color={'gray.600'} pl={9}>
+              Biaya Layanan
+            </Text>
+            <Text>Rp0</Text>
+          </Flex>
+          <Box pl={9}>
+            <Flex gap={2} justify={'space-between'} borderTopWidth={'1px'}>
+              <Text fontWeight={'medium'}>Total Penjualan</Text>
+              <Text>Rp190.000</Text>
+            </Flex>
+          </Box>
         </Box>
       </Box>
     </Box>
