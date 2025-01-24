@@ -1,239 +1,227 @@
-import { Box, Grid, Image, Text, VStack } from '@chakra-ui/react';
-import { Carousel } from 'react-responsive-carousel';
-import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import Navbar from './navbar';
-
-const backroundImages = [
-  'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548208/1_scleah.png',
-  'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548320/2_b4vc5m.png',
-  'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548327/3_xydogw.png',
-];
-
-const categories = [
-  {
-    name: 'Electronics',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Computer & Accessories',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Handphone & Accessories',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Man Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Man Shoes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Man Bags',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Fashion Accesories',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Watches',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Health & Medicine',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Hobby & Collections',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Food & Drinks',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Care & Beauty',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-  {
-    name: 'Home Utensils',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-  },
-];
-
-const recommendations = [
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-];
+import { Button } from '@/components/ui/button';
+import {
+  MenuContent,
+  MenuItem,
+  MenuRoot,
+  MenuTrigger,
+} from '@/components/ui/menu';
+import { Box, Flex, Icon, Text } from '@chakra-ui/react';
+import { BiTrendingUp } from 'react-icons/bi';
+import { BsCurrencyDollar } from 'react-icons/bs';
+import { IoIosArrowDown } from 'react-icons/io';
+import { TbShoppingCartDollar } from 'react-icons/tb';
 
 export function Dashboard() {
   return (
-    <Box>
-      <Box position="sticky" top="0" right="0" overflow="auto" zIndex="2">
-        <Navbar />
+    <Box spaceY={5}>
+      <Box bg={'white'} rounded={'md'} p={1}>
+        <Text
+          color="#5F2EEA"
+          fontWeight="900"
+          fontSize="25px"
+          mb="0"
+          textAlign={'center'}
+        >
+          DASHBOARD
+        </Text>
       </Box>
-      <Box m="0" h="full" w="full" p="3">
-        <Box bgColor="white" p="3">
-          <VStack>
-            <Box
-              display="flex"
-              justifyContent="flex-start"
-              alignItems="center"
-              w="full"
+      <Flex gap={5}>
+        <Flex
+          w={'50%'}
+          p={3}
+          bg={'white'}
+          justify={'space-between'}
+          rounded={'md'}
+        >
+          <Box>
+            <Text
+              fontSize={'18px'}
+              fontWeight={'500'}
+              fontFamily={'sans-serif'}
+              color={'gray.600'}
             >
-              <Text fontWeight="700" fontSize="2xl" color="#2400FE">
-                Dashboard
+              Overall Sales
+            </Text>
+            <Text
+              fontSize={'24px'}
+              fontWeight={'700'}
+              fontFamily={'sans-serif'}
+            >
+              Rp.178.000.000,00
+            </Text>
+          </Box>
+          <Box>
+            <MenuRoot>
+              <MenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  This Month
+                  <Icon>
+                    <IoIosArrowDown />
+                  </Icon>
+                </Button>
+              </MenuTrigger>
+              <MenuContent>
+                <MenuItem value="new-txt">Last Month</MenuItem>
+              </MenuContent>
+            </MenuRoot>
+          </Box>
+        </Flex>
+        <Flex direction={'column'} w={'50%'} gap={3}>
+          <Flex gap={5}>
+            <Box bg={'white'} rounded={'md'} w={'50%'} h={'32'} p={3}>
+              <Icon
+                size={'xl'}
+                color="#5F2EEA"
+                bg={'teal.300'}
+                p={1}
+                rounded={'md'}
+              >
+                <BsCurrencyDollar />
+              </Icon>
+              <Text
+                fontSize={'18px'}
+                fontWeight={'500'}
+                fontFamily={'sans-serif'}
+                color={'gray.600'}
+              >
+                Total Sales
+              </Text>
+              <Text
+                fontSize={'24px'}
+                fontWeight={'700'}
+                fontFamily={'sans-serif'}
+                pt={1}
+              >
+                Rp.14.000.000,00
+              </Text>
+              <Text
+                fontSize={'15px'}
+                fontWeight={'600'}
+                fontFamily={'sans-serif'}
+                color={'#5F2EEA'}
+              >
+                From Jan.
               </Text>
             </Box>
-            <Carousel
-              useKeyboardArrows={true}
-              showThumbs={false}
-              showStatus={false}
-            >
-              {backroundImages.map((URL, index) => (
-                <div className="slide">
-                  <img alt="sample_file" src={URL} key={index} width={'60%'} />
-                </div>
-              ))}
-            </Carousel>
-          </VStack>
-        </Box>
-
-        <VStack my="5" h="full" w="full" p="3" bgColor="white">
-          <Text
-            fontWeight="600"
-            fontSize="20px"
-            display="flex"
-            justifyContent="flex-start"
-            alignItems="center"
-            w="full"
-          >
-            Product Categories
-          </Text>
-          <Box w="90%" mt="10px">
-            <Grid templateColumns="repeat(5, 1fr)" gap="1" gapY="5" mb="15px">
-              {categories.map((category, index) => (
-                <Box
-                  bgColor="White"
-                  borderRadius="5px"
-                  w="90%"
-                  h="180px"
-                  boxShadow="2px 2px 5px 1px grey"
-                >
-                  <VStack
-                    m="15px"
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <Image
-                      src={category.image}
-                      borderRadius="5px"
-                      w="full"
-                      h="100px"
-                      objectFit="cover"
-                      alt={`User uploaded image ${index + 1}`}
-                    />
-                    <Text fontWeight="600" textAlign="center">
-                      {category.name}
-                    </Text>
-                  </VStack>
-                </Box>
-              ))}
-            </Grid>
-          </Box>
-        </VStack>
-
-        <VStack my="5" h="full" w="full" p="3" bgColor="white">
-          <Text
-            fontWeight="600"
-            fontSize="20px"
-            display="flex"
-            justifyContent="flex-start"
-            alignItems="center"
-            w="full"
-          >
-            Recommendations
-          </Text>
-          <Box w="90%" mt="10px">
-            <Grid templateColumns="repeat(4, 1fr)" gap="1" gapY="5" mb="15px">
-              {recommendations.map((recommendation, index) => (
-                <Box
-                  bgColor="White"
-                  borderRadius="5px"
-                  w="90%"
-                  h="250px"
-                  boxShadow="2px 2px 5px 1px grey"
-                >
-                  <VStack
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <Image
-                      src={recommendation.image}
-                      borderTopRadius="5px"
-                      w="full"
-                      h="170px"
-                      objectFit="cover"
-                      alt={`User uploaded image ${index + 1}`}
-                    />
-                    <Text fontWeight="600" textAlign="center">
-                      {recommendation.name}
-                    </Text>
-                    <Text fontWeight="400" textAlign="center" fontSize="15px">
-                      {recommendation.price}
-                    </Text>
-                  </VStack>
-                </Box>
-              ))}
-            </Grid>
-          </Box>
-        </VStack>
+            <Box bg={'white'} rounded={'md'} w={'50%'} h={'32'} p={3}>
+              <Icon
+                size={'xl'}
+                color="#5F2EEA"
+                bg={'teal.300'}
+                p={1}
+                rounded={'md'}
+              >
+                <BiTrendingUp />
+              </Icon>
+              <Text
+                fontSize={'18px'}
+                fontWeight={'500'}
+                fontFamily={'sans-serif'}
+                color={'gray.600'}
+              >
+                Weekly Sales
+              </Text>
+              <Text
+                fontSize={'24px'}
+                fontWeight={'700'}
+                fontFamily={'sans-serif'}
+                pt={1}
+              >
+                Rp.1.000.000,00
+              </Text>
+              <Text
+                fontSize={'15px'}
+                fontWeight={'600'}
+                fontFamily={'sans-serif'}
+                color={'#5F2EEA'}
+              >
+                From Jan.
+              </Text>
+            </Box>
+          </Flex>
+          <Flex gap={5}>
+            <Box bg={'white'} rounded={'md'} w={'50%'} h={'32'} p={3}>
+              <Icon
+                size={'xl'}
+                color="#5F2EEA"
+                bg={'teal.300'}
+                p={1}
+                rounded={'md'}
+              >
+                <TbShoppingCartDollar />
+              </Icon>
+              <Text
+                fontSize={'18px'}
+                fontWeight={'500'}
+                fontFamily={'sans-serif'}
+                color={'gray.600'}
+              >
+                Avg. Order Value
+              </Text>
+              <Text
+                fontSize={'24px'}
+                fontWeight={'700'}
+                fontFamily={'sans-serif'}
+                pt={1}
+              >
+                Rp.470.000,00
+              </Text>
+              <Text
+                fontSize={'15px'}
+                fontWeight={'600'}
+                fontFamily={'sans-serif'}
+                color={'#5F2EEA'}
+              >
+                From Jan.
+              </Text>
+            </Box>
+            <Box bg={'white'} rounded={'md'} w={'50%'} h={'32'} p={3}>
+              <Icon
+                size={'xl'}
+                color="#5F2EEA"
+                bg={'teal.300'}
+                p={1}
+                rounded={'md'}
+              >
+                <TbShoppingCartDollar />
+              </Icon>
+              <Text
+                fontSize={'18px'}
+                fontWeight={'500'}
+                fontFamily={'sans-serif'}
+                color={'gray.600'}
+              >
+                Avg. Order Value
+              </Text>
+              <Text
+                fontSize={'24px'}
+                fontWeight={'700'}
+                fontFamily={'sans-serif'}
+                pt={1}
+              >
+                100
+              </Text>
+              <Text
+                fontSize={'15px'}
+                fontWeight={'600'}
+                fontFamily={'sans-serif'}
+                color={'#5F2EEA'}
+              >
+                From Jan.
+              </Text>
+            </Box>
+          </Flex>
+        </Flex>
+      </Flex>
+      <Box w={'100%'} bg={'white'} rounded={'md'} h={'40'} p={3}>
+        <Text
+          fontSize={'18px'}
+          fontWeight={'500'}
+          fontFamily={'sans-serif'}
+          color={'gray.600'}
+        >
+          Selling Products
+        </Text>
       </Box>
     </Box>
   );

@@ -2,13 +2,14 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import Layout from './pages/layout';
 import Fallback from './pages/fallback';
 import Product from './pages/product';
-import { Dashboard } from './pages/dashboard';
 import addProduct from './pages/addProduct';
 import Login from './pages/login';
 import Registration from './pages/registration';
 import { Order } from './pages/order';
 import { DetailOrder } from './pages/detail-order';
 import Settings from './pages/settings';
+import { Home } from './pages/home';
+import { Dashboard } from './pages/dashboard';
 
 function App() {
   const router = createBrowserRouter([
@@ -23,8 +24,8 @@ function App() {
       HydrateFallback: Fallback,
     },
     {
-      path: '/dashboard',
-      Component: Dashboard,
+      path: '/home',
+      Component: Home,
       HydrateFallback: Fallback,
     },
     {
@@ -45,6 +46,11 @@ function App() {
         {
           path: '/order',
           Component: Order,
+          HydrateFallback: Fallback,
+        },
+        {
+          path: '/dashboard',
+          Component: Dashboard,
           HydrateFallback: Fallback,
         },
         {
