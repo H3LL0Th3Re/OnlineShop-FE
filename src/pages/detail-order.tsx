@@ -28,8 +28,81 @@ import {
   TimelineTitle,
 } from '@/components/ui/timeline';
 import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
+import { useParams } from 'react-router';
+import { getStatusColor } from './order';
+
+interface Order {
+  id: number;
+  status: string;
+  invoice: string;
+  productName: string;
+  productImage: string;
+  quantity: number;
+}
+
+const orders: Order[] = [
+  {
+    id: 1,
+    status: 'Belum Dibayar',
+    invoice: 'INV/20230809/MPL/00000289',
+    productName: 'KAOS BASIC COTTON KENARI',
+    productImage:
+      'https://ecs7.tokopedia.net/img/product-1/2015/8/30/574846/574846_bc62bae2-ce97-489d-bfcc-4c14ec8d7ec1.jpg',
+    quantity: 1,
+  },
+  {
+    id: 2,
+    status: 'Pesanan Baru',
+    invoice: 'INV/20230809/MPL/00000345',
+    productName: 'HOODIE OVERSIZE UNISEX',
+    productImage:
+      'https://patience-pno.com/cdn/shop/files/4b330d93b1504f2489eb8689d8d48457.png?v=1726327535',
+    quantity: 2,
+  },
+  {
+    id: 3,
+    status: 'Siap Dikirim',
+    invoice: 'INV/20230809/MPL/00000412',
+    productName: 'TAS SELEMPANG CASUAL',
+    productImage:
+      'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//catalog-image/MTA-74073081/fourtyfour_fourtyfour_airfox_2-0_-_tas_selempang_pria_wanita_casual_fourtyfour_airfox_2-0-_slingbag_casual_pria_wanita_fourtyfour_airfox_2-0_full02_pfujrz85.jpg',
+    quantity: 1,
+  },
+  {
+    id: 4,
+    status: 'Dalam Pengiriman',
+    invoice: 'INV/20230809/MPL/00000501',
+    productName: 'SEPATU SNEAKERS PRIA',
+    productImage:
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1H6fQs2LSN-mg4s7FnLRPSuiukA1bVg9iTw&s',
+    quantity: 1,
+  },
+  {
+    id: 5,
+    status: 'Pesanan Selesai',
+    invoice: 'INV/20230809/MPL/00000678',
+    productName: 'JAKET PARKA PRIA',
+    productImage:
+      'https://admincerdas.s3.ap-southeast-1.amazonaws.com/20200725/w768_1595652429_414897705--1591464448-BKR107-armykombinasi-OneSize2.jpeg',
+    quantity: 1,
+  },
+  {
+    id: 6,
+    status: 'Dibatalkan',
+    invoice: 'INV/20230809/MPL/00000779',
+    productName: 'JAKET PARKA PRIA',
+    productImage:
+      'https://admincerdas.s3.ap-southeast-1.amazonaws.com/20200725/w768_1595652429_414897705--1591464448-BKR107-armykombinasi-OneSize2.jpeg',
+    quantity: 1,
+  },
+];
 
 export function DetailOrder() {
+  const { orderId } = useParams();
+  const orderIdNumber = orderId ? parseInt(orderId, 10) : NaN;
+
+  const order = orders.find((order) => order.id === orderIdNumber);
+
   return (
     <Box>
       <Text color={'blue.600'} fontSize="2xl" fontWeight="semibold">
@@ -38,30 +111,34 @@ export function DetailOrder() {
           <IoIosArrowForward />
         </Icon>
       </Text>
-      <Box spaceY={4}>
+      <Box spaceY={4} key={order?.id}>
         <Box bg={'white'} p={3} rounded={'md'}>
           <Flex gap={2}>
             <Icon size={'xl'} color={'blue.600'}>
               <RiFileList2Line />
             </Icon>
-            <Box bg={'yellow.400'} borderRadius={'full'} width={'32'}>
-              <Text textAlign={'center'}>Belum Dibayar</Text>
+            <Box
+              bg={getStatusColor(order?.status)}
+              borderRadius={'full'}
+              width={'36'}
+            >
+              <Text textAlign={'center'}>{order?.status}</Text>
             </Box>
             {/* <Box bg={'green.400'} borderRadius={'full'} width={'32'}>
-              <Text textAlign={'center'}>Pesanan Baru</Text>
-            </Box>
-            <Box bg={'blue.400'} borderRadius={'full'} width={'32'}>
-              <Text textAlign={'center'}>Siap Dikirim</Text>
-            </Box>
-            <Box bg={'orange.400'} borderRadius={'full'} width={'32'}>
-              <Text textAlign={'center'}>Dalam Pengiriman</Text>
-            </Box>
-            <Box bg={'gray.400'} borderRadius={'full'} width={'32'}>
-              <Text textAlign={'center'}>Pesanan Selesai</Text>
-            </Box>
-            <Box bg={'red.500'} borderRadius={'full'} width={'32'}>
-              <Text textAlign={'center'}>Dibatalkan</Text>
-            </Box> */}
+                <Text textAlign={'center'}>Pesanan Baru</Text>
+              </Box>
+              <Box bg={'blue.400'} borderRadius={'full'} width={'32'}>
+                <Text textAlign={'center'}>Siap Dikirim</Text>
+              </Box>
+              <Box bg={'orange.400'} borderRadius={'full'} width={'32'}>
+                <Text textAlign={'center'}>Dalam Pengiriman</Text>
+              </Box>
+              <Box bg={'gray.400'} borderRadius={'full'} width={'32'}>
+                <Text textAlign={'center'}>Pesanan Selesai</Text>
+              </Box>
+              <Box bg={'red.500'} borderRadius={'full'} width={'32'}>
+                <Text textAlign={'center'}>Dibatalkan</Text>
+              </Box> */}
           </Flex>
           <Text pl={10} pt={2}>
             Pesanan akan dibatalkan bila pembayaran tidak dilakukan sampai
@@ -148,7 +225,7 @@ export function DetailOrder() {
               <Icon size={'md'} color={'grey.300'}>
                 <FaRegCopy />
               </Icon>
-              <Text>INV/202308009/MPL/00000289</Text>
+              <Text>{order?.invoice}</Text>
             </Flex>
           </Flex>
           <Flex justify={'space-between'}>
@@ -176,16 +253,16 @@ export function DetailOrder() {
           <Flex ml={10} p={2} borderWidth={'1px'} rounded={'md'}>
             <Box bg={'black'} rounded="sm">
               <Image
-                src="https://ecs7.tokopedia.net/img/product-1/2015/8/30/574846/574846_bc62bae2-ce97-489d-bfcc-4c14ec8d7ec1.jpg"
-                alt="Navy"
+                src={order?.productImage}
+                alt={order?.productName}
                 w={'14'}
               />
             </Box>
             <Flex pl={5} justify={'space-between'} w={'full'}>
               <Box>
-                <Text fontWeight="bold">KAOS BASIC COTTON KENARI</Text>
+                <Text fontWeight="bold">{order?.productName}</Text>
                 <Text fontSize="sm" color="gray.600">
-                  1 x Rp180.000
+                  {order?.quantity} x Rp180.000
                 </Text>
               </Box>
               <Flex direction={'column'} align={'end'}>
@@ -205,8 +282,8 @@ export function DetailOrder() {
             </Flex>
             <Box>
               {/* <Button bg={'blue.600'} rounded={'full'} fontWeight="semibold">
-                Lacak Pengiriman
-              </Button> */}
+                  Lacak Pengiriman
+                </Button> */}
               <TrackingShipment />
             </Box>
           </Flex>

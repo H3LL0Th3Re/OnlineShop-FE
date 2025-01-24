@@ -161,9 +161,6 @@ const ListProduct = () => {
                             {/* <Button size="xs" rounded={'full'} bg="green.600">
                               <DialogUpdateStock />
                             </Button> */}
-                            <Button size="xs" rounded={'full'} bg="gray.600">
-                              Lihat Halaman
-                            </Button>
                           </Flex>
                         </Box>
                         <Flex w={'lg'} justifyContent={'flex-end'}>
