@@ -11,6 +11,7 @@ import Settings from './pages/settings';
 import { Home } from './pages/home';
 import { Dashboard } from './pages/dashboard';
 
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -26,6 +27,11 @@ function App() {
     {
       path: '/home',
       Component: Home,
+      HydrateFallback: Fallback,
+    },
+    {
+      path: '/detail-product',
+      Component: DetailProduct,
       HydrateFallback: Fallback,
     },
     {
@@ -58,6 +64,7 @@ function App() {
           Component: DetailOrder,
           HydrateFallback: Fallback,
         },
+
         {
           path: '/pengaturan',
           Component: Settings,
