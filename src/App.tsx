@@ -9,6 +9,7 @@ import Registration from './pages/registration';
 import { Order } from './pages/order';
 import { DetailOrder } from './pages/detail-order';
 import Settings from './pages/settings';
+import DetailProduct from './pages/detail-product';
 
 function App() {
   const router = createBrowserRouter([
@@ -25,6 +26,11 @@ function App() {
     {
       path: '/dashboard',
       Component: Dashboard,
+      HydrateFallback: Fallback,
+    },
+    {
+      path: '/detail-product',
+      Component: DetailProduct,
       HydrateFallback: Fallback,
     },
     {
@@ -52,6 +58,7 @@ function App() {
           Component: DetailOrder,
           HydrateFallback: Fallback,
         },
+
         {
           path: '/pengaturan',
           Component: Settings,
