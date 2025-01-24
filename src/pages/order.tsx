@@ -225,7 +225,6 @@ export function Order() {
                   borderWidth="1px"
                   borderColor="gray.200"
                   rounded="md"
-                  onClick={() => handleClickOrder(order.id)}
                 >
                   <Flex
                     justifyContent={'space-between'}
@@ -252,7 +251,7 @@ export function Order() {
                       </Button>
                     </Box>
                   </Flex>
-                  <Flex>
+                  <Flex onClick={() => handleClickOrder(order.id)}>
                     <Box bg={'black'} rounded="md">
                       <Image
                         src={order.productImage}
@@ -312,7 +311,7 @@ export function Order() {
                         </Button>
                       </Box>
                     </Flex>
-                    <Flex>
+                    <Flex onClick={() => handleClickOrder(order.id)}>
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={order.productImage}
@@ -372,7 +371,7 @@ export function Order() {
                         </Button>
                       </Box>
                     </Flex>
-                    <Flex>
+                    <Flex onClick={() => handleClickOrder(order.id)}>
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={order.productImage}
@@ -432,7 +431,7 @@ export function Order() {
                         </Button>
                       </Box>
                     </Flex>
-                    <Flex>
+                    <Flex onClick={() => handleClickOrder(order.id)}>
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={order.productImage}
@@ -492,7 +491,7 @@ export function Order() {
                         </Button>
                       </Box>
                     </Flex>
-                    <Flex>
+                    <Flex onClick={() => handleClickOrder(order.id)}>
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={order.productImage}
@@ -552,7 +551,7 @@ export function Order() {
                         </Button>
                       </Box>
                     </Flex>
-                    <Flex>
+                    <Flex onClick={() => handleClickOrder(order.id)}>
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={order.productImage}
@@ -612,7 +611,7 @@ export function Order() {
                         </Button>
                       </Box>
                     </Flex>
-                    <Flex>
+                    <Flex onClick={() => handleClickOrder(order.id)}>
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={order.productImage}
