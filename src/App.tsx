@@ -10,7 +10,7 @@ import { DetailOrder } from './pages/detail-order';
 import Settings from './pages/settings';
 import { Home } from './pages/home';
 import { Dashboard } from './pages/dashboard';
-
+import DetailProduct from './pages/detail-product';
 
 function App() {
   const router = createBrowserRouter([
