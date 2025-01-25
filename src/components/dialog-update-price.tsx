@@ -34,9 +34,7 @@ export function DialogUpdatePrice() {
       size={'lg'}
     >
       <DialogTrigger asChild>
-        <Button size="xs" rounded={'full'} bg="blue.600">
-          Update Product
-        </Button>
+        <Text>Update Product</Text>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
