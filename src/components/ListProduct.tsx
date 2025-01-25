@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Flex,
+  HStack,
   Icon,
   Image,
   Input,
@@ -25,11 +26,14 @@ const ListProduct = () => {
       <Box bg={'white'} p={3}>
         <Flex justify="space-between" align="center">
           <Text fontSize="2xl" fontWeight="bold" color="#5F2EEA">
-            Daftar Produk
+            List Product
           </Text>
-          <Box bg="#5F2EEA" p={3} rounded={'md'}>
+          <Box bg="#5F2EEA" p={1} rounded={'full'} w={32}>
             <Link to={'/add-product'}>
-              <Text color={'white'}> Tambah Produk </Text>
+              <Text color={'white'} textAlign={'center'}>
+                {' '}
+                Add Product{' '}
+              </Text>
             </Link>
           </Box>
         </Flex>
@@ -98,18 +102,17 @@ const ListProduct = () => {
                     5 Product
                   </Text>
                 </Box>
-                <Flex align={'center'} gap={3}>
-                  <Button w={3} bg={'white'}>
-                    <Box
-                      borderWidth={'1px'}
-                      borderColor={'black'}
-                      rounded={'full'}
-                      p={'1'}
-                    >
-                      <Icon size={'md'} color={'black'}>
-                        <MdOutlineDelete />
-                      </Icon>
-                    </Box>
+                <Flex align={'center'} gap={2}>
+                  <Button
+                    w={'0'}
+                    bg={'white'}
+                    rounded={'full'}
+                    borderWidth={'1px'}
+                    borderColor={'black'}
+                  >
+                    <Icon size={'lg'} color={'black'}>
+                      <MdOutlineDelete />
+                    </Icon>
                   </Button>
                   <Box>
                     <Button
@@ -118,6 +121,7 @@ const ListProduct = () => {
                       borderColor={'black'}
                       bg={'white'}
                       color={'black'}
+                      h={9}
                     >
                       Nonaktifkan Produk
                     </Button>
@@ -143,7 +147,7 @@ const ListProduct = () => {
                         w={'28'}
                       />
                     </Box>
-                    <Flex direction={'column'} pl={5}>
+                    <Flex direction={'column'} pl={5} w={'full'}>
                       <Box>
                         <Text fontWeight="bold">
                           KAOS BASIC COTTON KENARI - {`Produk ${i + 1}`}
@@ -152,20 +156,40 @@ const ListProduct = () => {
                           Rp55.000 - Stok: 2{i + 1} - SKU: 01234XY{i + 1}
                         </Text>
                       </Box>
-                      <Flex align="center" justify="space-between" mt={4}>
-                        <Box>
-                          <Flex gap={4}>
-                            <Button size="xs" rounded={'full'} bg="blue.600">
+                      <Flex
+                        align="center"
+                        justify="space-between"
+                        w={'full'}
+                        mt={3}
+                      >
+                        <HStack>
+                          <Button
+                            size="xs"
+                            rounded={'full'}
+                            bg="white"
+                            color={'black'}
+                            borderWidth={'2px'}
+                            borderColor={'black'}
+                            h={7}
+                          >
+                            <Text>
                               <DialogUpdatePrice />
-                            </Button>
-                            {/* <Button size="xs" rounded={'full'} bg="green.600">
-                              <DialogUpdateStock />
-                            </Button> */}
-                          </Flex>
-                        </Box>
-                        <Flex w={'lg'} justifyContent={'flex-end'}>
-                          <Switch colorScheme="blue" defaultChecked />
-                        </Flex>
+                            </Text>
+                          </Button>
+                          <Button
+                            size="xs"
+                            rounded={'full'}
+                            bg="white"
+                            color={'black'}
+                            borderWidth={'2px'}
+                            borderColor={'black'}
+                            p={1}
+                            h={7}
+                          >
+                            <Text>Lihat Halaman</Text>
+                          </Button>
+                        </HStack>
+                        <Switch colorScheme="blue" defaultChecked />
                       </Flex>
                     </Flex>
                   </Flex>
