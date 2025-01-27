@@ -10,8 +10,43 @@ import {
 } from '@chakra-ui/react';
 import { FaGoogle } from 'react-icons/fa';
 import { FaFacebookF } from 'react-icons/fa6';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { loginUser } from '@/features/login';
+import { useNavigate } from 'react-router';
+const schema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+// TypeScript type inferred from Zod schema
+type LoginFormData = z.infer<typeof schema>;
 
 function Login() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(schema),
+  });
+  const navigate = useNavigate();
+  const [apiError, setApiError] = useState<string | null>(null);
+  const onSubmit = async (data: LoginFormData) => {
+    setApiError(null); // Reset API error
+    const response = await loginUser(data.email, data.password);
+
+    if (response.token) {
+      alert('Login successful');
+      navigate('/dashboard');
+    } else {
+      setApiError(response.message || 'Login failed');
+      console.log(apiError);
+      alert(response.message);
+    }
+  };
   return (
     <Box
       bgColor="#E5E5E5"
@@ -44,6 +79,8 @@ function Login() {
                   h="400px"
                   justifyContent="center"
                   borderRadius="15px"
+                  as="form"
+                  onSubmit={handleSubmit(onSubmit)}
                 >
                   <Text
                     color="#5F2EEA"
@@ -59,10 +96,16 @@ function Login() {
                     rounded="50px"
                     borderWidth="1px"
                     borderColor="whiteAlpha.950"
-                    placeholder="Email/Username*"
+                    placeholder="Email*"
                     color="#085DCF"
                     gap="4"
+                    {...register('email')}
                   />
+                  {errors.email && (
+                    <Text color="red.500" fontSize="sm">
+                      {errors.email.message}
+                    </Text>
+                  )}
                   <Input
                     width="80%"
                     padding="4"
@@ -72,8 +115,14 @@ function Login() {
                     placeholder="Password"
                     color="#085DCF"
                     gap="4"
+                    type="password"
+                    {...register('password')}
                   />
-
+                  {errors.password && (
+                    <Text color="red.500" fontSize="sm">
+                      {errors.password.message}
+                    </Text>
+                  )}
                   <Button
                     type="submit"
                     width="80%"
