@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { Switch } from './ui/switch';
 import { Link } from 'react-router';
-import { LuFolder, LuSquareCheck, LuUser } from 'react-icons/lu';
+import { LuUser } from 'react-icons/lu';
 import { MdModeEditOutline, MdOutlineDelete } from 'react-icons/md';
 import { Checkbox } from './ui/checkbox';
 import { DialogUpdatePrice } from './dialog-update-price';
@@ -204,11 +204,15 @@ const ListProduct = () => {
               Semua
             </Tabs.Trigger>
             <Tabs.Trigger value="aktif">
-              <LuFolder />
+              <Box bg={'#5F2EEA'} w={5} rounded={'full'} color={'white'}>
+                {searchedProducts.filter((s) => s.status === true).length}
+              </Box>
               Aktif
             </Tabs.Trigger>
             <Tabs.Trigger value="nonaktif">
-              <LuSquareCheck />
+              <Box bg={'#5F2EEA'} w={5} rounded={'full'} color={'white'}>
+                {searchedProducts.filter((s) => s.status === false).length}
+              </Box>
               Nonaktif
             </Tabs.Trigger>
           </Tabs.List>
