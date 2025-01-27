@@ -22,7 +22,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { Field } from './ui/field';
+import { Field } from '../../ui/field';
 
 export function DialogUpdatePrice() {
   const [open, setOpen] = useState(false);

@@ -12,23 +12,23 @@ import {
   Tabs,
   Text,
 } from '@chakra-ui/react';
-import { Switch } from './ui/switch';
+import { Switch } from '../ui/switch';
 import { Link } from 'react-router';
 import { LuUser } from 'react-icons/lu';
 import { MdModeEditOutline, MdOutlineDelete } from 'react-icons/md';
-import { Checkbox } from './ui/checkbox';
-import { DialogUpdatePrice } from './dialog-update-price';
+import { Checkbox } from '../ui/checkbox';
+import { DialogUpdatePrice } from './Dialog/dialog-update-price';
 import {
   SelectContent,
   SelectItem,
   SelectRoot,
   SelectTrigger,
   SelectValueText,
-} from './ui/select';
+} from '../ui/select';
 import { useState } from 'react';
 import { IoIosLink } from 'react-icons/io';
 import { HiDotsHorizontal } from 'react-icons/hi';
-import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from './ui/menu';
+import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from '../ui/menu';
 import {
   DialogActionTrigger,
   DialogBody,
@@ -39,7 +39,7 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog';
+} from '../ui/dialog';
 
 interface Product {
   id: number;

@@ -21,7 +21,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { Field } from './ui/field';
+import { Field } from '../../ui/field';
 
 export function DialogUpdateStock() {
   const [open, setOpen] = useState(false);

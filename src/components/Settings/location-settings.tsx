@@ -1,8 +1,8 @@
 import { Box, HStack, Text, VStack } from '@chakra-ui/react';
 import { LuNavigation2, LuNavigation2Off } from 'react-icons/lu';
-import DialogAddLocation from './dialog-add-location-settings';
-import DialogEditLocation from './dialog-edit-location-settings';
-import DialogDeleteLocation from './dialog-delete-location-settings';
+import DialogAddLocation from './Dialog/dialog-add-location-settings';
+import DialogEditLocation from './Dialog/dialog-edit-location-settings';
+import DialogDeleteLocation from './Dialog/dialog-delete-location-settings';
 
 const locations = [
   {
@@ -22,7 +22,7 @@ const locations = [
     subdistrict: 'Kec. Ciputat',
     postCode: '15113',
     isMain: false,
-    pin: <LuNavigation2Off color="#EA473C"/>,
+    pin: <LuNavigation2Off color="#EA473C" />,
     pinpoint: false,
   },
   {
@@ -32,7 +32,7 @@ const locations = [
     subdistrict: 'Kec. Ciputat',
     postCode: '15113',
     isMain: false,
-    pin: <LuNavigation2Off color="#EA473C"/>,
+    pin: <LuNavigation2Off color="#EA473C" />,
     pinpoint: false,
   },
 ];
@@ -51,7 +51,7 @@ export default function Location() {
             </Text>
           </VStack>
           <VStack>
-            <DialogAddLocation/>
+            <DialogAddLocation />
           </VStack>
         </HStack>
       </Box>
@@ -142,10 +142,10 @@ export default function Location() {
           </VStack>
           <HStack w="10%" h="full" display="flex" justifyContent="center">
             <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-            <DialogDeleteLocation/>
+              <DialogDeleteLocation />
             </Box>
             <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-            <DialogEditLocation/>
+              <DialogEditLocation />
             </Box>
           </HStack>
         </Box>
