@@ -21,7 +21,7 @@ import {
   TimelineItem,
   TimelineRoot,
   TimelineTitle,
-} from './ui/timeline';
+} from '../../ui/timeline';
 import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
 
 export function TrackingShipment() {

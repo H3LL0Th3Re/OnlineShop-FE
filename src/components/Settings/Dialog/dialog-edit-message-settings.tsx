@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Input,
-  Text,
-  Textarea,
-} from '@chakra-ui/react';
+import { Box, Button, Input, Text, Textarea } from '@chakra-ui/react';
 import {
   DialogActionTrigger,
   DialogBody,
@@ -17,7 +11,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { BiMessageAltEdit } from 'react-icons/bi';
-
 
 export default function DialogEditMessage() {
   return (

@@ -5,7 +5,6 @@ import {
   Input,
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectRoot,
   SelectTrigger,
   SelectValueText,
@@ -23,7 +22,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { MdEditLocationAlt } from 'react-icons/md';
 
 const daftarKecamatan = createListCollection({
   items: [
@@ -43,16 +41,25 @@ const daftarKodePos = createListCollection({
   ],
 });
 
-export default function DialogEditLocation() {
+export default function DialogAddLocation() {
   return (
     <Box>
       <DialogRoot>
         <DialogTrigger asChild>
-          <MdEditLocationAlt style={{ fontSize: '20px' }} />
+          <Button
+            bgColor="white"
+            color="black"
+            rounded="full"
+            borderWidth="1px"
+            borderColor="black"
+            fontWeight="700"
+          >
+            Add Location
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Location</DialogTitle>
+            <DialogTitle>Add New Location</DialogTitle>
           </DialogHeader>
           <DialogBody>
             <Text fontWeight="600" fontSize="15px" mb="7px">
