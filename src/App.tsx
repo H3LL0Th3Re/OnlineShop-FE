@@ -11,9 +11,15 @@ import { Home } from './pages/home';
 import { Dashboard } from './pages/dashboard';
 import DetailProduct from './components/Product/detail-product';
 import PrivateLayout from './layouts/PrivateLayout';
+import { LandingPage } from './pages/landing-page';
 
 function App() {
   const router = createBrowserRouter([
+    {
+      path: '/landing-page',
+      Component: LandingPage,
+      HydrateFallback: Fallback,
+    },
     {
       path: '/login',
       Component: Login,
