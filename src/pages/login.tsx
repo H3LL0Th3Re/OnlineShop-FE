@@ -16,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { loginUser } from '@/features/login';
 import { useNavigate } from 'react-router';
+import { useAuthStore } from '@/hooks/authstore';
 const schema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -25,6 +26,7 @@ const schema = z.object({
 type LoginFormData = z.infer<typeof schema>;
 
 function Login() {
+  const { setToken } = useAuthStore();
   const {
     register,
     handleSubmit,
@@ -35,10 +37,11 @@ function Login() {
   const navigate = useNavigate();
   const [apiError, setApiError] = useState<string | null>(null);
   const onSubmit = async (data: LoginFormData) => {
-    setApiError(null); // Reset API error
+    setApiError(null);
     const response = await loginUser(data.email, data.password);
 
     if (response.token) {
+      setToken(response.token);
       alert('Login successful');
       navigate('/dashboard');
     } else {

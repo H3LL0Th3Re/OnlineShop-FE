@@ -1,9 +1,15 @@
 import { Box, Flex } from '@chakra-ui/react';
-import { Outlet } from 'react-router';
+import { Outlet, Navigate } from 'react-router';
 import Sidebar from '@/pages/sidebar';
 import Navbar from '@/pages/navbar';
-
+import { useAuthStore } from '@/hooks/authstore';
 const PrivateLayout = () => {
+  const { token } = useAuthStore();
+  console.log(token);
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
   return (
     <Box>
       {/* <Navbar/> */}
