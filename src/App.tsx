@@ -10,6 +10,8 @@ import { DetailOrder } from './pages/detail-order';
 import Settings from './pages/settings';
 import { Home } from './pages/home';
 import { Dashboard } from './pages/dashboard';
+import DetailProduct from './pages/detail-product';
+import CheckoutProduct from './pages/checkout-product';
 
 
 function App() {
@@ -32,6 +34,11 @@ function App() {
     {
       path: '/detail-product',
       Component: DetailProduct,
+      HydrateFallback: Fallback,
+    },
+    {
+      path: '/checkout-product',
+      Component: CheckoutProduct,
       HydrateFallback: Fallback,
     },
     {
