@@ -7,7 +7,11 @@ import {
   Textarea,
   VStack,
 } from '@chakra-ui/react';
-import { FileUploadDropzone, FileUploadList, FileUploadRoot } from './ui/file-upload';
+import {
+  FileUploadDropzone,
+  FileUploadList,
+  FileUploadRoot,
+} from '../ui/file-upload';
 
 export default function Information() {
   return (
@@ -54,11 +58,9 @@ export default function Information() {
           Store Logo
         </Text>
 
-        <VStack w="100%" display="flex" alignItems="flex-start" >
+        <VStack w="100%" display="flex" alignItems="flex-start">
           <FileUploadRoot maxW="xs" alignItems="stretch" maxFiles={10}>
-            <FileUploadDropzone
-              label="Upload Store Logo"
-            />
+            <FileUploadDropzone label="Upload Store Logo" />
             <FileUploadList />
           </FileUploadRoot>
           <Text textAlign="left" w="50%" fontSize="13px">

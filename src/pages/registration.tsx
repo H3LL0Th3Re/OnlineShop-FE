@@ -10,8 +10,50 @@ import {
 } from '@chakra-ui/react';
 import { FaGoogle } from 'react-icons/fa';
 import { FaFacebookF } from 'react-icons/fa6';
-
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { useNavigate } from 'react-router';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { registerUser } from '@/features/register';
+import { useState } from 'react';
+const schema = z.object({
+  fullname: z.string().min(1, 'Fullname is required'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+type FormData = z.infer<typeof schema>;
 function Registration() {
+  const [errorMessage, setErrorMessage] = useState('');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  });
+  const navigate = useNavigate();
+  const onSubmit = async (data: FormData) => {
+    console.log(data);
+    try {
+      const result = await registerUser(
+        data.fullname,
+        data.email,
+        data.password
+      );
+
+      if (result.user) {
+        alert('Registration successful!');
+        navigate('/login');
+      } else {
+        setErrorMessage(result.message || 'Registration failed');
+        console.log(errorMessage);
+        alert(result.message);
+      }
+    } catch (err) {
+      setErrorMessage('An error occurred while registering.');
+      console.error(err);
+    }
+  };
   return (
     <Box
       bgColor="#E5E5E5"
@@ -52,6 +94,8 @@ function Registration() {
                   h="400px"
                   justifyContent="center"
                   borderRadius="15px"
+                  as="form"
+                  onSubmit={handleSubmit(onSubmit)}
                 >
                   <Text
                     color="#5F2EEA"
@@ -67,10 +111,16 @@ function Registration() {
                     rounded="50px"
                     borderWidth="1px"
                     borderColor="whiteAlpha.950"
-                    placeholder="Username*"
+                    placeholder="Full Name*"
                     color="#085DCF"
                     gap="4"
+                    {...register('fullname')}
                   />
+                  {errors.fullname && (
+                    <Text color="red.500" fontSize="sm">
+                      {errors.fullname.message}
+                    </Text>
+                  )}
                   <Input
                     width="80%"
                     padding="4"
@@ -80,7 +130,13 @@ function Registration() {
                     placeholder="Email*"
                     color="#085DCF"
                     gap="4"
+                    {...register('email')}
                   />
+                  {errors.email && (
+                    <Text color="red.500" fontSize="sm">
+                      {errors.email.message}
+                    </Text>
+                  )}
                   <Input
                     width="80%"
                     padding="4"
@@ -90,8 +146,14 @@ function Registration() {
                     placeholder="Password*"
                     color="#085DCF"
                     gap="4"
+                    type="password"
+                    {...register('password')}
                   />
-
+                  {errors.password && (
+                    <Text color="red.500" fontSize="sm">
+                      {errors.password.message}
+                    </Text>
+                  )}
                   <Button
                     type="submit"
                     width="80%"

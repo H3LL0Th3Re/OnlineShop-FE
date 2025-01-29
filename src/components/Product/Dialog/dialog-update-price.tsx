@@ -22,7 +22,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import { Field } from './ui/field';
+import { Field } from '../../ui/field';
 
 export function DialogUpdatePrice() {
   const [open, setOpen] = useState(false);
@@ -34,9 +34,7 @@ export function DialogUpdatePrice() {
       size={'lg'}
     >
       <DialogTrigger asChild>
-        <Button size="xs" rounded={'full'} bg="blue.600">
-          Update Product
-        </Button>
+        <Text>Update Product</Text>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

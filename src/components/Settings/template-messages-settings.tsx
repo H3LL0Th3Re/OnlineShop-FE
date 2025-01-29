@@ -1,7 +1,7 @@
 import { Box, HStack, Text, VStack } from '@chakra-ui/react';
-import DialogAddMessage from './dialog-add-message-settings';
-import DialogEditMessage from './dialog-edit-message-settings';
-import DialogDeleteMessage from './dialog-delete-message-settings';
+import DialogAddMessage from './Dialog/dialog-add-message-settings';
+import DialogEditMessage from './Dialog/dialog-edit-message-settings';
+import DialogDeleteMessage from './Dialog/dialog-delete-message-settings';
 
 const messages = [
   {
@@ -51,7 +51,7 @@ export default function TemplateMessages() {
           alignItems="flex-start"
           h="full"
         >
-          <VStack w="90%"  align="flex-start">
+          <VStack w="90%" align="flex-start">
             <Text fontWeight="600" fontSize="16px" w="full">
               {message.name}
             </Text>
@@ -61,12 +61,12 @@ export default function TemplateMessages() {
           </VStack>
           <VStack w="10%">
             <HStack display="flex" justifyContent="center">
-            <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-            <DialogDeleteMessage/>
-            </Box>
-            <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-            <DialogEditMessage/>
-            </Box>
+              <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
+                <DialogDeleteMessage />
+              </Box>
+              <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
+                <DialogEditMessage />
+              </Box>
             </HStack>
           </VStack>
         </Box>

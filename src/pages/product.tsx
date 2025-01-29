@@ -1,4 +1,4 @@
-import ListProduct from '@/components/ListProduct';
+import ListProduct from '@/components/Product/list-product';
 import { Box } from '@chakra-ui/react';
 
 const Product = () => {

@@ -1,21 +1,26 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
-import Layout from './pages/layout';
 import Fallback from './pages/fallback';
 import Product from './pages/product';
-import addProduct from './pages/addProduct';
+import addProduct from './components/Product/add-product';
 import Login from './pages/login';
 import Registration from './pages/registration';
 import { Order } from './pages/order';
-import { DetailOrder } from './pages/detail-order';
+import { DetailOrder } from './components/Order/detail-order';
 import Settings from './pages/settings';
 import { Home } from './pages/home';
 import { Dashboard } from './pages/dashboard';
-import DetailProduct from './pages/detail-product';
-import CheckoutProduct from './pages/checkout-product';
+import DetailProduct from './components/Product/detail-product';
+import PrivateLayout from './layouts/PrivateLayout';
+import { LandingPage } from './pages/landing-page';
 
 
 function App() {
   const router = createBrowserRouter([
+    {
+      path: '/landing-page',
+      Component: LandingPage,
+      HydrateFallback: Fallback,
+    },
     {
       path: '/login',
       Component: Login,
@@ -43,7 +48,7 @@ function App() {
     },
     {
       path: '/',
-      Component: Layout,
+      Component: PrivateLayout,
       HydrateFallback: Fallback,
       children: [
         {

@@ -1,4 +1,4 @@
-import { TrackingShipment } from '@/components/dialog-tracking-shipment';
+import { TrackingShipment } from '@/components/Order/Dialog/dialog-tracking-shipment';
 import {
   Box,
   Collapsible,
@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/timeline';
 import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
 import { useParams } from 'react-router';
-import { getStatusColor } from './order';
+import { getStatusColor } from '../../pages/order';
 
 interface Order {
   id: number;

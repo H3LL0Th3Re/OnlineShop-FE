@@ -1,4 +1,3 @@
-import { Box, Button, Input, Stack, Text } from '@chakra-ui/react';
 import {
   DialogActionTrigger,
   DialogBody,
@@ -8,7 +7,8 @@ import {
   DialogRoot,
   DialogTitle,
   DialogTrigger,
-} from './ui/dialog';
+} from '@/components/ui/dialog';
+import { Box, Button, Input, Stack, Text } from '@chakra-ui/react';
 
 function DialogAddVariant() {
   return (

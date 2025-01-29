@@ -55,7 +55,7 @@ export default function DetailProduct() {
                 Select Variant
               </Text>
               <Grid templateColumns="repeat(6, 1fr)" gap="2" mb="5px">
-              {['Biru', 'Hitam', 'Merah', 'Kuning'].map((warna) => (
+                {['Biru', 'Hitam', 'Merah', 'Kuning'].map((warna) => (
                   <Button
                     borderWidth="1px"
                     borderColor="black"

@@ -1,6 +1,6 @@
-import Information from '@/components/information-settings';
-import Location from '@/components/location-settings';
-import TemplateMessages from '@/components/template-messages-settings';
+import Information from '@/components/Settings/information-settings';
+import Location from '@/components/Settings/location-settings';
+import TemplateMessages from '@/components/Settings/template-messages-settings';
 import { Box, Tabs, Text, VStack } from '@chakra-ui/react';
 
 export default function Settings() {
@@ -10,27 +10,21 @@ export default function Settings() {
         <Text fontWeight="700" fontSize="2xl" color="#2400FE">
           Seller Store
         </Text>
-        <Tabs.Root defaultValue="location"  w="full">
+        <Tabs.Root defaultValue="location" w="full">
           <Tabs.List>
-            <Tabs.Trigger value="information">
-              Information
-            </Tabs.Trigger>
-            <Tabs.Trigger value="location">
-              Location
-            </Tabs.Trigger>
-            <Tabs.Trigger value="messages">
-              Template Messages
-            </Tabs.Trigger>
+            <Tabs.Trigger value="information">Information</Tabs.Trigger>
+            <Tabs.Trigger value="location">Location</Tabs.Trigger>
+            <Tabs.Trigger value="messages">Template Messages</Tabs.Trigger>
           </Tabs.List>
-          
+
           <Tabs.Content value="information">
-            <Information/>
+            <Information />
           </Tabs.Content>
           <Tabs.Content value="location">
-            <Location/>
+            <Location />
           </Tabs.Content>
           <Tabs.Content value="messages">
-            <TemplateMessages/>
+            <TemplateMessages />
           </Tabs.Content>
         </Tabs.Root>
       </VStack>
