@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
-
+import { Store } from '@/types/store';
 interface AuthState {
   token: string | null;
   setToken: (token: string | null) => void;
@@ -11,6 +11,17 @@ interface DecodedToken {
   exp: number; // exp is the expiration time in seconds (Unix timestamp)
   // Add other fields if needed, based on your JWT payload
 }
+
+interface StoreState {
+  store: Store | null;
+  setStore: (store: Store) => void;
+}
+export const useStoreState = create<StoreState>((set) => ({
+  store: null,
+  setStore(store: Store) {
+    set({ store });
+  },
+}));
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: Cookies.get('token') || null, // Retrieve token from cookies on load
