@@ -15,8 +15,11 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { loginUser } from '@/features/login';
-import { useNavigate, Navigate } from 'react-router';
+
+import { Link, useNavigate, Navigate } from 'react-router';
 import { useAuthStore } from '@/hooks/authstore';
+import Swal from 'sweetalert2';
+import { PasswordInput } from '@/components/ui/password-input';
 
 const schema = z.object({
   email: z.string().email('Invalid email address'),
@@ -48,34 +51,45 @@ function Login() {
 
     if (response.token) {
       setToken(response.token);
-      alert('Login successful');
+      Swal.fire({
+        title: 'Login Successful!',
+        text: 'Welcome to Lakoe App',
+        icon: 'success',
+        confirmButtonText: 'Ok',
+      });
+
       navigate('/dashboard');
     } else {
       setApiError(response.message || 'Login failed');
       console.log(apiError);
-      alert(response.message);
+      Swal.fire({
+        title: 'Login Failed!',
+        text:
+          response.message || 'Please check your credentials and try again.',
+        icon: 'error',
+        confirmButtonText: 'Retry',
+      });
     }
   };
   return (
     <Box
       bgColor="#E5E5E5"
-      height="100vh"
+      h="100vh"
       w="100vw"
       display="flex"
       justifyContent="center"
-      alignItems="center"
       m="0"
-      p="0"
+      p="10"
     >
       <HStack>
         <Box
-          w="90vw"
-          h="90vh"
+          w="full"
+          h="full"
           bgColor="white"
           display="flex"
           alignItems="center"
           justifyContent="center"
-          rounded="12px"
+          rounded="10px"
         >
           <VStack>
             <HStack gap="50px" marginLeft="40px" marginRight="40px">
@@ -99,34 +113,32 @@ function Login() {
                   >
                     LAKOE APP
                   </Text>
-                  <Input
-                    width="80%"
-                    padding="4"
-                    rounded="50px"
-                    borderWidth="1px"
-                    borderColor="whiteAlpha.950"
-                    placeholder="Email*"
-                    color="#085DCF"
-                    gap="4"
-                    {...register('email')}
-                  />
-                  {errors.email && (
-                    <Text color="red.500" fontSize="sm">
-                      {errors.email.message}
-                    </Text>
-                  )}
-                  <Input
-                    width="80%"
-                    padding="4"
-                    rounded="50px"
-                    borderWidth="1px"
-                    borderColor="whiteAlpha.950"
-                    placeholder="Password"
-                    color="#085DCF"
-                    gap="4"
-                    type="password"
-                    {...register('password')}
-                  />
+                  <Box w="80%">
+                    <Input
+                      padding="4"
+                      mb="10px"
+                      rounded="50px"
+                      borderWidth="1px"
+                      borderColor="#E5E5E5"
+                      placeholder="Email*"
+                      color="#2400FE"
+                      {...register('email')}
+                    />
+                    {errors.email && (
+                      <Text color="red.500" fontSize="sm">
+                        {errors.email.message}
+                      </Text>
+                    )}
+                    <PasswordInput
+                      rounded="50px"
+                      borderWidth="1px"
+                      borderColor="#E5E5E5"
+                      placeholder="Password"
+                      color="#2400FE"
+                      type="password"
+                      {...register('password')}
+                    />
+                  </Box>
                   {errors.password && (
                     <Text color="red.500" fontSize="sm">
                       {errors.password.message}
@@ -146,7 +158,8 @@ function Login() {
                       Don’t have an account?
                     </Text>
                     <Text color="#2400FE" fontWeight="500" fontSize="13px">
-                      Sign Up
+                      {' '}
+                      <Link to={'/register'}>Sign Up</Link>
                     </Text>
                   </HStack>
 
@@ -193,10 +206,11 @@ function Login() {
               </Box>
               <Box flex="7">
                 <Image
-                  src="https://plus.unsplash.com/premium_photo-1687203673190-d39c3719123a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d2VsY29tZXxlbnwwfHwwfHx8MA%3D%3D"
+                  src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1738209533/Welcome_jgxupu.png"
                   alt="Login Animation"
                   h="400px"
                   w="700px"
+                  objectFit="contain"
                 />
               </Box>
             </HStack>
