@@ -12,10 +12,13 @@ import { FaGoogle } from 'react-icons/fa';
 import { FaFacebookF } from 'react-icons/fa6';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerUser } from '@/features/register';
 import { useState } from 'react';
+import Swal from 'sweetalert2';
+import { PasswordInput } from '@/components/ui/password-input';
+
 const schema = z.object({
   fullname: z.string().min(1, 'Fullname is required'),
   email: z.string().email('Invalid email address'),
@@ -42,12 +45,22 @@ function Registration() {
       );
 
       if (result.user) {
-        alert('Registration successful!');
-        navigate('/login');
+        Swal.fire({
+          title: 'Registration Successful!',
+          text: 'Your account has been created. You can now log in.',
+          icon: 'success',
+          confirmButtonText: 'Go to Login',
+        }).then(() => {
+          navigate('/login');
+        });
       } else {
-        setErrorMessage(result.message || 'Registration failed');
         console.log(errorMessage);
-        alert(result.message);
+        Swal.fire({
+          title: '',
+          text: result.message || 'An error occurred. Please try again.',
+          icon: 'error',
+          confirmButtonText: 'Retry',
+        });
       }
     } catch (err) {
       setErrorMessage('An error occurred while registering.');
@@ -79,9 +92,9 @@ function Registration() {
             <HStack gap="50px" marginLeft="40px" marginRight="40px">
               <Box flex="2">
                 <Image
-                  src="https://plus.unsplash.com/premium_photo-1687203673190-d39c3719123a?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8d2VsY29tZXxlbnwwfHwwfHx8MA%3D%3D"
+                  src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1738211570/Logo_register_gj5gdy.png"
                   alt="Login Animation"
-                  h="400px"
+                  h="365px"
                   w="700px"
                 />
               </Box>
@@ -105,55 +118,53 @@ function Registration() {
                   >
                     LAKOE APP
                   </Text>
-                  <Input
-                    width="80%"
-                    padding="4"
-                    rounded="50px"
-                    borderWidth="1px"
-                    borderColor="whiteAlpha.950"
-                    placeholder="Full Name*"
-                    color="#085DCF"
-                    gap="4"
-                    {...register('fullname')}
-                  />
-                  {errors.fullname && (
-                    <Text color="red.500" fontSize="sm">
-                      {errors.fullname.message}
-                    </Text>
-                  )}
-                  <Input
-                    width="80%"
-                    padding="4"
-                    rounded="50px"
-                    borderWidth="1px"
-                    borderColor="whiteAlpha.950"
-                    placeholder="Email*"
-                    color="#085DCF"
-                    gap="4"
-                    {...register('email')}
-                  />
-                  {errors.email && (
-                    <Text color="red.500" fontSize="sm">
-                      {errors.email.message}
-                    </Text>
-                  )}
-                  <Input
-                    width="80%"
-                    padding="4"
-                    rounded="50px"
-                    borderWidth="1px"
-                    borderColor="whiteAlpha.950"
-                    placeholder="Password*"
-                    color="#085DCF"
-                    gap="4"
-                    type="password"
-                    {...register('password')}
-                  />
-                  {errors.password && (
-                    <Text color="red.500" fontSize="sm">
-                      {errors.password.message}
-                    </Text>
-                  )}
+                  <Box w="80%">
+                    <Input
+                      padding="4"
+                      mb="10px"
+                      rounded="50px"
+                      borderWidth="1px"
+                      borderColor="#E5E5E5"
+                      placeholder="Full Name*"
+                      color="#2400FE"
+                      {...register('fullname')}
+                    />
+                    {errors.fullname && (
+                      <Text color="red.500" fontSize="sm">
+                        {errors.fullname.message}
+                      </Text>
+                    )}
+                    <Input
+                      padding="4"
+                      mb="10px"
+                      rounded="50px"
+                      borderWidth="1px"
+                      borderColor="#E5E5E5"
+                      placeholder="Email*"
+                      color="#2400FE"
+                      {...register('email')}
+                    />
+                    {errors.email && (
+                      <Text color="red.500" fontSize="sm">
+                        {errors.email.message}
+                      </Text>
+                    )}
+                    <PasswordInput
+                      rounded="50px"
+                      borderWidth="1px"
+                      borderColor="#E5E5E5"
+                      placeholder="Password"
+                      color="#2400FE"
+                      type="password"
+                      {...register('password')}
+                    />
+
+                    {errors.password && (
+                      <Text color="red.500" fontSize="sm">
+                        {errors.password.message}
+                      </Text>
+                    )}
+                  </Box>
                   <Button
                     type="submit"
                     width="80%"
@@ -168,7 +179,7 @@ function Registration() {
                       Already have an account?
                     </Text>
                     <Text color="#2400FE" fontWeight="500" fontSize="13px">
-                      Sign In
+                      <Link to={'/login'}>Sign In</Link>
                     </Text>
                   </HStack>
 
