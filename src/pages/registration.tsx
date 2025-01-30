@@ -12,10 +12,11 @@ import { FaGoogle } from 'react-icons/fa';
 import { FaFacebookF } from 'react-icons/fa6';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, Navigate } from 'react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerUser } from '@/features/register';
 import { useState } from 'react';
+import { useAuthStore } from '@/hooks/authstore';
 import Swal from 'sweetalert2';
 import { PasswordInput } from '@/components/ui/password-input';
 
@@ -26,7 +27,9 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 function Registration() {
+  const { token } = useAuthStore();
   const [errorMessage, setErrorMessage] = useState('');
+
   const {
     register,
     handleSubmit,
@@ -35,6 +38,9 @@ function Registration() {
     resolver: zodResolver(schema),
   });
   const navigate = useNavigate();
+  if (token) {
+    return <Navigate to="/" replace />;
+  }
   const onSubmit = async (data: FormData) => {
     console.log(data);
     try {
