@@ -12,13 +12,7 @@ export interface Variant {
 export interface Product {
   id: string;
   name: string;
-  variants: Variant[];
-  attachments: string;
-}
-
-export interface Product {
-  id: string;
-  name: string;
+  description: string;
   category: string;
   variant: string;
   sku: string;
@@ -27,4 +21,11 @@ export interface Product {
   price: number;
   is_active: boolean;
   variants: Variant[];
+}
+
+export interface ProductTemporary {
+  id: string;
+  name: string;
+  description: string;
+  attachments: string;
 }
