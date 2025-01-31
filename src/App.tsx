@@ -12,6 +12,7 @@ import { Dashboard } from './pages/dashboard';
 import DetailProduct from './components/Product/detail-product';
 import PrivateLayout from './layouts/PrivateLayout';
 import { LandingPage } from './pages/landing-page';
+import CheckoutProduct from './pages/checkout-product';
 
 
 function App() {
