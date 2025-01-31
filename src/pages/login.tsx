@@ -43,7 +43,7 @@ function Login() {
   });
 
   if (token) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   const onSubmit = async (data: LoginFormData) => {
     setApiError(null);
