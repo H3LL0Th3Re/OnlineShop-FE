@@ -3,28 +3,45 @@ import DialogAddMessage from './Dialog/dialog-add-message-settings';
 import DialogEditMessage from './Dialog/dialog-edit-message-settings';
 import DialogDeleteMessage from './Dialog/dialog-delete-message-settings';
 
-const messages = [
-  {
-    name: 'Pesan Pembelian Produk',
-    content: 'Terima kasih telah membeli produk',
-  },
-  {
-    name: 'Pesan Pembelian Produk',
-    content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget convallis arcu. Phasellus quis egestas lorem. Aliquam finibus porttitor justo ac feugiat. Donec eget justo purus. Pellentesque ut viverra nunc. Donec finibus feugiat ipsum eget dictum. Pellentesque ornare, lacus non commodo consequat, arcu eros pellentesque eros, eget luctus libero sem sit amet quam. Morbi id vestibulum ligula, eget interdum urna.',
-  },
-  {
-    name: 'Pesan Pembelian Produk',
-    content:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque eget convallis arcu. Phasellus quis egestas lorem. Aliquam finibus porttitor justo ac feugiat. Donec eget justo purus. Pellentesque ut viverra nunc. Donec finibus feugiat ipsum eget dictum. Pellentesque ornare, lacus non commodo consequat, arcu eros pellentesque eros, eget luctus libero sem sit amet quam. Morbi id vestibulum ligula, eget interdum urna.',
-  },
-  {
-    name: 'Pesan Pembelian Produk',
-    content: 'Terima kasih telah membeli produk',
-  },
-];
+import { useEffect, useState } from 'react';
+// import axios from 'axios';
+// import { apiURL } from '@/utils/api-url';
+import { getMessage } from '@/features/message';
+// interface messages{
+//   name: string,
+//   content: string
+// }
+interface Message {
+  id: string;
+  name: string;
+  content: string;
+}
 
 export default function TemplateMessages() {
+  const [messages, setMessages] = useState<Message[]>([]); // State to store fetched messages
+  
+  // Fetch messages on component mount
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const data = await getMessage(); // Await the Promise
+        console.log("API Response:", data); // Log full response
+  
+        if (Array.isArray(data)) {
+          setMessages(data); // Only set if it's an array
+        } else if (data && Array.isArray(data.messages)) {
+          setMessages(data.messages); // If messages are nested inside an object
+        } else {
+          console.error("Unexpected data format:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+  
+    fetchMessages();
+  }, []);
+  
   return (
     <Box>
       <Box>
@@ -62,10 +79,10 @@ export default function TemplateMessages() {
           <VStack w="10%">
             <HStack display="flex" justifyContent="center">
               <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-                <DialogDeleteMessage />
+                <DialogDeleteMessage messageId={message.id}/>
               </Box>
               <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-                <DialogEditMessage />
+                <DialogEditMessage messageId={message.id} />
               </Box>
             </HStack>
           </VStack>
