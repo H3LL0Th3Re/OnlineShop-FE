@@ -11,7 +11,7 @@ import {
   Textarea,
   VStack,
 } from '@chakra-ui/react';
-import { FaRegImage } from 'react-icons/fa6';
+import { FileUploadProduct } from './file-upload-product';
 
 function addProduct() {
   return (
@@ -86,12 +86,7 @@ function addProduct() {
                   borderRadius="10px"
                   style={{ borderStyle: 'dashed' }}
                 >
-                  <VStack>
-                    <FaRegImage fontSize="50px" />
-                    <Text fontWeight="600" fontSize="17px">
-                      Foto Utama
-                    </Text>
-                  </VStack>
+                  <FileUploadProduct />
                 </Center>
                 <Center
                   bg="bg.emphasized"
@@ -101,12 +96,7 @@ function addProduct() {
                   borderRadius="10px"
                   style={{ borderStyle: 'dashed' }}
                 >
-                  <VStack>
-                    <FaRegImage fontSize="50px" />
-                    <Text fontWeight="600" fontSize="17px">
-                      Foto 2
-                    </Text>
-                  </VStack>
+                  <FileUploadProduct />
                 </Center>
                 <Center
                   bg="bg.emphasized"
@@ -116,12 +106,7 @@ function addProduct() {
                   borderRadius="10px"
                   style={{ borderStyle: 'dashed' }}
                 >
-                  <VStack>
-                    <FaRegImage fontSize="50px" />
-                    <Text fontWeight="600" fontSize="17px">
-                      Foto 3
-                    </Text>
-                  </VStack>
+                  <FileUploadProduct />
                 </Center>
                 <Center
                   bg="bg.emphasized"
@@ -131,27 +116,7 @@ function addProduct() {
                   borderRadius="10px"
                   style={{ borderStyle: 'dashed' }}
                 >
-                  <VStack>
-                    <FaRegImage fontSize="50px" />
-                    <Text fontWeight="600" fontSize="17px">
-                      Foto 4
-                    </Text>
-                  </VStack>
-                </Center>
-                <Center
-                  bg="bg.emphasized"
-                  h="200px"
-                  w="200px"
-                  borderWidth="3px"
-                  borderRadius="10px"
-                  style={{ borderStyle: 'dashed' }}
-                >
-                  <VStack>
-                    <FaRegImage fontSize="50px" />
-                    <Text fontWeight="600" fontSize="17px">
-                      Foto 5
-                    </Text>
-                  </VStack>
+                  <FileUploadProduct />
                 </Center>
               </HStack>
             </VStack>
