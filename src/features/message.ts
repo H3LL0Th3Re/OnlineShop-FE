@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { apiURL } from '@/utils/api-url';
+import Cookies from 'js-cookie';
 
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNtNml1aGd3bDAwMDF0YXQ4YmdtejR3a2MiLCJmdWxsbmFtZSI6Ikh1Z2dpbmcgRmFjZSIsImVtYWlsIjoiSHVnZ2luZ0ZhY2VAZ21haWwuY29tIiwiaWF0IjoxNzM4Mjg4MTUwLCJleHAiOjE3MzgzMzEzNTB9.6m42c4FZtyUlBtNYpj1_Rstm3Rb8UP6qgQlsEpLBIOA"
+const token = Cookies.get('token');
+
 export async function messageTemplates (
   name: string,
   content: string
