@@ -8,7 +8,8 @@ export const getAllProducts = async (token: string): Promise<Product[]> => {
       throw new Error('No authentication token found');
     }
 
-    const response = await axios.get(apiURL + '/product/create-product', {
+    const response = await axios.get(apiURL + '/product/get-product', {
+
       headers: {
         Authorization: `Bearer ${token}`,
       },
