@@ -9,6 +9,7 @@ export const getAllProducts = async (token: string): Promise<Product[]> => {
     }
 
     const response = await axios.get(apiURL + '/product/get-product', {
+
       headers: {
         Authorization: `Bearer ${token}`,
       },
