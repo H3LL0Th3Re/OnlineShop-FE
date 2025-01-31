@@ -14,7 +14,6 @@ import PrivateLayout from './layouts/PrivateLayout';
 import { LandingPage } from './pages/landing-page';
 import CheckoutProduct from './pages/checkout-product';
 
-
 function App() {
   const router = createBrowserRouter([
     {

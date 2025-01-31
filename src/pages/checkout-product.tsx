@@ -19,38 +19,40 @@ import {
 } from '@chakra-ui/react';
 import { RiShoppingBag4Line } from 'react-icons/ri';
 
-const products = [
-  {
-    id: 1,
-    name: 'Hp iphone 13',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: '10000000',
-    variant: [{ color: 'blue' }, { memory: '126 GB' }],
-  },
-  {
-    id: 2,
-    name: 'Hp iphone 11',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: '20000000',
-    variant: [{ color: 'white' }, { memory: '256 GB' }],
-  },
-  {
-    id: 3,
-    name: 'Hp iphone 13',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: '30000000',
-    variant: [{ color: 'grey' }, { memory: '512 GB' }],
-  },
-];
+// const products = [
+//   {
+//     id: 1,
+//     name: 'Hp iphone 13',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: '10000000',
+//     variant: [{ color: 'blue' }, { memory: '126 GB' }],
+//   },
+//   {
+//     id: 2,
+//     name: 'Hp iphone 11',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: '20000000',
+//     variant: [{ color: 'white' }, { memory: '256 GB' }],
+//   },
+//   {
+//     id: 3,
+//     name: 'Hp iphone 13',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: '30000000',
+//     variant: [{ color: 'grey' }, { memory: '512 GB' }],
+//   },
+// ];
 
 export default function CheckoutProduct() {
   return (
     <Box p="0" m="0">
-      <Box p="2" m="5px" bg="white" >
-        <Text fontSize="20px" fontWeight="600">Checkout Product</Text>
+      <Box p="2" m="5px" bg="white">
+        <Text fontSize="20px" fontWeight="600">
+          Checkout Product
+        </Text>
         <HStack mt="3" gap="10">
           <Box
             w="60%"
@@ -152,7 +154,12 @@ export default function CheckoutProduct() {
             </Box>
 
             <Box m="2">
-              <AccordionRoot collapsible defaultValue={['subtotal']} borderBottomColor="gray" borderBottomWidth="1px">
+              <AccordionRoot
+                collapsible
+                defaultValue={['subtotal']}
+                borderBottomColor="gray"
+                borderBottomWidth="1px"
+              >
                 <AccordionItem value="subtotal">
                   <AccordionItemTrigger p="2">
                     <Flex w="full" h="full" justify="space-between">
@@ -173,7 +180,7 @@ export default function CheckoutProduct() {
                         <Text>Rp 7.500.000</Text>
                       </Flex>
                     </Box>
-                    <Box  w="full" h="full" p="2">
+                    <Box w="full" h="full" p="2">
                       <Flex w="full" h="full" justify="space-between">
                         <Text>Buyer Service Fee(1%)</Text>
                         <Text>Rp 7.500.000</Text>
@@ -184,14 +191,18 @@ export default function CheckoutProduct() {
               </AccordionRoot>
             </Box>
             <Box m="2px" p="2">
-            <Field label="Notes"> 
-              <Textarea placeholder="Enter your request to product" h="80px"/>
-            </Field>
+              <Field label="Notes">
+                <Textarea
+                  placeholder="Enter your request to product"
+                  h="80px"
+                />
+              </Field>
             </Box>
-            <Box p="2" w="full" display="flex" justifyContent="flex-end" >
-              <Button bgColor="#2400FE" color="white" >Checkout Now</Button>
+            <Box p="2" w="full" display="flex" justifyContent="flex-end">
+              <Button bgColor="#2400FE" color="white">
+                Checkout Now
+              </Button>
             </Box>
-            
           </Box>
         </HStack>
       </Box>
