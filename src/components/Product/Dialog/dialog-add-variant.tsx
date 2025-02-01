@@ -8,12 +8,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Box, Button, Input, Stack, Text } from '@chakra-ui/react';
+import { Variant } from '@/types/product-type';
+import { Box, Button, Input, Stack } from '@chakra-ui/react';
+import { useState } from 'react';
 
-function DialogAddVariant() {
+interface DialogAddVariantProps {
+  onAddVariant: (variant: Variant) => void; // Define the type for onAddVariant
+}
+
+function DialogAddVariant({ onAddVariant }: DialogAddVariantProps) {
+  const [variantName, setVariantName] = useState('');
+
+  const handleSubmit = () => {
+    if (variantName) {
+      onAddVariant({
+        name: variantName,
+        id: '',
+        is_active: false,
+        Variant_options: [],
+      });
+      setVariantName(''); // Reset the input field
+    }
+  };
+
   return (
     <Box>
-      <DialogRoot>
+      <DialogRoot placement={'center'}>
         <DialogTrigger asChild>
           <Button
             variant="outline"
@@ -23,25 +43,28 @@ function DialogAddVariant() {
             bgColor="#085DCF"
             color="white"
           >
-            Open
+            Add Variant
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Dialog Header</DialogTitle>
+            <DialogTitle>Add Variant</DialogTitle>
           </DialogHeader>
           <DialogBody pb="4">
             <Stack gap="4">
-              <Text></Text>
-              <Input placeholder="First Name" />
+              <Input
+                placeholder="*Variant Name"
+                value={variantName}
+                onChange={(e) => setVariantName(e.target.value)}
+              />
             </Stack>
           </DialogBody>
           <DialogFooter>
             <DialogActionTrigger asChild>
               <Button variant="outline">Cancel</Button>
             </DialogActionTrigger>
-            <Button bgColor="#2400FE" color="white">
-              Save Variants
+            <Button bgColor="#2400FE" color="white" onClick={handleSubmit}>
+              Save Variant
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -88,7 +111,7 @@ function DialogAddVariant() {
     //                 Login
     //               </Button>
     //               <HStack>
-    //                 <Text color="#222222" fontWeight="500" fontSize="13px">Don’t have an account?</Text>
+    //                 <Text color="#222222" fontWeight="500" fontSize="13px">Don't have an account?</Text>
     //                 <Text color="#2400FE" fontWeight="500" fontSize="13px">Sign Up</Text>
     //               </HStack>
 

@@ -30,3 +30,28 @@ export const getAllProducts = async (token: string): Promise<Product[]> => {
     throw new Error(errorMessage);
   }
 };
+
+export const createProduct = async (
+  token: string,
+  productData: FormData
+): Promise<Product> => {
+  try {
+    const response = await axios.post(
+      `${apiURL}/product/create-product`,
+      productData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data.product;
+  } catch (error) {
+    let errorMessage = 'Failed to create product';
+    if (axios.isAxiosError(error) && error.response) {
+      errorMessage = error.response.data.message || errorMessage;
+    }
+    throw new Error(errorMessage);
+  }
+};
