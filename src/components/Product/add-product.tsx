@@ -13,7 +13,7 @@ import {
 } from '@chakra-ui/react';
 import { FileUploadProduct } from './file-upload-product';
 
-function addProduct() {
+function AddProduct() {
   return (
     <Box>
       <Flex>
@@ -194,7 +194,7 @@ function addProduct() {
                   Product Stock
                 </Text>
                 <Group flex="1">
-                  <Input placeholder="Username" />
+                  <Input placeholder="Stock" />
                 </Group>
               </VStack>
               <VStack w="full" align="flex-start">
@@ -202,7 +202,7 @@ function addProduct() {
                   SKU (Stock Keeping Unit)
                 </Text>
                 <Group flex="1">
-                  <Input placeholder="Username" />
+                  <Input placeholder="Sku" />
                 </Group>
               </VStack>
             </HStack>
@@ -298,4 +298,4 @@ function addProduct() {
   );
 }
 
-export default addProduct;
+export default AddProduct;
