@@ -4,7 +4,7 @@ export interface Product {
   description: string;
   categoryIds: string[];
   subcategoryIds: string[];
-  attachments: string;
+  attachments: File | null;
   variants: Variant[];
 }
 

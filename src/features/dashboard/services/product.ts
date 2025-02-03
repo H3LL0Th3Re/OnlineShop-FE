@@ -31,14 +31,25 @@ export const getAllProducts = async (token: string): Promise<Product[]> => {
   }
 };
 
-export const createProduct = async (
-  token: string,
-  productData: FormData
-): Promise<Product> => {
+export const createProducts = async (data: Product, token: string) => {
   try {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const formData = new FormData();
+    formData.append('name', data.name);
+    formData.append('description', data.description);
+    formData.append('categoryIds', JSON.stringify(data.categoryIds));
+    formData.append('subcategoryIds', JSON.stringify(data.subcategoryIds));
+
+    if (data.attachments) {
+      formData.append('attachments', data.attachments);
+    }
+
     const response = await axios.post(
       `${apiURL}/product/create-product`,
-      productData,
+      formData,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -46,11 +57,37 @@ export const createProduct = async (
         },
       }
     );
-    return response.data.product;
+
+    return response.data;
   } catch (error) {
     let errorMessage = 'Failed to create product';
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage = error.response.data.message || errorMessage;
+    if (axios.isAxiosError(error)) {
+      errorMessage = error.response?.data?.message || errorMessage;
+    }
+    throw new Error(errorMessage);
+  }
+};
+
+export const deleteProducts = async (
+  id: string,
+  token: string
+): Promise<void> => {
+  try {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    await axios.delete(`${apiURL}/product/delete-product`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      data: { id },
+    });
+  } catch (error) {
+    let errorMessage = 'Failed to Delete Product';
+    if (axios.isAxiosError(error)) {
+      errorMessage = error.response?.data?.message || errorMessage;
     }
     throw new Error(errorMessage);
   }
