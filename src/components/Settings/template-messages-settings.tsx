@@ -3,45 +3,48 @@ import DialogAddMessage from './Dialog/dialog-add-message-settings';
 import DialogEditMessage from './Dialog/dialog-edit-message-settings';
 import DialogDeleteMessage from './Dialog/dialog-delete-message-settings';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 // import axios from 'axios';
 // import { apiURL } from '@/utils/api-url';
-import { getMessage } from '@/features/message';
+// import { getMessage } from '@/features/message';
+import { useMessageStore } from '@/features/message_store';
 // interface messages{
 //   name: string,
 //   content: string
 // }
-interface Message {
-  id: string;
-  name: string;
-  content: string;
-}
+
+// interface Message {
+//   id: string;
+//   name: string;
+//   content: string;
+// }
 
 export default function TemplateMessages() {
-  const [messages, setMessages] = useState<Message[]>([]); // State to store fetched messages
-  
+  // const [messages, setMessages] = useState<Message[]>([]); // State to store fetched messages
+  const { fetchMessages, messages } = useMessageStore();
   // Fetch messages on component mount
   useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const data = await getMessage(); // Await the Promise
-        console.log("API Response:", data); // Log full response
-  
-        if (Array.isArray(data)) {
-          setMessages(data); // Only set if it's an array
-        } else if (data && Array.isArray(data.messages)) {
-          setMessages(data.messages); // If messages are nested inside an object
-        } else {
-          console.error("Unexpected data format:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
-  
+    // const fetchMessages = async () => {
+    //   try {
+    //     const data = await getMessage(); // Await the Promise
+    //     console.log("API Response:", data); // Log full response
+
+    //     if (Array.isArray(data)) {
+    //       setMessages(data); // Only set if it's an array
+    //     } else if (data && Array.isArray(data.messages)) {
+    //       setMessages(data.messages); // If messages are nested inside an object
+    //     } else {
+    //       console.error("Unexpected data format:", data);
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching messages:", error);
+    //   }
+    // };
+
     fetchMessages();
-  }, []);
-  
+    // console.log(messages);
+  });
+
   return (
     <Box>
       <Box>
@@ -70,19 +73,19 @@ export default function TemplateMessages() {
         >
           <VStack w="90%" align="flex-start">
             <Text fontWeight="600" fontSize="16px" w="full">
-              {message.name}
+              {message?.name}
             </Text>
             <Text fontWeight="400" fontSize="14px" w="full" textAlign="justify">
-              {message.content}
+              {message?.content}
             </Text>
           </VStack>
           <VStack w="10%">
             <HStack display="flex" justifyContent="center">
               <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-                <DialogDeleteMessage messageId={message.id}/>
+                <DialogDeleteMessage messageId={message?.id} />
               </Box>
               <Box rounded="full" borderWidth="2px" borderColor="black" p="5px">
-                <DialogEditMessage messageId={message.id} />
+                <DialogEditMessage messageId={message?.id} />
               </Box>
             </HStack>
           </VStack>
