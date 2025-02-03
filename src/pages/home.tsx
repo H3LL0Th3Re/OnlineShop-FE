@@ -2,7 +2,7 @@ import { Box, Grid, Image, Text, VStack } from '@chakra-ui/react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Navbar from './navbar';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/features/dashboard/get-categories';
 import { Categories } from '@/types/categories';
 import { useAuthStore } from '@/hooks/authstore';
@@ -113,33 +113,22 @@ const recommendations = [
   },
 ];
 
+type CategoryResponse = Categories[];
 export function Home() {
-  const [categories, setCategories] = useState<Categories[]>([]); // Store fetched categories
-
-  const [error, setError] = useState<string | null>(null); // Handle errors
-
   const token = useAuthStore().token; // Replace this with your
-
-  useEffect(() => {
-    // Fetch categories when the component is mounted
-
-    const fetchCategories = async () => {
-      setError(null); // Reset error before fetching
-      if (token) {
-        try {
-          const fetchedCategories = await getCategories(token);
-          console.log('Fetched Categories:', fetchedCategories);
-          setCategories(fetchedCategories); // Update state with fetched categories
-        } catch (err) {
-          setError('Failed to fetch categories');
-          console.error(err);
-          console.log(error);
-        }
+  const { data, isLoading, isError, error } = useQuery<
+    CategoryResponse | undefined,
+    Error
+  >({
+    queryKey: ['categories', token],
+    queryFn: async () => {
+      if (!token) {
+        return;
       }
-    };
-
-    fetchCategories(); // Call the fetch function on mount
-  }, [token]);
+      const data = getCategories(token);
+      return data;
+    },
+  });
 
   return (
     <Box>
@@ -186,26 +175,34 @@ export function Home() {
           </Text>
           <Box w="90%" mt="10px">
             <Grid templateColumns="repeat(5, 1fr)" gap="1" gapY="5" mb="15px">
-              {!categories && (
+              {isLoading && (
                 <>
                   {' '}
-                  <Text> Tidak ada Kategori</Text>{' '}
+                  <Text> Loading....</Text>{' '}
                 </>
               )}
-              {categories.map((category) => (
-                <Box
-                  bgColor="White"
-                  borderRadius="5px"
-                  w="90%"
-                  boxShadow="2px 2px 5px 1px grey"
-                >
-                  <VStack
-                    m="15px"
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
+              {isError && (
+                <>
+                  {' '}
+                  <Text> Error: {error.message}</Text>{' '}
+                </>
+              )}
+              {data
+                ?.filter((category) => !category.parentId)
+                .map((category) => (
+                  <Box
+                    bgColor="White"
+                    borderRadius="5px"
+                    w="90%"
+                    boxShadow="2px 2px 5px 1px grey"
                   >
-                    {/* <Image
+                    <VStack
+                      m="15px"
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      {/* <Image
                       src={category.image}
                       borderRadius="5px"
                       w="full"
@@ -213,12 +210,12 @@ export function Home() {
                       objectFit="cover"
                       alt={`User uploaded image ${index + 1}`}
                     /> */}
-                    <Text fontWeight="600" textAlign="center">
-                      {category.name}
-                    </Text>
-                  </VStack>
-                </Box>
-              ))}
+                      <Text fontWeight="600" textAlign="center">
+                        {category.name}
+                      </Text>
+                    </VStack>
+                  </Box>
+                ))}
             </Grid>
           </Box>
         </VStack>
