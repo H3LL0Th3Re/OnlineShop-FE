@@ -85,19 +85,13 @@ const ListProduct = () => {
             </Tabs.Trigger>
             <Tabs.Trigger value="aktif">
               <Box bg={'#5F2EEA'} w={5} rounded={'full'} color={'white'}>
-                {
-                  products?.filter((s) => s.variants[0]?.is_active === true)
-                    .length
-                }
+                {products?.filter((s) => s.is_active === true).length}
               </Box>
               Aktif
             </Tabs.Trigger>
             <Tabs.Trigger value="nonaktif">
               <Box bg={'#5F2EEA'} w={5} rounded={'full'} color={'white'}>
-                {
-                  products?.filter((s) => s.variants[0]?.is_active === false)
-                    .length
-                }
+                {products?.filter((s) => s.is_active === false).length}
               </Box>
               Nonaktif
             </Tabs.Trigger>
@@ -203,7 +197,7 @@ const ListProduct = () => {
                             ? product.attachments
                             : ''
                         }
-                        alt={product.variants[0]?.name}
+                        alt={product.name}
                         w={'28'}
                       />
                     </Box>
@@ -211,11 +205,10 @@ const ListProduct = () => {
                       <Box>
                         <Text fontWeight="bold">
                           {product.name} -{' '}
-                          {product.variants[0]?.Variant_options[0]?.name}
+                          {product.variants?.[0]?.variantOptions?.[0]?.name}
                         </Text>
                         {/* <Text fontSize="sm" color="gray.600">
                           Rp
-                          {
                             product.variants[0]?.Variant_options[0]
                               ?.Variant_option_values[0]?.price
                           }{' '}
@@ -297,8 +290,8 @@ const ListProduct = () => {
                               <MenuItem value="new-file">
                                 <HStack>
                                   <DialogDeleteProduct
-                                    productId={product.id}
-                                    productName={product.name}
+                                    productId={product.id || ''}
+                                    productName={product.name || ''}
                                   />
                                 </HStack>
                               </MenuItem>
@@ -318,10 +311,7 @@ const ListProduct = () => {
               <Flex align={'center'} justify={'space-between'}>
                 <Box>
                   <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
-                    {
-                      products?.filter((s) => s.variants[0]?.is_active === true)
-                        .length
-                    }{' '}
+                    {products?.filter((s) => s.is_active === true).length}{' '}
                     Product
                   </Text>
                 </Box>
@@ -357,7 +347,7 @@ const ListProduct = () => {
               </Flex>
               <Stack gap="4">
                 {products
-                  ?.filter((product) => product.variants[0]?.is_active === true)
+                  ?.filter((product) => product.is_active === true)
                   .map((product) => (
                     <Flex
                       key={product.id}
@@ -373,16 +363,17 @@ const ListProduct = () => {
                               ? product.attachments
                               : ''
                           }
-                          alt={product.variants[0]?.name}
+                          alt={product.name}
                           w={'28'}
                         />
                       </Box>
                       <Flex direction={'column'} pl={5} w={'full'}>
                         <Box>
                           <Text fontWeight="bold">
-                            {product.name} - {product.variants[0]?.name}
+                            {product.name} -{' '}
+                            {product.variants?.[0]?.variantOptions?.[0]?.name}
                           </Text>
-                          <Text fontSize="sm" color="gray.600">
+                          {/* <Text fontSize="sm" color="gray.600">
                             Rp
                             {
                               product.variants[0]?.Variant_options[0]
@@ -398,7 +389,7 @@ const ListProduct = () => {
                               product.variants[0]?.Variant_options[0]
                                 ?.Variant_option_values[0]?.sku
                             }
-                          </Text>
+                          </Text> */}
                         </Box>
                         <Flex
                           align="center"
@@ -446,11 +437,7 @@ const ListProduct = () => {
               <Flex align={'center'} justify={'space-between'}>
                 <Box>
                   <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
-                    {
-                      products?.filter(
-                        (s) => s.variants[0]?.is_active === false
-                      ).length
-                    }{' '}
+                    {products?.filter((s) => s.is_active === false).length}{' '}
                     Product
                   </Text>
                 </Box>
@@ -486,9 +473,7 @@ const ListProduct = () => {
               </Flex>
               <Stack gap="4">
                 {products
-                  ?.filter(
-                    (product) => product.variants[0]?.is_active === false
-                  )
+                  ?.filter((product) => product.is_active === false)
                   .map((product) => (
                     <Flex
                       key={product.id}
@@ -504,32 +489,30 @@ const ListProduct = () => {
                               ? product.attachments
                               : ''
                           }
-                          alt={product.variants[0]?.name}
+                          alt={product.name}
                           w={'28'}
                         />
                       </Box>
                       <Flex direction={'column'} pl={5} w={'full'}>
                         <Box>
-                          <Text fontWeight="bold">
-                            {product.name} - {product.variants[0]?.name}
-                          </Text>
-                          <Text fontSize="sm" color="gray.600">
+                          <Text fontWeight="bold">{product.name} -</Text>
+                          {/* <Text fontSize="sm" color="gray.600">
                             Rp
                             {
-                              product.variants[0]?.Variant_options[0]
+                              product.Variant_options[0]
                                 ?.Variant_option_values[0]?.price
                             }{' '}
                             - Stock:{' '}
                             {
-                              product.variants[0]?.Variant_options[0]
+                              product.Variant_options[0]
                                 ?.Variant_option_values[0]?.stock
                             }{' '}
                             - SKU:{' '}
                             {
-                              product.variants[0]?.Variant_options[0]
+                              product.Variant_options[0]
                                 ?.Variant_option_values[0]?.sku
                             }
-                          </Text>
+                          </Text> */}
                         </Box>
                         <Flex
                           align="center"
