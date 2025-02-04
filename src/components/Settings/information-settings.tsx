@@ -6,6 +6,7 @@ import {
   Text,
   Textarea,
   VStack,
+  Image,
 } from '@chakra-ui/react';
 // import {
 //   FileUploadDropzone,
@@ -55,7 +56,7 @@ export default function Information() {
       setSlogan(store.slogan || '');
       setDescription(store.description || '');
       setStoreName(store.name || '');
-      setLogoPreview(store.logo_attachement || null);
+      setLogoPreview(store.logo_attachment || null);
     }
   }, [store]);
   // useEffect(() => {
@@ -205,20 +206,49 @@ export default function Information() {
             />
             <FileUploadList />
           </FileUploadRoot> */}
-          <Input
-            type="file"
-            width={'50%'}
-            id="logo_attachment"
-            onChange={handleImageChange}
-          />
-          {logoPreview && (
-            <Box mt="10px">
-              <Text fontWeight="700" fontSize="17px" color="black" mb="10px">
-                Logo Preview
-              </Text>
-              <img src={logoPreview} alt="Logo Preview" width="150" />
+          <Box
+            width={'100px'}
+            height={'100px'}
+            borderRadius={'100%'}
+            position="relative"
+            cursor="pointer" // Makes it clear the area is clickable
+            onClick={() => document.getElementById('logo_attachment')?.click()} // Triggers file input click
+            _hover={{
+              opacity: 0.8, // Slightly dim the image on hover for effect
+              backgroundColor: 'rgba(0, 0, 0, 0.3)', // Optional background color on hover
+            }}
+          >
+            <Image
+              src={logoPreview ? logoPreview : store?.logo_attachment} // Fallback if no image
+              alt="Profile"
+              width="100%"
+              height="100%"
+              borderRadius="50%" // Ensures the image stays circular
+              objectFit="cover" // Keeps the image properly cropped inside the circle
+            />
+            <Input
+              type="file"
+              id="logo_attachment"
+              onChange={handleImageChange}
+              display="none" // Hides the default file input
+            />
+            <Box
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)"
+              color="white"
+              fontWeight="bold"
+              fontSize="14px"
+              opacity="0"
+              _hover={{
+                opacity: 1, // Make text visible on hover
+              }}
+              transition="opacity 0.3s ease"
+            >
+              Upload Photo
             </Box>
-          )}
+          </Box>
 
           {error && (
             <Box mt="10px" color="red.500">
