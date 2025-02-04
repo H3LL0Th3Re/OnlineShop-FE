@@ -38,14 +38,13 @@ export default function DialogAddLocation() {
   const [districts, setDistricts] = useState<DropdownOption[]>([]);
   const [villages, setVillages] = useState<DropdownOption[]>([]);
   const [postalCodes, setPostalCodes] = useState<DropdownOption[]>([]);
+  const [position, setPosition] = useState<LatLng | null>(null);
 
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedVillage, setSelectedVillage] = useState<string | null>(null);
-  const [selectedPostalCode, setselectedPostalCode] = useState<string | null>(
-    null
-  );
+  const [selectedPostalCode, setselectedPostalCode] = useState<string | null>(null);
   const { token } = useAuthStore();
 
   useEffect(() => {
@@ -194,25 +193,28 @@ export default function DialogAddLocation() {
     }
   }, [selectedDistrict, token]);
 
+
   function LocationMarker() {
-    const [position, setPosition] = useState<LatLng | null>(null);
     const map = useMapEvents({
       click() {
         map.locate();
       },
       locationfound(e) {
-        setPosition(e.latlng);
+        setPosition(e.latlng); // Simpan posisi
+        console.log('Latitude:', e.latlng.lat, 'Longitude:', e.latlng.lng); // Log koordinat
         map.flyTo(e.latlng, map.getZoom());
       },
     });
 
     return position === null ? null : (
       <Marker position={position}>
-        <Popup>You are here</Popup>
+        <Popup>
+          Latitude: {position.lat} <br />
+          Longitude: {position.lng}
+        </Popup>
       </Marker>
     );
   }
-
   return (
     <>
       <Box>
@@ -229,7 +231,7 @@ export default function DialogAddLocation() {
               Add Location
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent >
             <DialogHeader>
               <DialogTitle>Add New Location</DialogTitle>
             </DialogHeader>
@@ -245,6 +247,7 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1  w-full rounded-sm shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                style={{ height: '40px',padding: '3px' }}
                 value={selectedProvince || ''}
                 onChange={(e) => {
                   setSelectedProvince(e.target.value);
@@ -280,8 +283,19 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                style={{ height: '40px',padding: '3px' }}
                 value={selectedCity || ''}
-                onChange={(e) => setSelectedCity(e.target.value)}
+                onChange={(e) => {setSelectedCity(e.target.value)
+                  // Reset nilai terkait
+                  setSelectedDistrict(null);
+                  setSelectedVillage(null);
+                  setselectedPostalCode(null);
+
+                  // Kosongkan opsi kota, kecamatan, dan kelurahan
+                  setDistricts([]);
+                  setVillages([]);
+                  setPostalCodes([]);
+                }}
                 disabled={!selectedProvince}
               >
                 <option value="">Pilih Kota/Kabupaten</option>
@@ -302,8 +316,15 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                style={{ height: '40px',padding: '3px' }}
                 value={selectedDistrict || ''}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
+                onChange={(e) => {setSelectedDistrict(e.target.value)
+                  setSelectedVillage(null);
+                  setselectedPostalCode(null);
+                  
+                  setVillages([]);
+                  setPostalCodes([]);
+                }}
                 disabled={!selectedCity}
               >
                 <option value="">Pilih Kecamatan</option>
@@ -324,8 +345,12 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                style={{ height: '40px',padding: '3px' }}
                 value={selectedVillage || ''}
-                onChange={(e) => setSelectedVillage(e.target.value)}
+                onChange={(e) => {setSelectedVillage(e.target.value)
+                  setselectedPostalCode(null);
+                  setPostalCodes([]);
+                }}
                 disabled={!selectedDistrict}
               >
                 <option value="">Pilih Kelurahan</option>
@@ -346,6 +371,7 @@ export default function DialogAddLocation() {
               {/* menu input Kode pos */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                style={{ height: '40px',padding: '3px' }}
                 value={selectedPostalCode || ''}
                 onChange={(e) => setselectedPostalCode(e.target.value)}
                 disabled={!selectedVillage}
@@ -370,14 +396,14 @@ export default function DialogAddLocation() {
                 Pinpoint Lokasi*
               </Text>
 
-              <Box style={{width:"100px", height:"100px"}} borderRadius="7px">
+              <Box borderRadius="7px" style={{ height: '100px',display: 'flex'}}>
                 <MapContainer
                   center={{ lat: 51.505, lng: -0.09 }}
                   zoom={15}
                   scrollWheelZoom={false}
                 >
                   <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright"></a> '
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   <LocationMarker />
