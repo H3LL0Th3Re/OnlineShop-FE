@@ -1,30 +1,32 @@
-export interface VariantOption {
-  id: string;
+export interface Product {
+  id?: string;
   name: string;
+  description: string;
+  categoryIds: string[];
+  subcategoryIds: string[];
+  attachments: File | null;
+  variants?: Variant[];
+  is_active?: boolean;
 }
 
 export interface Variant {
-  id: string;
+  id?: string;
   name: string;
-  Variant_options: VariantOption[];
+  productId?: string;
+  variantOptions: VariantOption[];
 }
 
-export interface Product {
-  id: string;
+export interface VariantOption {
   name: string;
-  variants: Variant[];
-  attachments: string;
+  values: string[];
 }
 
-export interface Product {
+export interface VariantOptionValue {
   id: string;
-  name: string;
-  category: string;
-  variant: string;
   sku: string;
-  attachments: string;
-  quantity: number;
+  weight: number;
+  stock: number;
   price: number;
   is_active: boolean;
-  variants: Variant[];
+  variant_optionsId: string;
 }
