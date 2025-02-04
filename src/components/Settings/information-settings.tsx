@@ -124,11 +124,6 @@ export default function Information() {
       formData.append('logo_attachment', logo_attachment);
     }
 
-    // // If no changes were detected, do not send the form data
-    // if (formData.entries().next().done) {
-    //   console.log('No changes to update');
-    //   return;
-    // }
 
     mutation.mutate({ token, formData });
   };
