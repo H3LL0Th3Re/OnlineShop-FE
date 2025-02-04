@@ -13,55 +13,78 @@ import {
 //   FileUploadRoot,
 // } from '../ui/file-upload';
 import { currentStore } from '@/features/get-store';
-import { useStoreState, useAuthStore } from '@/hooks/authstore';
-import { useEffect, useState } from 'react';
+import { Store } from '@/types/store';
+import { useAuthStore } from '@/hooks/authstore';
+import { useState, useEffect } from 'react';
 import { updateStore } from '@/features/update-store';
-interface InitialValues {
-  name: string;
-  description: string;
-  slogan: string;
-}
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
 export default function Information() {
   const { token } = useAuthStore();
-  const { store, setStore } = useStoreState();
+  const queryClient = useQueryClient();
   const [slogan, setSlogan] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [storename, setStoreName] = useState<string>('');
-  const [initialValues, setInitialValues] = useState<InitialValues | null>(
-    null
-  );
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logo_attachment, setLogo] = useState<File | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
 
+  const {
+    data: store,
+    isLoading,
+    isError,
+    error,
+  } = useQuery<Store, Error>({
+    queryKey: ['store'],
+    queryFn: () => currentStore(token!),
+    enabled: !!token, // Only fetch if token exists
+  });
+  const mutation = useMutation({
+    mutationFn: updateStore,
+    onSuccess: (data) => {
+      queryClient.setQueryData(['store'], data.store); // Update the cache
+      alert('Store Updated!');
+    },
+    onError: (error) => {
+      console.error('Error updating Store:', error);
+      alert('Error updating Store, please try again later.');
+    },
+  });
   useEffect(() => {
-    const getCurrentStore = async () => {
-      if (token) {
-        try {
-          const storedata = await currentStore(token);
-          setStore(storedata);
-          setInitialValues({
-            name: storedata.name,
-            description: storedata.description || '',
-            slogan: storedata.slogan || '',
-          });
-          setStoreName(storedata.name);
-          setSlogan(storedata.slogan || '');
-          setDescription(storedata.description || '');
-          setLogoPreview(storedata.logo_attachement);
-        } catch (err) {
-          console.error('Error fetching store data:', err);
-          setErrorMessage('Failed to fetch store data');
-          console.log(errorMessage);
-        }
-      } else {
-        console.log('No token found');
-      }
-    };
+    if (store) {
+      setSlogan(store.slogan || '');
+      setDescription(store.description || '');
+      setStoreName(store.name || '');
+      setLogoPreview(store.logo_attachement || null);
+    }
+  }, [store]);
+  // useEffect(() => {
+  //   const getCurrentStore = async () => {
+  //     if (token) {
+  //       try {
+  //         const storedata = await currentStore(token);
+  //         setStore(storedata);
+  //         setInitialValues({
+  //           name: storedata.name,
+  //           description: storedata.description || '',
+  //           slogan: storedata.slogan || '',
+  //         });
+  //         setStoreName(storedata.name);
+  //         setSlogan(storedata.slogan || '');
+  //         setDescription(storedata.description || '');
+  //         setLogoPreview(storedata.logo_attachement);
+  //       } catch (err) {
+  //         console.error('Error fetching store data:', err);
+  //         setErrorMessage('Failed to fetch store data');
+  //         console.log(errorMessage);
+  //       }
+  //     } else {
+  //       console.log('No token found');
+  //     }
+  //   };
 
-    getCurrentStore();
-  }, [token, setStore, errorMessage]);
+  //   getCurrentStore();
+  // }, [token, setStore, errorMessage]);
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Access the file input through the event's currentTarget
 
@@ -81,17 +104,17 @@ export default function Information() {
     }
 
     const formData = new FormData();
-    if (storename !== initialValues?.name) {
+    if (storename !== store?.name) {
       formData.append('name', storename);
     }
 
     // Check if the slogan has changed, and only append if it's different
-    if (slogan !== initialValues?.slogan) {
+    if (slogan !== store?.slogan) {
       formData.append('slogan', slogan);
     }
 
     // Check if the description has changed, and only append if it's different
-    if (description !== initialValues?.description) {
+    if (description !== store?.description) {
       formData.append('description', description);
     }
 
@@ -106,21 +129,11 @@ export default function Information() {
     //   return;
     // }
 
-    setLoading(true);
-    try {
-      await updateStore(token, formData);
-      const response = await currentStore(token);
-      setStore(response);
-      console.log('Store updated successfully:', response);
-      alert('Store Updated!');
-    } catch (error) {
-      console.error('Error updating Store:', error);
-      setErrorMessage('Error updating Store, please try again later.');
-    } finally {
-      setLoading(false);
-    }
+    mutation.mutate({ token, formData });
   };
   console.log(store);
+  if (isLoading) return <Text>Loading...</Text>;
+  if (isError) return <Text>Error: {error.message}</Text>;
   return (
     <Box>
       <Box>
@@ -172,7 +185,7 @@ export default function Information() {
           rounded="full"
           mb="10px"
           type="submit"
-          disabled={loading}
+          disabled={isLoading}
           onClick={onSubmit}
         >
           Save Information
@@ -192,8 +205,9 @@ export default function Information() {
             />
             <FileUploadList />
           </FileUploadRoot> */}
-          <input
+          <Input
             type="file"
+            width={'50%'}
             id="logo_attachment"
             onChange={handleImageChange}
           />
@@ -206,9 +220,9 @@ export default function Information() {
             </Box>
           )}
 
-          {errorMessage && (
+          {error && (
             <Box mt="10px" color="red.500">
-              <Text>{errorMessage}</Text>
+              <Text>{error}</Text>
             </Box>
           )}
           <Text textAlign="left" w="50%" fontSize="13px">
