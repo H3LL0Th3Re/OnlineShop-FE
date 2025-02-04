@@ -21,13 +21,13 @@ function DialogAddVariant({ onAddVariant }: DialogAddVariantProps) {
 
   const handleSubmit = () => {
     if (variantName) {
-      onAddVariant({
+      const newVariant: Variant = {
         name: variantName,
         id: '',
-        is_active: false,
-        Variant_options: [],
-      });
-      setVariantName(''); // Reset the input field
+        variantOptions: [],
+      };
+      onAddVariant(newVariant);
+      setVariantName('');
     }
   };
 

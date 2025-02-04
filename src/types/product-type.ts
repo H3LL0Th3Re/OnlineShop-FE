@@ -1,24 +1,24 @@
 export interface Product {
-  id: string;
+  id?: string;
   name: string;
   description: string;
   categoryIds: string[];
   subcategoryIds: string[];
   attachments: File | null;
-  variants: Variant[];
+  variants?: Variant[];
+  is_active?: boolean;
 }
 
 export interface Variant {
-  id: string;
+  id?: string;
   name: string;
-  is_active: boolean;
-  Variant_options: VariantOption[];
+  productId?: string;
+  variantOptions: VariantOption[];
 }
 
 export interface VariantOption {
-  id: string;
   name: string;
-  Variant_option_values: VariantOptionValue[];
+  values: string[];
 }
 
 export interface VariantOptionValue {
