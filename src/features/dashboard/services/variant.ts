@@ -1,12 +1,26 @@
+import { Variant } from '@/types/product-type';
+import { apiURL } from '@/utils/api-url';
 import axios from 'axios';
-import { apiURL } from '@/utils/api-url'; // Adjust the path as necessary
 
 export const createVariant = async (
-  token: string,
   productId: string,
-  variantData: { name: string; is_active: boolean }
+  data: Variant,
+  token: string
 ) => {
   try {
+    if (!token) {
+      throw new Error('Token autentikasi tidak ditemukan');
+    }
+
+    // Pastikan data yang dikirim sesuai dengan yang diharapkan API
+    const variantData = {
+      name: data.name,
+      productId: productId,
+      variantOptions: data.variantOptions || [],
+    };
+
+    console.log('Sending variant data:', variantData); // Untuk debugging
+
     const response = await axios.post(
       `${apiURL}/variant/create/${productId}`,
       variantData,
@@ -17,12 +31,20 @@ export const createVariant = async (
         },
       }
     );
-    return response.data.variant; // Return the created variant
-  } catch (error) {
-    let errorMessage = 'Failed to create variant';
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage = error.response.data.error || errorMessage;
+
+    if (!response.data) {
+      throw new Error('Respons kosong dari server');
     }
-    throw new Error(errorMessage);
+
+    return response.data;
+  } catch (error) {
+    console.error('Variant creation error:', error); // Untuk debugging
+    if (axios.isAxiosError(error)) {
+      const errorMessage =
+        error.response?.data?.message || 'Gagal membuat varian';
+      console.error('API Error:', error.response?.data); // Untuk debugging
+      throw new Error(errorMessage);
+    }
+    throw new Error('Gagal membuat varian');
   }
 };

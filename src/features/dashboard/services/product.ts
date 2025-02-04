@@ -34,14 +34,21 @@ export const getAllProducts = async (token: string): Promise<Product[]> => {
 export const createProducts = async (data: Product, token: string) => {
   try {
     if (!token) {
-      throw new Error('No authentication token found');
+      throw new Error('Token autentikasi tidak ditemukan');
     }
 
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('description', data.description);
-    formData.append('categoryIds', JSON.stringify(data.categoryIds));
-    formData.append('subcategoryIds', JSON.stringify(data.subcategoryIds));
+
+    // Pastikan format array sesuai dengan yang diharapkan backend
+    if (data.categoryIds && data.categoryIds.length > 0) {
+      formData.append('categoryIds', JSON.stringify(data.categoryIds));
+    }
+
+    if (data.subcategoryIds && data.subcategoryIds.length > 0) {
+      formData.append('subcategoryIds', JSON.stringify(data.subcategoryIds));
+    }
 
     if (data.attachments) {
       formData.append('attachments', data.attachments);
@@ -58,13 +65,16 @@ export const createProducts = async (data: Product, token: string) => {
       }
     );
 
-    return response.data;
+    // Response dari backend berisi { message: string, product: Product }
+    return response.data.product;
   } catch (error) {
-    let errorMessage = 'Failed to create product';
     if (axios.isAxiosError(error)) {
-      errorMessage = error.response?.data?.message || errorMessage;
+      const errorMessage =
+        error.response?.data?.message || 'Gagal membuat produk';
+      console.error('API Error:', error.response?.data);
+      throw new Error(errorMessage);
     }
-    throw new Error(errorMessage);
+    throw error;
   }
 };
 

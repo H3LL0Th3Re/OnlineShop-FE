@@ -11,25 +11,30 @@ import {
   Textarea,
   VStack,
 } from '@chakra-ui/react';
-import toast from 'react-hot-toast';
 import { FileUploadProduct } from './file-upload-product';
 import { useAuthStore } from '@/hooks/authstore';
 import { useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
 import { useCreateProduct } from '../tanstack/useProduct';
+import { useCreateVariant } from '../tanstack/useVariant';
+import DialogAddVariant from './Dialog/dialog-add-variant';
+import { Variant } from '@/types/product-type';
+import Swal from 'sweetalert2';
 
 function AddProduct() {
   const { token } = useAuthStore();
-  const { mutate: createProduct, isPending } = useCreateProduct(token || '');
+  const createProductMutation = useCreateProduct(token || '');
+  const createVariantMutation = useCreateVariant(token || '');
 
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    categoryIds: [],
-    subcategoryIds: [],
+    categoryIds: [] as string[],
+    subcategoryIds: [] as string[],
   });
 
   const [attachments, setAttachments] = useState<File | null>(null);
+  const [variants, setVariants] = useState<Variant[]>([]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -38,23 +43,101 @@ function AddProduct() {
   };
 
   const handleFileSelect = (file: File | null) => {
-    setAttachments(file); // Set file yang dipilih ke state
+    setAttachments(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    toast.loading('Waiting...');
+    try {
+      if (!token) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Silakan login terlebih dahulu!',
+        });
+        return;
+      }
 
-    if (attachments) {
-      createProduct({
+      if (!attachments) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Perhatian',
+          text: 'Gambar produk wajib diisi!',
+        });
+        return;
+      }
+
+      // Loading state
+      Swal.fire({
+        title: 'Sedang memproses...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // Buat produk
+      const productResponse = await createProductMutation.mutateAsync({
         ...formData,
         attachments,
-        id: '',
-        variants: [],
       });
-    } else {
-      alert('Image is required');
+
+      console.log('Response lengkap dari server setelah membuat produk:', {
+        status: 'success',
+        productResponse,
+        productId: productResponse?.id,
+      });
+
+      // Pastikan productResponse valid
+      if (!productResponse || !productResponse.id) {
+        throw new Error('Gagal mendapatkan ID produk');
+      }
+
+      // Buat varian jika ada
+      if (variants.length > 0) {
+        for (const variant of variants) {
+          try {
+            await createVariantMutation.mutateAsync({
+              productId: productResponse.id,
+              data: variant,
+            });
+          } catch (variantError) {
+            console.error('Error creating variant:', variantError);
+            Swal.fire({
+              icon: 'warning',
+              title: 'Perhatian',
+              text: 'Beberapa varian gagal dibuat',
+            });
+          }
+        }
+      }
+
+      // Sukses
+      Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: 'Produk berhasil dibuat',
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        description: '',
+        categoryIds: [],
+        subcategoryIds: [],
+      });
+      setAttachments(null);
+      setVariants([]);
+    } catch (error) {
+      console.error('Error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal!',
+        text: error instanceof Error ? error.message : 'Gagal membuat produk',
+      });
     }
   };
 
@@ -192,42 +275,41 @@ function AddProduct() {
                 <Text fontWeight="600" fontSize="15px">
                   Add variants so buyers can choose the right product, come on!{' '}
                 </Text>
-                {/* <DialogAddVariant /> */}
+                <DialogAddVariant
+                  onAddVariant={(newVariant) =>
+                    setVariants([...variants, newVariant])
+                  }
+                />
               </HStack>
 
-              {/* {variants.map((variant, index) => ( */}
-              <Button
-                gap="5px"
-                bg={'white'}
-                color={'black'}
-                border={'1px solid rgb(87, 87, 87)'}
-                borderRadius={'10px'}
-              >
-                <HStack gap="2">
-                  <Text fontWeight="500" fontSize="14px">
-                    {/* {variant.name} */}
-                  </Text>
-                  <Checkbox size="sm" />
-                </HStack>
-              </Button>
-              {/* ))} */}
+              {variants.map((variant, index) => (
+                <Button
+                  key={index}
+                  gap="5px"
+                  bg={'white'}
+                  color={'black'}
+                  border={'1px solid rgb(87, 87, 87)'}
+                  borderRadius={'10px'}
+                >
+                  <HStack gap="2">
+                    <Text fontWeight="500" fontSize="14px">
+                      {variant.name}
+                    </Text>
+                    <Checkbox size="sm" />
+                  </HStack>
+                </Button>
+              ))}
 
-              {/* {showField && ( */}
               <VStack gap="5px" w="full" align="flex-start">
                 <Text fontWeight="600" fontSize="15px">
                   Additional Information *
                 </Text>
                 <HStack>
-                  {/* {additionalInfo.map((info, index) => ( */}
-                  <Button size="sm" variant="outline">
-                    {/* {info.name} &times; */}
-                  </Button>
-                  {/* ))} */}
+                  <Button size="sm" variant="outline"></Button>
                   <Input placeholder="Add info..." />
                 </HStack>
               </VStack>
-              {/* )} */}
-              {/* {showField && additionalInfo.length > 0 && ( */}
+
               <VStack
                 bgColor="white"
                 w={'full'}
@@ -239,14 +321,7 @@ function AddProduct() {
                 <Text fontWeight="700" fontSize="17px" color="#2400FE">
                   Variant List
                 </Text>
-                {/* {variants.map((variant, index) => ( */}
-                <Box
-                  // key={index}
-                  w={'full'}
-                  p={4}
-                  borderWidth="1px"
-                  borderRadius="md"
-                >
+                <Box w={'full'} p={4} borderWidth="1px" borderRadius="md">
                   <HStack justify="space-between" w="100%">
                     <Text fontWeight="600" fontSize="15px"></Text>
                   </HStack>
@@ -281,9 +356,7 @@ function AddProduct() {
                     </Flex>
                   </Flex>
                 </Box>
-                {/* ))} */}
               </VStack>
-              {/* )} */}
             </VStack>
 
             <VStack
@@ -435,17 +508,6 @@ function AddProduct() {
               <Text fontWeight="700" fontSize="17px" color="#2400FE">
                 Variant List
               </Text>
-              {/* {variants.map((variant, index) => (
-                <Box key={index} p={4} borderWidth="1px" borderRadius="md">
-                  <Text>Variant Name: {variant.name}</Text>
-                  <Text>Variant Options:</Text>
-                  <VStack spaceY={2}>
-                    {variant.Variant_options.map((option, optionIndex) => (
-                      <Text key={optionIndex}>{option.name}</Text>
-                    ))}
-                  </VStack>
-                </Box>
-              ))} */}
             </VStack>
 
             <VStack
@@ -459,13 +521,8 @@ function AddProduct() {
             >
               <HStack>
                 <Button variant="outline">Cancel</Button>
-                <Button
-                  bgColor="#2400FE"
-                  color="white"
-                  type="submit"
-                  disabled={isPending}
-                >
-                  {isPending ? 'Submitting ...' : 'Save Product'}
+                <Button bgColor="#2400FE" color="white" type="submit">
+                  Save Product
                 </Button>
               </HStack>
             </VStack>

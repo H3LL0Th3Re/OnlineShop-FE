@@ -16,10 +16,15 @@ export const useFetchProduct = (token: string) => {
 
 export const useCreateProduct = (token: string) => {
   const queryClient = useQueryClient();
-  return useMutation({
+
+  return useMutation<Product, Error, Product>({
     mutationFn: (data: Product) => createProducts(data, token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['Products'] });
+    },
+    onError: (error) => {
+      console.error('Gagal membuat produk:', error);
+      throw error;
     },
   });
 };
@@ -29,7 +34,7 @@ export const useDeleteProduct = (token: string) => {
   return useMutation({
     mutationFn: (id: string) => deleteProducts(id, token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['Products'] });
     },
   });
 };
