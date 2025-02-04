@@ -20,6 +20,7 @@ import { useCreateVariant } from '../tanstack/useVariant';
 import DialogAddVariant from './Dialog/dialog-add-variant';
 import { Variant } from '@/types/product-type';
 import Swal from 'sweetalert2';
+import DropdownCategory from './dropdown-category';
 
 function AddProduct() {
   const { token } = useAuthStore();
@@ -35,6 +36,14 @@ function AddProduct() {
 
   const [attachments, setAttachments] = useState<File | null>(null);
   const [variants, setVariants] = useState<Variant[]>([]);
+
+  const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
+    setFormData({
+      ...formData,
+      categoryIds: [categoryId],
+      subcategoryIds: [subcategoryId],
+    });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -178,7 +187,7 @@ function AddProduct() {
                 <Text fontWeight="600" fontSize="15px">
                   Category
                 </Text>
-                <Input placeholder="Select category" />
+                <DropdownCategory onSelectCategory={handleCategorySelect} />
               </VStack>
             </VStack>
 
