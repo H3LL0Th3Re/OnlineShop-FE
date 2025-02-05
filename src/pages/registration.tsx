@@ -23,6 +23,7 @@ import { PasswordInput } from '@/components/ui/password-input';
 const schema = z.object({
   fullname: z.string().min(1, 'Fullname is required'),
   email: z.string().email('Invalid email address'),
+  phone_number: z.string().min(6, 'Phone number is required '),
   password: z.string().min(6, 'Password must be at least 6 characters'),
 });
 type FormData = z.infer<typeof schema>;
@@ -47,6 +48,7 @@ function Registration() {
       const result = await registerUser(
         data.fullname,
         data.email,
+        data.phone_number,
         data.password
       );
 
@@ -153,6 +155,22 @@ function Registration() {
                     {errors.email && (
                       <Text color="red.500" fontSize="sm">
                         {errors.email.message}
+                      </Text>
+                    )}
+                    <Input
+                      padding="4"
+                      mb="10px"
+                      rounded="50px"
+                      borderWidth="1px"
+                      borderColor="#E5E5E5"
+                      placeholder="Phone Number*"
+                      type="number"
+                      color="#2400FE"
+                      {...register('phone_number')}
+                    />
+                    {errors.fullname && (
+                      <Text color="red.500" fontSize="sm">
+                        {errors.fullname.message}
                       </Text>
                     )}
                     <PasswordInput
