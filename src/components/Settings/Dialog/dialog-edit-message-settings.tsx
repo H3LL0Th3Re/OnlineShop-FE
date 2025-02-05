@@ -12,7 +12,13 @@ import {
 } from '@/components/ui/dialog';
 import { BiMessageAltEdit } from 'react-icons/bi';
 import { useState } from 'react';
-import { useMessageStore } from '@/features/message_store'; // Update the import path
+// import { useMessageStore } from '@/features/message_store'; // Update the import path
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
+import { apiURL } from '@/utils/api-url';
+import Cookies from 'js-cookie';
+const token = Cookies.get('token');
+// import { useEditMessage } from '@/features/message_tanstack';
 
 interface DialogEditMessageProps {
   messageId: string;
@@ -21,8 +27,10 @@ interface DialogEditMessageProps {
 export default function DialogEditMessage({
   messageId,
 }: DialogEditMessageProps) {
+  // const { data: messages } = useEditMessage();
+
   // Zustand store
-  const { editMessage } = useMessageStore();
+  // const { editMessage } = useMessageStore();
 
   // State for form inputs
   const [name, setName] = useState<string>('');
@@ -46,6 +54,34 @@ export default function DialogEditMessage({
     return Object.keys(newErrors).length === 0; // Return true if no errors
   };
 
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: async ({
+      id,
+      name,
+      content,
+    }: {
+      id: string;
+      name: string;
+      content: string;
+    }) => {
+      const response = await axios.put(
+        `${apiURL}/message/update-message`,
+        { id, name, content },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      return response.data.updatedMessage;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
+  });
+
   // Handle form submission
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,13 +92,14 @@ export default function DialogEditMessage({
 
     try {
       // Call the editMessage action from Zustand store
-      const response = await editMessage(messageId, name, content);
+      // const response = await editMessage(messageId, name, content);
+      mutation.mutate({ id: messageId, name, content });
       // console.log(response);
-      if (response) {
-        alert('Message updated successfully');
-      } else {
-        console.log('something went wrong');
-      }
+      // if (response) {
+      //   alert('Message updated successfully');
+      // } else {
+      //   console.log('something went wrong');
+      // }
     } catch (error) {
       console.error('Error updating message:', error);
       alert('Message failed to update');

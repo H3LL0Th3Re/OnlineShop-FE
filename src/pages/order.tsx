@@ -20,9 +20,11 @@ import { useState } from 'react';
 
 import { LuUser } from 'react-icons/lu';
 import { useNavigate } from 'react-router';
+// import dialogTemplateMessage from '../components/Order/Dialog/dialog-template-message'
+import DialogTemplateMessage from '../components/Order/Dialog/dialog-template-message';
 
 interface Order {
-  id: number;
+  id: string;
   status: string;
   invoice: string;
   productName: string;
@@ -33,7 +35,7 @@ interface Order {
 
 const orders: Order[] = [
   {
-    id: 1,
+    id: '1',
     status: 'Belum Dibayar',
     invoice: 'INV/20230809/MPL/00000289',
     productName: 'KAOS BASIC COTTON KENARI',
@@ -43,7 +45,7 @@ const orders: Order[] = [
     Courier: 'J&T',
   },
   {
-    id: 2,
+    id: '2',
     status: 'Pesanan Baru',
     invoice: 'INV/20230809/MPL/00000345',
     productName: 'HOODIE OVERSIZE UNISEX',
@@ -53,7 +55,7 @@ const orders: Order[] = [
     Courier: 'J&T',
   },
   {
-    id: 3,
+    id: '3',
     status: 'Siap Dikirim',
     invoice: 'INV/20230809/MPL/00000412',
     productName: 'TAS SELEMPANG CASUAL',
@@ -63,7 +65,7 @@ const orders: Order[] = [
     Courier: 'JNE',
   },
   {
-    id: 4,
+    id: '4',
     status: 'Dalam Pengiriman',
     invoice: 'INV/20230809/MPL/00000501',
     productName: 'SEPATU SNEAKERS PRIA',
@@ -73,7 +75,7 @@ const orders: Order[] = [
     Courier: 'Si Cepat',
   },
   {
-    id: 5,
+    id: '5',
     status: 'Pesanan Selesai',
     invoice: 'INV/20230809/MPL/00000678',
     productName: 'JAKET PARKA PRIA',
@@ -83,7 +85,7 @@ const orders: Order[] = [
     Courier: 'Ninja Express',
   },
   {
-    id: 6,
+    id: '6',
     status: 'Dibatalkan',
     invoice: 'INV/20230809/MPL/00000779',
     productName: 'JAKET PARKA PRIA',
@@ -194,7 +196,7 @@ export function Order() {
 
   const searchedOrder = searchOrder(filteredCourier, searchQuery);
 
-  const handleClickOrder = (orderId: number) => {
+  const handleClickOrder = (orderId: string) => {
     navigate(`/detail-order/${orderId}`);
   };
   return (
@@ -339,9 +341,13 @@ export function Order() {
                       </Box>
                     </Box>
                     <Box maxWidth={'60'} textAlign={'center'}>
-                      <Button rounded="full" bg={'blue.600'}>
+                      {/* <Button rounded="full" bg={'blue.600'}>
                         {getButtonStatus(order.status)}
-                      </Button>
+                      </Button> */}
+                      <DialogTemplateMessage
+                        status={order.status}
+                        productid={'cm6k7x2gw0003wqmwan8jtl1m'}
+                      />
                     </Box>
                   </Flex>
                   <Flex onClick={() => handleClickOrder(order.id)}>
