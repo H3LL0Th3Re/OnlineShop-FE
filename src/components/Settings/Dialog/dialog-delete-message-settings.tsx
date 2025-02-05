@@ -9,33 +9,75 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { deleteMessage } from '@/features/message';
+// import { deleteMessage } from '@/features/message';
+// import { useMessageStore } from '@/features/message_store';
+import { apiURL } from '@/utils/api-url';
 import { Button, Text } from '@chakra-ui/react';
-import { useState } from 'react';
-import { MdOutlineDelete } from 'react-icons/md';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import axios from 'axios';
 
+// import { useState } from 'react';
+import { MdOutlineDelete } from 'react-icons/md';
+import Cookies from 'js-cookie';
+const token = Cookies.get('token');
 interface DialogEditMessageProps {
   messageId: string;
 }
 
-export default function DialogDeleteMessage({ messageId }: DialogEditMessageProps) {
-  const [apiError, setApiError] = useState<string | null>(null);
+export default function DialogDeleteMessage({
+  messageId,
+}: DialogEditMessageProps) {
+  // const [apiError, setApiError] = useState<string | null>(null);
+  // const { deleteMessage } = useMessageStore();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      await axios.delete(`${apiURL}/message/delete-message`, {
+        data: { id },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
+  });
+  // const onSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault(); // Prevent default form submission
+  //   setApiError(null);
+  //   try {
+  //     const response = await deleteMessage(messageId);
+  //     if (response) {
+  //       alert('Message deleted successfully');
+  //     } else {
+  //       setApiError('Failed to delete message');
+  //       alert('Failed to delete message');
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     setApiError('An error occurred while deleting the message');
+  //     alert('An error occurred while deleting the message');
+  //   }
+  // };
 
   const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent default form submission
-    setApiError(null);
+    e.preventDefault();
+
     try {
-      const response = await deleteMessage(messageId);
-      if (response) {
-        alert('Message deleted successfully');
-      } else {
-        setApiError('Failed to delete message');
-        alert('Failed to delete message');
-      }
+      // Call the editMessage action from Zustand store
+      // const response = await editMessage(messageId, name, content);
+      mutation.mutate({ id: messageId });
+      // console.log(response);
+      // if (response) {
+      //   alert('Message updated successfully');
+      // } else {
+      //   console.log('something went wrong');
+      // }
     } catch (error) {
-      console.log(error);
-      setApiError('An error occurred while deleting the message');
-      alert('An error occurred while deleting the message');
+      console.error('Error updating message:', error);
+      alert('Message failed to update');
     }
   };
 
@@ -50,11 +92,11 @@ export default function DialogDeleteMessage({ messageId }: DialogEditMessageProp
         </DialogHeader>
         <DialogBody>
           <form onSubmit={onSubmit}>
-          <Text fontWeight="400" fontSize="15px">
-            Apakah kamu yakin untuk menghapus Pesan? Kamu tidak akan dapat
-            mengembalikan pesan yang sudah dihapus.
-          </Text>
-            {apiError && <Text color="red.500">{apiError}</Text>}
+            <Text fontWeight="400" fontSize="15px">
+              Apakah kamu yakin untuk menghapus Pesan? Kamu tidak akan dapat
+              mengembalikan pesan yang sudah dihapus.
+            </Text>
+            {/* {apiError && <Text color="red.500">{apiError}</Text>} */}
             <DialogFooter>
               <DialogActionTrigger asChild>
                 <Button variant="outline">Cancel</Button>
@@ -65,7 +107,7 @@ export default function DialogDeleteMessage({ messageId }: DialogEditMessageProp
             </DialogFooter>
           </form>
         </DialogBody>
-        <DialogCloseTrigger/>
+        <DialogCloseTrigger />
       </DialogContent>
     </DialogRoot>
   );

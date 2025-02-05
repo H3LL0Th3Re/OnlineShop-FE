@@ -68,7 +68,6 @@ export const createProducts = async (data: Product, token: string) => {
     formData.append('name', data.name);
     formData.append('description', data.description);
 
-    // Pastikan format array sesuai dengan yang diharapkan backend
     if (data.categoryIds && data.categoryIds.length > 0) {
       formData.append('categoryIds', JSON.stringify(data.categoryIds));
     }
