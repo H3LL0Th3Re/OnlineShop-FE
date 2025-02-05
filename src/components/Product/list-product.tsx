@@ -8,7 +8,6 @@ import {
   Image,
   Input,
   Stack,
-  Strong,
   Tabs,
   Text,
 } from '@chakra-ui/react';
@@ -25,25 +24,13 @@ import {
   SelectTrigger,
   SelectValueText,
 } from '../ui/select';
-import { useEffect, useState } from 'react';
 import { IoIosLink } from 'react-icons/io';
 import { HiDotsHorizontal } from 'react-icons/hi';
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from '../ui/menu';
-import {
-  DialogActionTrigger,
-  DialogBody,
-  DialogCloseTrigger,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DialogTrigger,
-} from '../ui/dialog';
-import { useProductStore } from '../Store/product-store';
-import { useAuthStore } from '@/hooks/authstore';
-import { Product } from '@/types/product-type';
 
+import { useAuthStore } from '@/hooks/authstore';
+import { useFetchProduct } from '../tanstack/useProduct';
+import { DialogDeleteProduct } from './Dialog/dialog-delete-product';
 const categories = createListCollection({
   items: [
     { label: 'All', value: 'all' },
@@ -64,61 +51,11 @@ const sortbyOptions = createListCollection({
 });
 
 const ListProduct = () => {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    'all',
-  ]);
-  const [sortBy, setSortBy] = useState<string>('terakhir-diubah');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const token = useAuthStore((state) => state.token);
+  const { data: products, isLoading, error } = useFetchProduct(token || '');
 
-  const { token } = useAuthStore();
-  const { products, loading, error, fetchProducts } = useProductStore();
-
-  useEffect(() => {
-    if (token) {
-      fetchProducts(token);
-    }
-  }, [token, fetchProducts]);
-
-  const filteredProducts = products.filter((p) => {
-    if (selectedCategories.includes('all')) return true;
-    return selectedCategories.includes(p.category);
-  });
-
-  const handleCategoryChange = (values: string[]) => {
-    setSelectedCategories(values.length ? values : ['all']);
-  };
-
-  const sortProducts = (products: Product[], sortBy: string) => {
-    switch (sortBy) {
-      case 'harga-tertinggi':
-        return [...products].sort((a, b) => b.price - a.price);
-      case 'harga-terendah':
-        return [...products].sort((a, b) => a.price - b.price);
-      case 'stock-terbanyak':
-        return [...products].sort((a, b) => b.quantity - a.quantity);
-      case 'stock-sedikit':
-        return [...products].sort((a, b) => a.quantity - b.quantity);
-      case 'terakhir-diubah':
-      default:
-        return products;
-    }
-  };
-
-  // Filter produk berdasarkan pencarian
-  const filterProductsBySearch = (products: Product[], query: string) => {
-    if (!query) return products;
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.sku.toLowerCase().includes(query.toLowerCase())
-    );
-  };
-
-  const sortedProducts = sortProducts(filteredProducts, sortBy);
-  const searchedProducts = filterProductsBySearch(sortedProducts, searchQuery);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   console.log('Product Data:', products);
 
@@ -148,13 +85,13 @@ const ListProduct = () => {
             </Tabs.Trigger>
             <Tabs.Trigger value="aktif">
               <Box bg={'#5F2EEA'} w={5} rounded={'full'} color={'white'}>
-                {searchedProducts.filter((s) => s.is_active === true).length}
+                {products?.filter((s) => s.is_active === true).length}
               </Box>
               Aktif
             </Tabs.Trigger>
             <Tabs.Trigger value="nonaktif">
               <Box bg={'#5F2EEA'} w={5} rounded={'full'} color={'white'}>
-                {searchedProducts.filter((s) => s.is_active === false).length}
+                {products?.filter((s) => s.is_active === false).length}
               </Box>
               Nonaktif
             </Tabs.Trigger>
@@ -163,20 +100,14 @@ const ListProduct = () => {
             <Input
               placeholder="Cari Pesanan"
               w={'50%'}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              // value={searchQuery}
+              // onChange={(e) => setSearchQuery(e.target.value)}
             />
             <SelectRoot
               multiple
               collection={categories}
               size="sm"
               width="320px"
-              onValueChange={(details) => {
-                const selectedCategories = Array.isArray(details.value)
-                  ? details.value
-                  : [details.value];
-                handleCategoryChange(selectedCategories);
-              }}
             >
               <SelectTrigger>
                 <SelectValueText placeholder="All Category" />
@@ -193,12 +124,12 @@ const ListProduct = () => {
               collection={sortbyOptions}
               size="sm"
               width="320px"
-              onValueChange={(details) => {
-                const selectedSortBy = Array.isArray(details.value)
-                  ? details.value[0]
-                  : details.value;
-                setSortBy(selectedSortBy);
-              }}
+              // onValueChange={(details) => {
+              //   const selectedSortBy = Array.isArray(details.value)
+              //     ? details.value[0]
+              //     : details.value;
+              //   setSortBy(selectedSortBy);
+              // }}
             >
               <SelectTrigger>
                 <SelectValueText placeholder="Sort By" />
@@ -217,7 +148,7 @@ const ListProduct = () => {
               <Flex align={'center'} justify={'space-between'}>
                 <Box>
                   <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
-                    {searchedProducts.length} Product
+                    {products?.length} Product
                   </Text>
                 </Box>
                 <Flex align={'center'} gap={2}>
@@ -251,9 +182,9 @@ const ListProduct = () => {
                 </Flex>
               </Flex>
               <Stack gap="4">
-                {searchedProducts.map((products, i) => (
+                {products?.map((product) => (
                   <Flex
-                    key={i}
+                    key={product.id}
                     p="4"
                     borderWidth="1px"
                     borderColor="gray.200"
@@ -261,21 +192,37 @@ const ListProduct = () => {
                   >
                     <Box bg={'black'} rounded="md">
                       <Image
-                        src={products.attachments}
-                        alt={products.variant}
+                        src={
+                          typeof product.attachments === 'string'
+                            ? product.attachments
+                            : ''
+                        }
+                        alt={product.name}
                         w={'28'}
                       />
                     </Box>
                     <Flex direction={'column'} pl={5} w={'full'}>
                       <Box>
                         <Text fontWeight="bold">
-                          {products.name} -{' '}
-                          {products.variants[0]?.Variant_options[0]?.name}
+                          {product.name} -{' '}
+                          {product.variants?.[0]?.variantOptions?.[0]?.name}
                         </Text>
-                        <Text fontSize="sm" color="gray.600">
-                          Rp{products.price} - Stock: {products.quantity} - SKU:{' '}
-                          {products.sku}
-                        </Text>
+                        {/* <Text fontSize="sm" color="gray.600">
+                          Rp
+                            product.variants[0]?.Variant_options[0]
+                              ?.Variant_option_values[0]?.price
+                          }{' '}
+                          - Stock:{' '}
+                          {
+                            product.variants[0]?.Variant_options[0]
+                              ?.Variant_option_values[0]?.stock
+                          }{' '}
+                          - SKU:{' '}
+                          {
+                            product.variants[0]?.Variant_options[0]
+                              ?.Variant_option_values[0]?.sku
+                          }
+                        </Text> */}
                       </Box>
                       <Flex
                         align="center"
@@ -341,41 +288,12 @@ const ListProduct = () => {
                                 </HStack>
                               </MenuItem>
                               <MenuItem value="new-file">
-                                <DialogRoot placement={'center'}>
-                                  <DialogTrigger asChild>
-                                    <HStack>
-                                      <Icon size={'sm'} color={'black'}>
-                                        <MdOutlineDelete />
-                                      </Icon>
-                                      <Text>Delete Product</Text>
-                                    </HStack>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Delete Product</DialogTitle>
-                                    </DialogHeader>
-                                    <DialogBody spaceY={5}>
-                                      <Text>
-                                        Product <Strong>{products.name}</Strong>{' '}
-                                        will be removed
-                                      </Text>
-                                      <Text>
-                                        Removed products will not be able to
-                                        Cancelled. Make sure the product you
-                                        Select it correctly.
-                                      </Text>
-                                    </DialogBody>
-                                    <DialogFooter>
-                                      <DialogActionTrigger asChild>
-                                        <Button variant="outline">
-                                          Cancel
-                                        </Button>
-                                      </DialogActionTrigger>
-                                      <Button>Save</Button>
-                                    </DialogFooter>
-                                    <DialogCloseTrigger />
-                                  </DialogContent>
-                                </DialogRoot>
+                                <HStack>
+                                  <DialogDeleteProduct
+                                    productId={product.id || ''}
+                                    productName={product.name || ''}
+                                  />
+                                </HStack>
                               </MenuItem>
                             </MenuContent>
                           </MenuRoot>
@@ -393,10 +311,7 @@ const ListProduct = () => {
               <Flex align={'center'} justify={'space-between'}>
                 <Box>
                   <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
-                    {
-                      searchedProducts.filter((s) => s.is_active === true)
-                        .length
-                    }{' '}
+                    {products?.filter((s) => s.is_active === true).length}{' '}
                     Product
                   </Text>
                 </Box>
@@ -431,11 +346,11 @@ const ListProduct = () => {
                 </Flex>
               </Flex>
               <Stack gap="4">
-                {searchedProducts
-                  .filter((products) => products.is_active === true)
-                  .map((products, i) => (
+                {products
+                  ?.filter((product) => product.is_active === true)
+                  .map((product) => (
                     <Flex
-                      key={i}
+                      key={product.id}
                       p="4"
                       borderWidth="1px"
                       borderColor="gray.200"
@@ -443,20 +358,38 @@ const ListProduct = () => {
                     >
                       <Box bg={'black'} rounded="md">
                         <Image
-                          src={products.attachments}
-                          alt={products.variant}
+                          src={
+                            typeof product.attachments === 'string'
+                              ? product.attachments
+                              : ''
+                          }
+                          alt={product.name}
                           w={'28'}
                         />
                       </Box>
                       <Flex direction={'column'} pl={5} w={'full'}>
                         <Box>
                           <Text fontWeight="bold">
-                            {products.name} - {products.variant}
+                            {product.name} -{' '}
+                            {product.variants?.[0]?.variantOptions?.[0]?.name}
                           </Text>
-                          <Text fontSize="sm" color="gray.600">
-                            {products.price} - Stock: {products.quantity} - SKU:{' '}
-                            {products.sku}
-                          </Text>
+                          {/* <Text fontSize="sm" color="gray.600">
+                            Rp
+                            {
+                              product.variants[0]?.Variant_options[0]
+                                ?.Variant_option_values[0]?.price
+                            }{' '}
+                            - Stock:{' '}
+                            {
+                              product.variants[0]?.Variant_options[0]
+                                ?.Variant_option_values[0]?.stock
+                            }{' '}
+                            - SKU:{' '}
+                            {
+                              product.variants[0]?.Variant_options[0]
+                                ?.Variant_option_values[0]?.sku
+                            }
+                          </Text> */}
                         </Box>
                         <Flex
                           align="center"
@@ -504,10 +437,7 @@ const ListProduct = () => {
               <Flex align={'center'} justify={'space-between'}>
                 <Box>
                   <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
-                    {
-                      searchedProducts.filter((s) => s.is_active === false)
-                        .length
-                    }{' '}
+                    {products?.filter((s) => s.is_active === false).length}{' '}
                     Product
                   </Text>
                 </Box>
@@ -542,11 +472,11 @@ const ListProduct = () => {
                 </Flex>
               </Flex>
               <Stack gap="4">
-                {searchedProducts
-                  .filter((products) => products.is_active === false)
-                  .map((products, i) => (
+                {products
+                  ?.filter((product) => product.is_active === false)
+                  .map((product) => (
                     <Flex
-                      key={i}
+                      key={product.id}
                       p="4"
                       borderWidth="1px"
                       borderColor="gray.200"
@@ -554,20 +484,35 @@ const ListProduct = () => {
                     >
                       <Box bg={'black'} rounded="md">
                         <Image
-                          src={products.attachments}
-                          alt={products.variant}
+                          src={
+                            typeof product.attachments === 'string'
+                              ? product.attachments
+                              : ''
+                          }
+                          alt={product.name}
                           w={'28'}
                         />
                       </Box>
                       <Flex direction={'column'} pl={5} w={'full'}>
                         <Box>
-                          <Text fontWeight="bold">
-                            {products.name} - {products.variant}
-                          </Text>
-                          <Text fontSize="sm" color="gray.600">
-                            {products.price} - Stock: {products.quantity} - SKU:{' '}
-                            {products.sku}
-                          </Text>
+                          <Text fontWeight="bold">{product.name} -</Text>
+                          {/* <Text fontSize="sm" color="gray.600">
+                            Rp
+                            {
+                              product.Variant_options[0]
+                                ?.Variant_option_values[0]?.price
+                            }{' '}
+                            - Stock:{' '}
+                            {
+                              product.Variant_options[0]
+                                ?.Variant_option_values[0]?.stock
+                            }{' '}
+                            - SKU:{' '}
+                            {
+                              product.Variant_options[0]
+                                ?.Variant_option_values[0]?.sku
+                            }
+                          </Text> */}
                         </Box>
                         <Flex
                           align="center"

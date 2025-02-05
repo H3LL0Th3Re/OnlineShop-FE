@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import Fallback from './pages/fallback';
 import Product from './pages/product';
-import addProduct from './components/Product/add-product';
 import Login from './pages/login';
 import Registration from './pages/registration';
 import { Order } from './pages/order';
@@ -13,6 +12,7 @@ import DetailProduct from './components/Product/detail-product';
 import PrivateLayout from './layouts/PrivateLayout';
 import { LandingPage } from './pages/landing-page';
 import CheckoutProduct from './pages/checkout-product';
+import AddProduct from './components/Product/add-product';
 
 function App() {
   const router = createBrowserRouter([
@@ -58,7 +58,7 @@ function App() {
         },
         {
           path: '/add-product',
-          Component: addProduct,
+          Component: AddProduct,
           HydrateFallback: Fallback,
         },
         {
