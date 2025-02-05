@@ -1,6 +1,17 @@
-import { createVariant } from '@/features/dashboard/services/variant';
+import {
+  createVariant,
+  getAllVariant,
+} from '@/features/dashboard/services/variant';
 import { Variant } from '@/types/product-type';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+export const useFetchVariant = (token: string) => {
+  return useQuery({
+    queryKey: ['Variant'],
+    queryFn: () => getAllVariant(token),
+    enabled: !!token,
+  });
+};
 
 export const useCreateVariant = (token: string) => {
   const queryClient = useQueryClient();
@@ -19,7 +30,7 @@ export const useCreateVariant = (token: string) => {
       return createVariant(productId, data, token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['Products'] });
+      queryClient.invalidateQueries({ queryKey: ['Variant'] });
     },
     onError: (error) => {
       console.error('Gagal membuat varian:', error);

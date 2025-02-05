@@ -21,11 +21,13 @@ import DialogAddVariant from './Dialog/dialog-add-variant';
 import { Variant } from '@/types/product-type';
 import Swal from 'sweetalert2';
 import DropdownCategory from './dropdown-category';
+import { useCreateVariantOptions } from '../tanstack/useVariantOptions';
 
 function AddProduct() {
   const { token } = useAuthStore();
   const createProductMutation = useCreateProduct(token || '');
   const createVariantMutation = useCreateVariant(token || '');
+  const createVariantOptionMutation = useCreateVariantOptions();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -36,6 +38,11 @@ function AddProduct() {
 
   const [attachments, setAttachments] = useState<File | null>(null);
   const [variants, setVariants] = useState<Variant[]>([]);
+  const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
+  const [variantOptionInput, setVariantOptionInput] = useState('');
+  const [variantOptions, setVariantOptions] = useState<
+    { name: string; variantId: string }[]
+  >([]);
 
   const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
     setFormData({
@@ -77,6 +84,15 @@ function AddProduct() {
         return;
       }
 
+      if (!formData.name || !formData.description) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Perhatian',
+          text: 'Semua field wajib diisi!',
+        });
+        return;
+      }
+
       // Loading state
       Swal.fire({
         title: 'Sedang memproses...',
@@ -92,32 +108,44 @@ function AddProduct() {
         attachments,
       });
 
-      console.log('Response lengkap dari server setelah membuat produk:', {
-        status: 'success',
-        productResponse,
-        productId: productResponse?.id,
-      });
-
       // Pastikan productResponse valid
       if (!productResponse || !productResponse.id) {
         throw new Error('Gagal mendapatkan ID produk');
       }
 
-      // Buat varian jika ada
+      // Buat varian dan variant options
       if (variants.length > 0) {
         for (const variant of variants) {
           try {
-            await createVariantMutation.mutateAsync({
+            const variantResponse = await createVariantMutation.mutateAsync({
               productId: productResponse.id,
-              data: variant,
+              data: {
+                ...variant,
+              },
             });
-          } catch (variantError) {
-            console.error('Error creating variant:', variantError);
-            Swal.fire({
-              icon: 'warning',
-              title: 'Perhatian',
-              text: 'Beberapa varian gagal dibuat',
-            });
+
+            console.log('variant response:', variantResponse);
+
+            // Pastikan variantResponse valid
+            if (!variantResponse || !variantResponse.variant.id) {
+              throw new Error('Gagal mendapatkan ID varian');
+            }
+
+            // Buat variant options jika ada
+            if (variant.variantOptions && variant.variantOptions.length > 0) {
+              for (const option of variant.variantOptions) {
+                await createVariantOptionMutation.mutateAsync({
+                  token,
+                  variantOptionsData: {
+                    ...option,
+                    variantId: variantResponse.variant.id,
+                  },
+                });
+              }
+            }
+          } catch (error) {
+            console.error('Error creating variant or options:', error);
+            throw error;
           }
         }
       }
@@ -141,7 +169,7 @@ function AddProduct() {
       setAttachments(null);
       setVariants([]);
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error creating product:', error);
       Swal.fire({
         icon: 'error',
         title: 'Gagal!',
@@ -291,9 +319,9 @@ function AddProduct() {
                 />
               </HStack>
 
-              {variants.map((variant, index) => (
+              {variants.map((variant, variantIndex) => (
                 <Button
-                  key={index}
+                  key={variantIndex}
                   gap="5px"
                   bg={'white'}
                   color={'black'}
@@ -304,20 +332,114 @@ function AddProduct() {
                     <Text fontWeight="500" fontSize="14px">
                       {variant.name}
                     </Text>
-                    <Checkbox size="sm" />
+                    <Checkbox
+                      size="sm"
+                      onCheckedChange={(details) => {
+                        console.log(
+                          'Checkbox changed:',
+                          details.checked,
+                          variantIndex
+                        );
+                        setSelectedVariant(
+                          details.checked ? variantIndex : null
+                        );
+                      }}
+                      checked={selectedVariant === variantIndex}
+                    />
                   </HStack>
                 </Button>
               ))}
 
-              <VStack gap="5px" w="full" align="flex-start">
-                <Text fontWeight="600" fontSize="15px">
-                  Additional Information *
-                </Text>
-                <HStack>
-                  <Button size="sm" variant="outline"></Button>
-                  <Input placeholder="Add info..." />
-                </HStack>
-              </VStack>
+              {selectedVariant !== null && (
+                <VStack gap="5px" w="full" align="flex-start">
+                  <Text fontWeight="600" fontSize="15px">
+                    Variant Options *
+                  </Text>
+                  <HStack>
+                    <Input
+                      placeholder="Variant Options..."
+                      value={variantOptionInput}
+                      onChange={(e) => setVariantOptionInput(e.target.value)}
+                    />
+                    <Button
+                      onClick={() => {
+                        // Validasi sebelum menambahkan opsi varian
+                        if (!variantOptionInput || selectedVariant === null) {
+                          Swal.fire({
+                            icon: 'warning',
+                            title: 'Perhatian',
+                            text: 'Semua field wajib diisi!',
+                          });
+                          return;
+                        }
+
+                        const updatedVariants = variants.map(
+                          (variant, variantIndex) => {
+                            if (selectedVariant === variantIndex) {
+                              const newOption = {
+                                name: variantOptionInput,
+                                variantId: variantIndex.toString(),
+                              };
+                              setVariantOptions([...variantOptions, newOption]);
+                              console.log('Variant Options Data:', [
+                                ...variantOptions,
+                                newOption,
+                              ]);
+                              return {
+                                ...variant,
+                                variantOptions: [
+                                  ...variant.variantOptions,
+                                  newOption,
+                                ],
+                              };
+                            }
+                            return variant;
+                          }
+                        );
+                        setVariants(updatedVariants);
+                        setVariantOptionInput('');
+                      }}
+                    >
+                      Add Option
+                    </Button>
+                  </HStack>
+                  <VStack spaceY={2} align="flex-start">
+                    {variantOptions.map((option, index) => (
+                      <HStack key={index} justify="space-between" w="full">
+                        <Text>{option.name}</Text>
+                        <Button
+                          onClick={() => {
+                            // Hapus opsi varian dari state
+                            const updatedOptions = variantOptions.filter(
+                              (_, i) => i !== index
+                            );
+                            setVariantOptions(updatedOptions);
+                            // Juga hapus dari varian yang sesuai
+                            const updatedVariants = variants.map(
+                              (variant, variantIndex) => {
+                                if (selectedVariant === variantIndex) {
+                                  return {
+                                    ...variant,
+                                    variantOptions:
+                                      variant.variantOptions.filter(
+                                        (_, i) => i !== index
+                                      ),
+                                  };
+                                }
+                                return variant;
+                              }
+                            );
+                            setVariants(updatedVariants);
+                          }}
+                        >
+                          ✖
+                        </Button>
+                      </HStack>
+                    ))}
+                  </VStack>
+                </VStack>
+              )}
+
               <Text fontWeight="700" fontSize="17px" color="#2400FE">
                 Variant List
               </Text>
