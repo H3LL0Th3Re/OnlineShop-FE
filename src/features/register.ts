@@ -5,6 +5,7 @@ interface RegisterResponse {
     id: string;
     fullname: string;
     email: string;
+    phone_number: string;
     password: string;
   };
   message?: string;
@@ -13,6 +14,7 @@ interface RegisterResponse {
 export const registerUser = async (
   fullname: string,
   email: string,
+  phone_number: string,
   password: string
 ): Promise<RegisterResponse> => {
   try {
@@ -21,6 +23,7 @@ export const registerUser = async (
       {
         fullname,
         email,
+        phone_number,
         password,
       },
       {

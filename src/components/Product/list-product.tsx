@@ -29,7 +29,7 @@ import { HiDotsHorizontal } from 'react-icons/hi';
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from '../ui/menu';
 
 import { useAuthStore } from '@/hooks/authstore';
-import { useFetchProduct } from '../tanstack/useProduct';
+import { useFetchProductStore } from '../tanstack/useProduct';
 import { DialogDeleteProduct } from './Dialog/dialog-delete-product';
 const categories = createListCollection({
   items: [
@@ -52,7 +52,11 @@ const sortbyOptions = createListCollection({
 
 const ListProduct = () => {
   const token = useAuthStore((state) => state.token);
-  const { data: products, isLoading, error } = useFetchProduct(token || '');
+  const {
+    data: products,
+    isLoading,
+    error,
+  } = useFetchProductStore(token || '');
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;

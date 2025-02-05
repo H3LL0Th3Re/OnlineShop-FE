@@ -30,6 +30,33 @@ export const getAllProducts = async (token: string): Promise<Product[]> => {
     throw new Error(errorMessage);
   }
 };
+export const getStoreProduct = async (token: string): Promise<Product[]> => {
+  try {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await axios.get(`${apiURL}/product/check-product`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log(response.data.product);
+    return response.data.product;
+  } catch (error) {
+    let errorMessage = 'Failed to fetch products';
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized: Please log in again.';
+      } else {
+        errorMessage = error.response?.data?.message || errorMessage;
+      }
+    }
+
+    throw new Error(errorMessage);
+  }
+};
 
 export const createProducts = async (data: Product, token: string) => {
   try {
