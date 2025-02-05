@@ -1,10 +1,10 @@
-// export interface Categories {
-//   id: string;
-//   name: string;
-//   parentId: string;
-//   parent: Categories;
-//   children: Categories;
-// }
+export interface Categories {
+  id: string;
+  name: string;
+  parentId: string;
+  parent: Categories;
+  children: Categories;
+}
 
 // Tipe data sesuai schema Prisma
 export interface Category {

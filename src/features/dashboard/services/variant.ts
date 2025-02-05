@@ -2,6 +2,34 @@ import { Variant } from '@/types/product-type';
 import { apiURL } from '@/utils/api-url';
 import axios from 'axios';
 
+export const getAllVariant = async (token: string): Promise<Variant[]> => {
+  try {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await axios.get(`${apiURL}/variant`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    let errorMessage = 'Failed to fetch products';
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized: Please log in again.';
+      } else {
+        errorMessage = error.response?.data?.message || errorMessage;
+      }
+    }
+
+    throw new Error(errorMessage);
+  }
+};
+
 export const createVariant = async (
   productId: string,
   data: Variant,
