@@ -19,7 +19,7 @@ export const createVariant = async (
       variantOptions: data.variantOptions || [],
     };
 
-    console.log('Sending variant data:', variantData); // Untuk debugging
+    console.log('Sending variant data:', variantData);
 
     const response = await axios.post(
       `${apiURL}/variant/create/${productId}`,
