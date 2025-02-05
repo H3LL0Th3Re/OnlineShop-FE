@@ -318,8 +318,10 @@ function AddProduct() {
                   <Input placeholder="Add info..." />
                 </HStack>
               </VStack>
-
-              <VStack
+              <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                Variant List
+              </Text>
+              <Flex
                 bgColor="white"
                 w={'full'}
                 gap="10px"
@@ -327,45 +329,60 @@ function AddProduct() {
                 borderRadius="10px"
                 align="flex-start"
               >
-                <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                  Variant List
-                </Text>
-                <Box w={'full'} p={4} borderWidth="1px" borderRadius="md">
+                <Box
+                  w={'full'}
+                  p={4}
+                  spaceY={5}
+                  borderWidth="1px"
+                  borderRadius="md"
+                >
                   <HStack justify="space-between" w="100%">
                     <Text fontWeight="600" fontSize="15px"></Text>
                   </HStack>
-                  <Flex justify={'space-between'} w={'full'} gap={2}>
-                    <Flex w={'50%'}>
-                      <Text fontWeight="600" fontSize="15px">
-                        Price *
-                      </Text>
-                      <InputAddon>Rp</InputAddon>
-                      <Input placeholder="Enter price" />
+                  <HStack w={'full'} gap={5}>
+                    <Flex w={'40%'} direction={'column'}>
+                      <Box w={'96'}>
+                        <Text fontWeight="600" fontSize="15px">
+                          Price *
+                        </Text>
+                      </Box>
+                      <Flex>
+                        <InputAddon>Rp</InputAddon>
+                        <Input placeholder="Enter price" />
+                      </Flex>
                     </Flex>
-                    <Flex w={'50%'}>
-                      <Text fontWeight="600" fontSize="15px">
-                        SKU (Stock Keeping Unit) *
-                      </Text>
+                    <Flex w={'40%'} direction={'column'}>
+                      <Box w={'96'}>
+                        <Text fontWeight="600" fontSize="15px">
+                          SKU (Stock Keeping Unit) *
+                        </Text>
+                      </Box>
                       <Input placeholder="Enter SKU" />
                     </Flex>
-                  </Flex>
-                  <Flex justify={'space-between'} w={'full'} gap={2}>
-                    <Flex w={'50%'}>
-                      <Text fontWeight="600" fontSize="15px">
-                        Product Stock *
-                      </Text>
+                  </HStack>
+                  <HStack w={'full'} gap={5}>
+                    <Flex w={'40%'} direction={'column'}>
+                      <Box w={'72'}>
+                        <Text fontWeight="600" fontSize="15px">
+                          Product Stock *
+                        </Text>
+                      </Box>
                       <Input placeholder="Enter stock" />
                     </Flex>
-                    <Flex w={'50%'}>
-                      <Text fontWeight="600" fontSize="15px">
-                        Product Weight *
-                      </Text>
-                      <Input placeholder="Enter weight" />
-                      <InputAddon>Gram</InputAddon>
+                    <Flex w={'40%'} direction={'column'}>
+                      <Box w={'96'}>
+                        <Text fontWeight="600" fontSize="15px">
+                          Product Weight *
+                        </Text>
+                      </Box>
+                      <Flex>
+                        <Input placeholder="Enter weight" />
+                        <InputAddon>Gram</InputAddon>
+                      </Flex>
                     </Flex>
-                  </Flex>
+                  </HStack>
                 </Box>
-              </VStack>
+              </Flex>
             </VStack>
 
             <VStack
@@ -503,20 +520,6 @@ function AddProduct() {
                   </VStack>
                 </HStack>
               </VStack>
-            </VStack>
-
-            <VStack
-              bgColor="white"
-              w={'full'}
-              p="7"
-              gap="10px"
-              mt="30px"
-              align="flex-start"
-              borderRadius="10px"
-            >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                Variant List
-              </Text>
             </VStack>
 
             <VStack
