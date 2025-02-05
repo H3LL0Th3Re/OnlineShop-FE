@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { CategoryDisplay } from '@/types/categories';
-import { getAllCategory } from '@/services/category-services';
+import { getAllCategory } from '@/features/dashboard/services/category-services';
 
 export const useCategories = (token: string) => {
   return useQuery({
