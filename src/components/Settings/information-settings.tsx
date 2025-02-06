@@ -26,7 +26,8 @@ export default function Information() {
   const [slogan, setSlogan] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [storename, setStoreName] = useState<string>('');
-
+  const [banner_attachment, setBanner] = useState<File | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logo_attachment, setLogo] = useState<File | null>(null);
 
@@ -37,7 +38,7 @@ export default function Information() {
     error,
   } = useQuery<Store, Error>({
     queryKey: ['store'],
-    queryFn: () => currentStore(token!),
+    queryFn: () => currentStore(token || ''),
     enabled: !!token, // Only fetch if token exists
   });
   const mutation = useMutation({
@@ -56,7 +57,6 @@ export default function Information() {
       setSlogan(store.slogan || '');
       setDescription(store.description || '');
       setStoreName(store.name || '');
-      setLogoPreview(store.logo_attachment || null);
     }
   }, [store]);
   // useEffect(() => {
@@ -96,6 +96,17 @@ export default function Information() {
       setLogoPreview(URL.createObjectURL(file));
     }
   };
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Access the file input through the event's currentTarget
+
+    const file = e.target.files ? e.target.files[0] : null;
+
+    if (file) {
+      setBanner(file);
+      setBannerPreview(URL.createObjectURL(file));
+    }
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -123,7 +134,9 @@ export default function Information() {
     if (logo_attachment) {
       formData.append('logo_attachment', logo_attachment);
     }
-
+    if (banner_attachment) {
+      formData.append('banner_attachment', banner_attachment);
+    }
 
     mutation.mutate({ token, formData });
   };
@@ -188,74 +201,155 @@ export default function Information() {
         </Button>
       </Box>
 
-      <Box mt="10px">
-        <Text fontWeight="700" fontSize="17px" color="black" mb="10px">
-          Store Logo
-        </Text>
+      <HStack>
+        <Box mt="10px">
+          <Text fontWeight="700" fontSize="17px" color="black" mb="10px">
+            Store Logo
+          </Text>
 
-        <VStack w="100%" display="flex" alignItems="flex-start">
-          {/* <FileUploadRoot maxW="xs" alignItems="stretch" maxFiles={1}>
+          <VStack w="100%" display="flex" alignItems="flex-start">
+            {/* <FileUploadRoot maxW="xs" alignItems="stretch" maxFiles={1}>
             <FileUploadDropzone
               label="Upload Store Logo"
               onSelect={handleImageChange}
             />
             <FileUploadList />
           </FileUploadRoot> */}
-          <Box
-            width={'100px'}
-            height={'100px'}
-            borderRadius={'100%'}
-            position="relative"
-            cursor="pointer" // Makes it clear the area is clickable
-            onClick={() => document.getElementById('logo_attachment')?.click()} // Triggers file input click
-            _hover={{
-              opacity: 0.8, // Slightly dim the image on hover for effect
-              backgroundColor: 'rgba(0, 0, 0, 0.3)', // Optional background color on hover
-            }}
-          >
-            <Image
-              src={logoPreview ? logoPreview : store?.logo_attachment} // Fallback if no image
-              alt="Profile"
-              width="100%"
-              height="100%"
-              borderRadius="50%" // Ensures the image stays circular
-              objectFit="cover" // Keeps the image properly cropped inside the circle
-            />
-            <Input
-              type="file"
-              id="logo_attachment"
-              onChange={handleImageChange}
-              display="none" // Hides the default file input
-            />
             <Box
-              position="absolute"
-              top="50%"
-              left="50%"
-              transform="translate(-50%, -50%)"
-              color="white"
-              fontWeight="bold"
-              fontSize="14px"
-              opacity="0"
+              width={'100px'}
+              height={'100px'}
+              borderRadius={'100%'}
+              position="relative"
+              cursor="pointer" // Makes it clear the area is clickable
+              onClick={() =>
+                document.getElementById('logo_attachment')?.click()
+              } // Triggers file input click
               _hover={{
-                opacity: 1, // Make text visible on hover
+                opacity: 0.8, // Slightly dim the image on hover for effect
+                backgroundColor: 'rgba(0, 0, 0, 0.3)', // Optional background color on hover
               }}
-              transition="opacity 0.3s ease"
             >
-              Upload Photo
+              <Image
+                src={
+                  logoPreview ||
+                  store?.logo_attachment ||
+                  'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+                } // Fallback if no image
+                alt="Profile"
+                width="100%"
+                height="100%"
+                borderRadius="50%" // Ensures the image stays circular
+                objectFit="cover" // Keeps the image properly cropped inside the circle
+              />
+              <Input
+                type="file"
+                id="logo_attachment"
+                onChange={handleImageChange}
+                display="none" // Hides the default file input
+              />
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+                color="white"
+                fontWeight="bold"
+                fontSize="14px"
+                opacity="0"
+                _hover={{
+                  opacity: 1, // Make text visible on hover
+                }}
+                transition="opacity 0.3s ease"
+              >
+                Upload Photo
+              </Box>
             </Box>
-          </Box>
 
-          {error && (
-            <Box mt="10px" color="red.500">
-              <Text>{error}</Text>
-            </Box>
-          )}
-          <Text textAlign="left" w="50%" fontSize="13px">
-            Ukuran optimal 300 x 300 piksel dengan Besar file: Maksimum 10
-            Megabytes. Ekstensi file yang diperbolehkan: JPG, JPEG, PNG
+            {error && (
+              <Box mt="10px" color="red.500">
+                <Text>{error}</Text>
+              </Box>
+            )}
+            <Text textAlign="left" w="50%" fontSize="13px">
+              Ukuran optimal 300 x 300 piksel dengan Besar file: Maksimum 10
+              Megabytes. Ekstensi file yang diperbolehkan: JPG, JPEG, PNG
+            </Text>
+          </VStack>
+        </Box>
+        <Box mt="10px">
+          <Text fontWeight="700" fontSize="17px" color="black" mb="10px">
+            Store Banner
           </Text>
-        </VStack>
-      </Box>
+
+          <VStack w="100%" display="flex" alignItems="flex-start">
+            {/* <FileUploadRoot maxW="xs" alignItems="stretch" maxFiles={1}>
+            <FileUploadDropzone
+              label="Upload Store Logo"
+              onSelect={handleImageChange}
+            />
+            <FileUploadList />
+          </FileUploadRoot> */}
+            <Box
+              width={'400px'}
+              height={'350px'}
+              borderRadius={'100%'}
+              position="relative"
+              cursor="pointer" // Makes it clear the area is clickable
+              onClick={() =>
+                document.getElementById('banner_attachment')?.click()
+              } // Triggers file input click
+              _hover={{
+                opacity: 0.8, // Slightly dim the image on hover for effect
+                backgroundColor: 'rgba(0, 0, 0, 0.3)', // Optional background color on hover
+              }}
+            >
+              <Image
+                src={
+                  bannerPreview ||
+                  store?.banner_attachment ||
+                  'https://wallpapers.com/images/featured/blank-h9v8oske8iey8nkq.jpg'
+                } // Fallback if no image
+                alt="Profile"
+                width="100%"
+                height="100%"
+                objectFit="cover" // Keeps the image properly cropped inside the circle
+              />
+              <Input
+                type="file"
+                id="banner_attachment"
+                onChange={handleBannerChange}
+                display="none" // Hides the default file input
+              />
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+                color="white"
+                fontWeight="bold"
+                fontSize="14px"
+                opacity="0"
+                _hover={{
+                  opacity: 1, // Make text visible on hover
+                }}
+                transition="opacity 0.3s ease"
+              >
+                Upload Photo
+              </Box>
+            </Box>
+
+            {error && (
+              <Box mt="10px" color="red.500">
+                <Text>{error}</Text>
+              </Box>
+            )}
+            <Text textAlign="left" w="50%" fontSize="13px">
+              Ukuran optimal 300 x 300 piksel dengan Besar file: Maksimum 10
+              Megabytes. Ekstensi file yang diperbolehkan: JPG, JPEG, PNG
+            </Text>
+          </VStack>
+        </Box>
+      </HStack>
     </Box>
   );
 }

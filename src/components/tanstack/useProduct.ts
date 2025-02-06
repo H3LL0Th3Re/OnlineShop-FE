@@ -3,11 +3,26 @@ import {
   deleteProducts,
   getAllProducts,
   getStoreProduct,
+  getStorebyName,
 } from '@/features/dashboard/services/product';
 import { Product } from '@/types/product-type';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const useFetchProduct = (token: string) => {
+  return useQuery({
+    queryKey: ['Products'],
+    queryFn: () => getAllProducts(token),
+    enabled: !!token,
+  });
+};
+export const useStoreName = (username: string) => {
+  return useQuery({
+    queryKey: ['Products'],
+    queryFn: () => getStorebyName(username),
+    enabled: !!username,
+  });
+};
+export const useFetchStoreProduct = (token: string) => {
   return useQuery({
     queryKey: ['Products'],
     queryFn: () => getAllProducts(token),

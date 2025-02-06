@@ -1,15 +1,12 @@
 import { Box, Grid, Image, Text, VStack } from '@chakra-ui/react';
-import { Carousel } from 'react-responsive-carousel';
+
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import Navbar from './navbar';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/features/dashboard/get-categories';
-
-const backroundImages = [
-  'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548208/1_scleah.png',
-  'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548320/2_b4vc5m.png',
-  'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548327/3_xydogw.png',
-];
+import { useParams } from 'react-router';
+import { useStoreName } from '@/components/tanstack/useProduct';
+import { useFetchStoreName } from '@/components/tanstack/useStore';
 
 // const categories = [
 //   {
@@ -79,47 +76,55 @@ const backroundImages = [
 //   },
 // ];
 
-const recommendations = [
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-  {
-    name: 'Woman Clothes',
-    image:
-      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-    price: 'Rp 950.000',
-  },
-];
+// const recommendations = [
+//   {
+//     name: 'Woman Clothes',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: 'Rp 950.000',
+//   },
+//   {
+//     name: 'Woman Clothes',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: 'Rp 950.000',
+//   },
+//   {
+//     name: 'Woman Clothes',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: 'Rp 950.000',
+//   },
+//   {
+//     name: 'Woman Clothes',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: 'Rp 950.000',
+//   },
+//   {
+//     name: 'Woman Clothes',
+//     image:
+//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+//     price: 'Rp 950.000',
+//   },
+// ];
 
-export function Home() {
+export default function StoreProduct() {
+  const { username } = useParams();
   const useFetchCategory = () => {
     return useQuery({
       queryKey: ['Category'],
       queryFn: () => getCategories(),
     });
   };
+
   const { data, isLoading, error } = useFetchCategory();
+  const { data: products } = useStoreName(String(username));
+  const {
+    data: store,
+    isLoading: loadingStore,
+    error: storeError,
+  } = useFetchStoreName(String(username));
   // const { data, isLoading, isError, error } = useQuery<
   //   CategoryResponse | undefined,
   //   Error
@@ -142,10 +147,31 @@ export function Home() {
               w="full"
             >
               <Text fontWeight="700" fontSize="2xl" color="#2400FE">
-                Dashboard
+                {store?.name}
               </Text>
             </Box>
-            <Carousel
+            {loadingStore && (
+              <>
+                {' '}
+                <Text>Loading....</Text>{' '}
+              </>
+            )}
+            {storeError && (
+              <>
+                {' '}
+                <Text>{storeError.message}</Text>{' '}
+              </>
+            )}
+            <Image
+              width={'auto'}
+              height={'25%'}
+              src={
+                store?.banner_attachment
+                  ? store.banner_attachment
+                  : 'https://wallpapers.com/images/featured/blank-h9v8oske8iey8nkq.jpg'
+              }
+            />
+            {/* <Carousel
               useKeyboardArrows={true}
               showThumbs={false}
               showStatus={false}
@@ -155,7 +181,7 @@ export function Home() {
                   <img alt="sample_file" src={URL} key={index} width={'60%'} />
                 </div>
               ))}
-            </Carousel>
+            </Carousel> */}
           </VStack>
         </Box>
 
@@ -226,40 +252,52 @@ export function Home() {
             alignItems="center"
             w="full"
           >
-            Recommendations
+            Our Product
           </Text>
           <Box w="90%" mt="10px">
             <Grid templateColumns="repeat(4, 1fr)" gap="1" gapY="5" mb="15px">
-              {recommendations.map((recommendation, index) => (
-                <Box
-                  bgColor="White"
-                  borderRadius="5px"
-                  w="90%"
-                  h="250px"
-                  boxShadow="2px 2px 5px 1px grey"
-                >
-                  <VStack
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
+              {!products ? (
+                <>
+                  <Text textAlign={'center'}>No Product Available</Text>
+                </>
+              ) : (
+                products?.map((product) => (
+                  <Box
+                    bgColor="White"
+                    borderRadius="5px"
+                    w="90%"
+                    h="250px"
+                    boxShadow="2px 2px 5px 1px grey"
                   >
-                    <Image
-                      src={recommendation.image}
-                      borderTopRadius="5px"
-                      w="full"
-                      h="170px"
-                      objectFit="cover"
-                      alt={`User uploaded image ${index + 1}`}
-                    />
-                    <Text fontWeight="600" textAlign="center">
-                      {recommendation.name}
-                    </Text>
-                    <Text fontWeight="400" textAlign="center" fontSize="15px">
-                      {recommendation.price}
-                    </Text>
-                  </VStack>
-                </Box>
-              ))}
+                    <VStack
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      <Image
+                        src={
+                          typeof product.attachments === 'string'
+                            ? product.attachments
+                            : ''
+                        }
+                        alt={product.name}
+                        w={'28'}
+                      />
+                      <Text fontWeight="600" textAlign="center">
+                        {product.name}
+                      </Text>
+                      <Text fontWeight="400" textAlign="center" fontSize="15px">
+                        Rp.{' '}
+                        {product.variants?.[0].variantOptions[0].values?.[0]
+                          .price
+                          ? product.variants?.[0].variantOptions[0].values[0]
+                              .price
+                          : '-'}
+                      </Text>
+                    </VStack>
+                  </Box>
+                ))
+              )}
             </Grid>
           </Box>
         </VStack>

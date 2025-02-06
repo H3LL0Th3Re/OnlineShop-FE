@@ -13,7 +13,7 @@ import PrivateLayout from './layouts/PrivateLayout';
 import { LandingPage } from './pages/landing-page';
 import CheckoutProduct from './pages/checkout-product';
 import AddProduct from './components/Product/add-product';
-
+import StoreProduct from './pages/store-product';
 function App() {
   const router = createBrowserRouter([
     {
@@ -34,6 +34,11 @@ function App() {
     {
       path: '/home',
       Component: Home,
+      HydrateFallback: Fallback,
+    },
+    {
+      path: '/store/:username',
+      Component: StoreProduct,
       HydrateFallback: Fallback,
     },
     {
