@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Input,
-  Text,
-  Textarea,
-} from '@chakra-ui/react';
+import { Box, Button, Input, Text, Textarea } from '@chakra-ui/react';
 import {
   DialogActionTrigger,
   DialogBody,
@@ -25,7 +19,9 @@ import {
   TileLayer,
   useMapEvents,
 } from 'react-leaflet';
-import { LatLng } from "leaflet";
+import { LatLng } from 'leaflet';
+import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 interface DropdownOption {
   label: string;
@@ -33,19 +29,35 @@ interface DropdownOption {
   postCode?: string;
 }
 export default function DialogAddLocation() {
+  const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
   const [provinces, setProvinces] = useState<DropdownOption[]>([]);
   const [cities, setCities] = useState<DropdownOption[]>([]);
   const [districts, setDistricts] = useState<DropdownOption[]>([]);
   const [villages, setVillages] = useState<DropdownOption[]>([]);
   const [postalCodes, setPostalCodes] = useState<DropdownOption[]>([]);
-  const [position, setPosition] = useState<LatLng | null>(null);
+  const [locationName, setLocationName] = useState<string>('');
+  const queryClient = useQueryClient();
 
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedVillage, setSelectedVillage] = useState<string | null>(null);
-  const [selectedPostalCode, setselectedPostalCode] = useState<string | null>(null);
+  const [selectedPostalCode, setselectedPostalCode] = useState<string | null>(
+    null
+  );
   const { token } = useAuthStore();
+
+  const getProvinceLabel = (value: string | null) => {
+    const province = provinces.find((prov) => prov.value === value);
+    return province ? province.label : null;
+  };
+
+  const getLabelByValue = (options: DropdownOption[], value: string | null) => {
+    const option = options.find((opt) => opt.value === value);
+    return option ? option.label : null;
+  };
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -193,7 +205,6 @@ export default function DialogAddLocation() {
     }
   }, [selectedDistrict, token]);
 
-
   function LocationMarker() {
     const map = useMapEvents({
       click() {
@@ -215,6 +226,50 @@ export default function DialogAddLocation() {
       </Marker>
     );
   }
+
+  const addLocation = async (data: any) => {
+    const response = await fetch('http://localhost:3000/api/locations/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+  
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to add location');
+    }
+    return await response.json();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !selectedProvince ||
+      !selectedCity ||
+      !selectedDistrict ||
+      !selectedVillage ||
+      !selectedPostalCode
+    ) {
+      console.log('Please fill all required fields');
+      return;
+    }
+    const data = {
+      locationName,
+      selectedProvince: getLabelByValue(provinces, selectedProvince),
+      selectedCity: getLabelByValue(cities, selectedCity),
+      selectedDistrict: getLabelByValue(districts, selectedDistrict),
+      selectedVillage: getLabelByValue(villages, selectedVillage),
+      position: { lat: position?.lat, lng: position?.lng },
+      selectedPostalCode,
+    };
+    console.log(data);
+    
+  };
+
   return (
     <>
       <Box>
@@ -231,7 +286,7 @@ export default function DialogAddLocation() {
               Add Location
             </Button>
           </DialogTrigger>
-          <DialogContent >
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>Add New Location</DialogTitle>
             </DialogHeader>
@@ -239,7 +294,11 @@ export default function DialogAddLocation() {
               <Text fontWeight="600" fontSize="15px" mb="7px">
                 Location Name*
               </Text>
-              <Input mb="7px" />
+              <Input
+                mb="7px"
+                value={locationName}
+                onChange={(e) => setLocationName(e.target.value)}
+              />
 
               <Text fontWeight="600" fontSize="15px" mb="7px">
                 Provinsi*
@@ -247,8 +306,7 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1  w-full rounded-sm shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                style={{ height: '40px',padding: '3px' }}
-                value={selectedProvince || ''}
+                style={{ height: '40px', padding: '3px' }}
                 onChange={(e) => {
                   setSelectedProvince(e.target.value);
 
@@ -283,9 +341,10 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                style={{ height: '40px',padding: '3px' }}
+                style={{ height: '40px', padding: '3px' }}
                 value={selectedCity || ''}
-                onChange={(e) => {setSelectedCity(e.target.value)
+                onChange={(e) => {
+                  setSelectedCity(e.target.value);
                   // Reset nilai terkait
                   setSelectedDistrict(null);
                   setSelectedVillage(null);
@@ -316,12 +375,13 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                style={{ height: '40px',padding: '3px' }}
+                style={{ height: '40px', padding: '3px' }}
                 value={selectedDistrict || ''}
-                onChange={(e) => {setSelectedDistrict(e.target.value)
+                onChange={(e) => {
+                  setSelectedDistrict(e.target.value);
                   setSelectedVillage(null);
                   setselectedPostalCode(null);
-                  
+
                   setVillages([]);
                   setPostalCodes([]);
                 }}
@@ -345,9 +405,10 @@ export default function DialogAddLocation() {
               {/* menu input kota/kecamatan */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                style={{ height: '40px',padding: '3px' }}
+                style={{ height: '40px', padding: '3px' }}
                 value={selectedVillage || ''}
-                onChange={(e) => {setSelectedVillage(e.target.value)
+                onChange={(e) => {
+                  setSelectedVillage(e.target.value);
                   setselectedPostalCode(null);
                   setPostalCodes([]);
                 }}
@@ -371,7 +432,7 @@ export default function DialogAddLocation() {
               {/* menu input Kode pos */}
               <select
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                style={{ height: '40px',padding: '3px' }}
+                style={{ height: '40px', padding: '3px' }}
                 value={selectedPostalCode || ''}
                 onChange={(e) => setselectedPostalCode(e.target.value)}
                 disabled={!selectedVillage}
@@ -396,7 +457,10 @@ export default function DialogAddLocation() {
                 Pinpoint Lokasi*
               </Text>
 
-              <Box borderRadius="7px" style={{ height: '100px',display: 'flex'}}>
+              <Box
+                borderRadius="7px"
+                style={{ height: '100px', display: 'flex' }}
+              >
                 <MapContainer
                   center={{ lat: 51.505, lng: -0.09 }}
                   zoom={15}
@@ -413,12 +477,24 @@ export default function DialogAddLocation() {
               <Text fontWeight="400" fontSize="13px" mb="7px">
                 Tandai lokasi untuk mempermudah pemintaan pickup kurir{' '}
               </Text>
+              {position && (
+                <div>
+                  <Text fontWeight="400" fontSize="13px" mb="7px">
+                    Latitude: {position.lat} | Longitude: {position.lng}
+                  </Text>
+                </div>
+              )}
             </DialogBody>
             <DialogFooter>
               <DialogActionTrigger asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogActionTrigger>
-              <Button bgColor="#2400FE" color="white">
+              <Button
+                bgColor="#2400FE"
+                color="white"
+                onClick={handleSubmit}
+
+              >
                 Save
               </Button>
             </DialogFooter>

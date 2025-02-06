@@ -19,6 +19,8 @@ export interface Variant {
 export interface VariantOption {
   name: string;
   values: VariantOptionValue[];
+  variantId: string;
+
 }
 
 export interface VariantOptionValue {

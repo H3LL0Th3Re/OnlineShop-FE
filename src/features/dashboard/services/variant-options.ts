@@ -1,13 +1,14 @@
 import axios from 'axios';
-import { apiURL } from '@/utils/api-url'; // Adjust the path as necessary
+import { apiURL } from '@/utils/api-url';
+import { VariantOption } from '@/types/product-type';
 
 export const createVariantOptions = async (
   token: string,
-  variantOptionsData: { name: string; variantId: string }
+  variantOptionsData: VariantOption
 ) => {
   try {
     const response = await axios.post(
-      `${apiURL}/variant-options/create`, // Adjust the endpoint as necessary
+      `${apiURL}/variant-options/create`,
       variantOptionsData,
       {
         headers: {
@@ -16,7 +17,7 @@ export const createVariantOptions = async (
         },
       }
     );
-    return response.data.variant_options; // Return the created variant options
+    return response.data.variant_options;
   } catch (error) {
     let errorMessage = 'Failed to create variant options';
     if (axios.isAxiosError(error) && error.response) {
