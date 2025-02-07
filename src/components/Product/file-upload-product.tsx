@@ -1,62 +1,107 @@
 import { Box, Icon, Image, Input } from '@chakra-ui/react';
 import { useState } from 'react';
 import { FaRegFileImage } from 'react-icons/fa';
+import { CloseButton } from '../ui/close-button';
 
 interface FileUploadProductProps {
-  onFileSelect: (file: File | null) => void;
+  onFileSelect: (files: File[]) => void;
 }
 
 export const FileUploadProduct: React.FC<FileUploadProductProps> = ({
   onFileSelect,
 }) => {
-  const [preview, setPreview] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const [inputVisible, setInputVisible] = useState(true);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      onFileSelect(file);
-      setPreview(URL.createObjectURL(file));
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+      const newPreviews = selectedFiles.map((file) =>
+        URL.createObjectURL(file)
+      );
+      setPreviews((prevPreviews) => [...prevPreviews, ...newPreviews]);
+      onFileSelect([...files, ...selectedFiles]);
+      setInputVisible(false);
     }
   };
+
+  const removePreview = (index: number) => {
+    const updatedPreviews = previews.filter((_, i) => i !== index);
+    const updatedFiles = files.filter((_, i) => i !== index);
+    setPreviews(updatedPreviews);
+    setFiles(updatedFiles);
+    onFileSelect(updatedFiles);
+
+    if (updatedPreviews.length === 0) {
+      setInputVisible(true);
+    }
+  };
+
   return (
     <Box>
-      {/* Button untuk membuka input file */}
-      <label htmlFor="file-upload">
-        {/* Hidden file input */}
-        <Box
-          h="200px"
-          w="200px"
-          borderWidth="3px"
-          borderRadius="10px"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          cursor="pointer"
-        >
-          <Icon size={'xl'}>
-            <FaRegFileImage />
-          </Icon>
-          <Input
+      {inputVisible && (
+        <label htmlFor="file-upload">
+          <Box
             h="200px"
             w="200px"
-            type="file"
-            id="file-upload"
-            onChange={handleFileChange}
-            hidden
-            accept="image/*"
-          />
-          {preview && (
+            borderWidth="3px"
+            borderRadius="10px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            cursor="pointer"
+            borderColor="gray.300"
+            bg="gray.100"
+          >
+            <Icon size={'xl'}>
+              <FaRegFileImage />
+            </Icon>
+            <Input
+              h="200px"
+              w="200px"
+              type="file"
+              id="file-upload"
+              onChange={handleFileChange}
+              hidden
+              accept="image/*"
+              multiple
+            />
+          </Box>
+        </label>
+      )}
+      <Box display="flex" flexWrap="wrap" mt={2}>
+        {previews.map((preview, index) => (
+          <Box
+            key={index}
+            h="200px"
+            w="200px"
+            borderWidth="1px"
+            borderRadius="10px"
+            overflow="hidden"
+            borderColor="gray.300"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            position="relative"
+            m={1}
+          >
             <Image
               src={preview}
-              alt="Preview"
-              boxSize="200px"
+              alt={`Preview ${index + 1}`}
+              boxSize="100%"
               objectFit="cover"
-              borderRadius="10px"
-              mb={2}
             />
-          )}
-        </Box>
-      </label>
+            <CloseButton
+              position="absolute"
+              top={1}
+              right={1}
+              onClick={() => removePreview(index)}
+            />
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };

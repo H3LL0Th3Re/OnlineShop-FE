@@ -94,9 +94,10 @@ export const createProducts = async (data: Product, token: string) => {
     if (data.subcategoryIds && data.subcategoryIds.length > 0) {
       formData.append('subcategoryIds', JSON.stringify(data.subcategoryIds));
     }
-
     if (data.attachments) {
-      formData.append('attachments', data.attachments);
+      data.attachments.forEach((attachment) => {
+        formData.append('attachments', attachment);
+      });
     }
 
     const response = await axios.post(
