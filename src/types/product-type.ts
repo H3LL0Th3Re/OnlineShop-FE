@@ -23,7 +23,7 @@ export interface VariantOption {
 }
 
 export interface VariantOptionValue {
-  id: string;
+  id?: string;
   sku: string;
   weight: number;
   stock: number;
