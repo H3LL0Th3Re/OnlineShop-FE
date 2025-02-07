@@ -22,12 +22,14 @@ import { Variant } from '@/types/product-type';
 import Swal from 'sweetalert2';
 import DropdownCategory from './dropdown-category';
 import { useCreateVariantOptions } from '../tanstack/useVariantOptions';
+import { useCreateVariantOptionValue } from '../tanstack/useVariantOptionValues';
 
 function AddProduct() {
   const { token } = useAuthStore();
   const createProductMutation = useCreateProduct(token || '');
   const createVariantMutation = useCreateVariant(token || '');
   const createVariantOptionMutation = useCreateVariantOptions();
+  const createVariantOptionValueMutation = useCreateVariantOptionValue();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -44,6 +46,9 @@ function AddProduct() {
     { name: string; variantId: string }[]
   >([]);
   const [showVariantList, setShowVariantList] = useState(false);
+  const [variantOptionValues, setVariantOptionValues] = useState<
+    { sku: string; price: number; stock: number; weight: number }[]
+  >([]);
 
   const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
     setFormData({
@@ -142,6 +147,35 @@ function AddProduct() {
                     variantId: variantResponse.variant.id,
                   },
                 });
+
+                // Create variant option values
+                for (const value of variantOptionValues) {
+                  console.log('Sending variant option value:', value);
+                  await createVariantOptionValueMutation
+                    .mutateAsync({
+                      token,
+                      variantOptionValueData: {
+                        sku: value.sku,
+                        price: value.price,
+                        stock: value.stock,
+                        weight: value.weight,
+                        variant_optionsId: variantResponse.variant.id,
+                        is_active: true,
+                      },
+                    })
+                    .then((response) => {
+                      console.log(
+                        'Response from createVariantOptionValue:',
+                        response
+                      );
+                    })
+                    .catch((error) => {
+                      console.error(
+                        'Error creating variant option value:',
+                        error
+                      );
+                    });
+                }
               }
             }
           } catch (error) {
@@ -169,6 +203,7 @@ function AddProduct() {
       });
       setAttachments([]);
       setVariants([]);
+      setVariantOptionValues([]);
     } catch (error) {
       console.error('Error creating product:', error);
       Swal.fire({
@@ -349,6 +384,7 @@ function AddProduct() {
                         const newOption = {
                           name: variantOptionInput,
                           variantId: selectedVariant.toString(),
+                          values: [],
                         };
 
                         const updatedVariants = variants.map(
@@ -636,6 +672,61 @@ function AddProduct() {
                   </VStack>
                 </HStack>
               </VStack>
+            </VStack>
+
+            <VStack
+              bgColor="white"
+              w={'full'}
+              p="7"
+              gap="10px"
+              mt="30px"
+              align="flex-start"
+              borderRadius="10px"
+            >
+              <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                Variant Option Values
+              </Text>
+              <HStack>
+                <Input
+                  placeholder="SKU"
+                  onChange={(e) =>
+                    setVariantOptionValues((prev) => [
+                      ...prev,
+                      { ...prev[0], sku: e.target.value },
+                    ])
+                  }
+                />
+                <Input
+                  placeholder="Price"
+                  type="number"
+                  onChange={(e) =>
+                    setVariantOptionValues((prev) => [
+                      ...prev,
+                      { ...prev[0], price: Number(e.target.value) },
+                    ])
+                  }
+                />
+                <Input
+                  placeholder="Stock"
+                  type="number"
+                  onChange={(e) =>
+                    setVariantOptionValues((prev) => [
+                      ...prev,
+                      { ...prev[0], stock: Number(e.target.value) },
+                    ])
+                  }
+                />
+                <Input
+                  placeholder="Weight"
+                  type="number"
+                  onChange={(e) =>
+                    setVariantOptionValues((prev) => [
+                      ...prev,
+                      { ...prev[0], weight: Number(e.target.value) },
+                    ])
+                  }
+                />
+              </HStack>
             </VStack>
 
             <VStack
