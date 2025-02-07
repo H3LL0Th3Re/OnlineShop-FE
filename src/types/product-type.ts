@@ -4,7 +4,7 @@ export interface Product {
   description: string;
   categoryIds: string[];
   subcategoryIds: string[];
-  attachments: File | null;
+  attachments: File[] | null;
   variants?: Variant[];
   is_active?: boolean;
 }
@@ -19,6 +19,7 @@ export interface Variant {
 export interface VariantOption {
   name: string;
   variantId: string;
+  variantOptionValues: VariantOptionValue[];
 }
 
 export interface VariantOptionValue {

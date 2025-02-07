@@ -197,8 +197,11 @@ const ListProduct = () => {
                     <Box bg={'black'} rounded="md">
                       <Image
                         src={
-                          typeof product.attachments === 'string'
-                            ? product.attachments
+                          Array.isArray(product.attachments) &&
+                          product.attachments.length > 0
+                            ? typeof product.attachments[0] === 'string'
+                              ? product.attachments[0]
+                              : URL.createObjectURL(product.attachments[0])
                             : ''
                         }
                         alt={product.name}
@@ -363,8 +366,11 @@ const ListProduct = () => {
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={
-                            typeof product.attachments === 'string'
-                              ? product.attachments
+                            Array.isArray(product.attachments) &&
+                            product.attachments.length > 0
+                              ? typeof product.attachments[0] === 'string'
+                                ? product.attachments[0]
+                                : URL.createObjectURL(product.attachments[0])
                               : ''
                           }
                           alt={product.name}
@@ -489,8 +495,11 @@ const ListProduct = () => {
                       <Box bg={'black'} rounded="md">
                         <Image
                           src={
-                            typeof product.attachments === 'string'
-                              ? product.attachments
+                            Array.isArray(product.attachments) &&
+                            product.attachments.length > 0
+                              ? typeof product.attachments[0] === 'string'
+                                ? product.attachments[0]
+                                : URL.createObjectURL(product.attachments[0])
                               : ''
                           }
                           alt={product.name}

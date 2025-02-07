@@ -36,13 +36,14 @@ function AddProduct() {
     subcategoryIds: [] as string[],
   });
 
-  const [attachments, setAttachments] = useState<File | null>(null);
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
   const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
   const [variantOptionInput, setVariantOptionInput] = useState('');
   const [variantOptions, setVariantOptions] = useState<
     { name: string; variantId: string }[]
   >([]);
+  const [showVariantList, setShowVariantList] = useState(false);
 
   const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
     setFormData({
@@ -58,8 +59,8 @@ function AddProduct() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleFileSelect = (file: File | null) => {
-    setAttachments(file);
+  const handleFileSelect = (files: File[]) => {
+    setAttachments((prev) => [...prev, ...files]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -75,7 +76,7 @@ function AddProduct() {
         return;
       }
 
-      if (!attachments) {
+      if (attachments.length === 0) {
         Swal.fire({
           icon: 'warning',
           title: 'Perhatian',
@@ -166,7 +167,7 @@ function AddProduct() {
         categoryIds: [],
         subcategoryIds: [],
       });
-      setAttachments(null);
+      setAttachments([]);
       setVariants([]);
     } catch (error) {
       console.error('Error creating product:', error);
@@ -251,47 +252,19 @@ function AddProduct() {
               </Text>
               <VStack gap="5px" w="full" align="center">
                 <HStack align="center" gap="50px">
-                  <Center
-                    bg="bg.emphasized"
-                    h="200px"
-                    w="200px"
-                    borderWidth="3px"
-                    borderRadius="10px"
-                    style={{ borderStyle: 'dashed' }}
-                  >
-                    <FileUploadProduct onFileSelect={handleFileSelect} />
-                  </Center>
-
-                  <Center
-                    bg="bg.emphasized"
-                    h="200px"
-                    w="200px"
-                    borderWidth="3px"
-                    borderRadius="10px"
-                    style={{ borderStyle: 'dashed' }}
-                  >
-                    <FileUploadProduct onFileSelect={handleFileSelect} />
-                  </Center>
-                  <Center
-                    bg="bg.emphasized"
-                    h="200px"
-                    w="200px"
-                    borderWidth="3px"
-                    borderRadius="10px"
-                    style={{ borderStyle: 'dashed' }}
-                  >
-                    <FileUploadProduct onFileSelect={handleFileSelect} />
-                  </Center>
-                  <Center
-                    bg="bg.emphasized"
-                    h="200px"
-                    w="200px"
-                    borderWidth="3px"
-                    borderRadius="10px"
-                    style={{ borderStyle: 'dashed' }}
-                  >
-                    <FileUploadProduct onFileSelect={handleFileSelect} />
-                  </Center>
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <Center
+                      key={index}
+                      bg="bg.emphasized"
+                      h="200px"
+                      w="200px"
+                      borderWidth="3px"
+                      borderRadius="10px"
+                      style={{ borderStyle: 'dashed' }}
+                    >
+                      <FileUploadProduct onFileSelect={handleFileSelect} />
+                    </Center>
+                  ))}
                 </HStack>
               </VStack>
             </VStack>
@@ -373,18 +346,14 @@ function AddProduct() {
                           return;
                         }
 
+                        const newOption = {
+                          name: variantOptionInput,
+                          variantId: selectedVariant.toString(),
+                        };
+
                         const updatedVariants = variants.map(
                           (variant, variantIndex) => {
                             if (selectedVariant === variantIndex) {
-                              const newOption = {
-                                name: variantOptionInput,
-                                variantId: variantIndex.toString(),
-                              };
-                              setVariantOptions([...variantOptions, newOption]);
-                              console.log('Variant Options Data:', [
-                                ...variantOptions,
-                                newOption,
-                              ]);
                               return {
                                 ...variant,
                                 variantOptions: [
@@ -396,115 +365,140 @@ function AddProduct() {
                             return variant;
                           }
                         );
+
                         setVariants(updatedVariants);
+                        setVariantOptions([...variantOptions, newOption]);
                         setVariantOptionInput('');
+                        setShowVariantList(true);
                       }}
                     >
                       Add Option
                     </Button>
                   </HStack>
-                  <VStack spaceY={2} align="flex-start">
-                    {variantOptions.map((option, index) => (
-                      <HStack key={index} justify="space-between" w="full">
-                        <Text>{option.name}</Text>
-                        <Button
-                          onClick={() => {
-                            // Hapus opsi varian dari state
-                            const updatedOptions = variantOptions.filter(
-                              (_, i) => i !== index
-                            );
-                            setVariantOptions(updatedOptions);
-                            // Juga hapus dari varian yang sesuai
-                            const updatedVariants = variants.map(
-                              (variant, variantIndex) => {
-                                if (selectedVariant === variantIndex) {
-                                  return {
-                                    ...variant,
-                                    variantOptions:
-                                      variant.variantOptions.filter(
-                                        (_, i) => i !== index
-                                      ),
-                                  };
-                                }
-                                return variant;
-                              }
-                            );
-                            setVariants(updatedVariants);
-                          }}
+                  {variantOptions.length > 0 && (
+                    <Flex gap={2} justify={'center'} align={'center'}>
+                      {variantOptions.map((option, index) => (
+                        <HStack
+                          key={index}
+                          justify="space-between"
+                          rounded={'md'}
+                          pl={2}
+                          bg={'blackAlpha.300'}
+                          w="full"
                         >
-                          ✖
-                        </Button>
-                      </HStack>
-                    ))}
-                  </VStack>
+                          <Text>{option.name}</Text>
+                          <Button
+                            color={'black'}
+                            bg={'blackAlpha.300'}
+                            size={'xs'}
+                            fontSize={'medium'}
+                            onClick={() => {
+                              // Hapus opsi varian dari state
+                              const updatedOptions = variantOptions.filter(
+                                (_, i) => i !== index
+                              );
+                              setVariantOptions(updatedOptions);
+                              // Juga hapus dari varian yang sesuai
+                              const updatedVariants = variants.map(
+                                (variant, variantIndex) => {
+                                  if (selectedVariant === variantIndex) {
+                                    return {
+                                      ...variant,
+                                      variantOptions:
+                                        variant.variantOptions.filter(
+                                          (_, i) => i !== index
+                                        ),
+                                    };
+                                  }
+                                  return variant;
+                                }
+                              );
+                              setVariants(updatedVariants);
+                            }}
+                          >
+                            x
+                          </Button>
+                        </HStack>
+                      ))}
+                    </Flex>
+                  )}
                 </VStack>
               )}
 
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                Variant List
-              </Text>
-              <Flex
-                bgColor="white"
-                w={'full'}
-                gap="10px"
-                mt="20px"
-                borderRadius="10px"
-                align="flex-start"
-              >
-                <Box
-                  w={'full'}
-                  p={4}
-                  spaceY={5}
-                  borderWidth="1px"
-                  borderRadius="md"
-                >
-                  <HStack justify="space-between" w="100%">
-                    <Text fontWeight="600" fontSize="15px"></Text>
-                  </HStack>
-                  <HStack w={'full'} gap={5}>
-                    <Flex w={'40%'} direction={'column'}>
-                      <Box w={'96'}>
-                        <Text fontWeight="600" fontSize="15px">
-                          Price *
-                        </Text>
+              {showVariantList && variants.length > 0 && (
+                <>
+                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                    Variant List
+                  </Text>
+                  <Flex
+                    bgColor="white"
+                    w={'full'}
+                    gap="10px"
+                    borderRadius="10px"
+                    align="flex-start"
+                  >
+                    {variants.map((variant, variantIndex) => (
+                      <Box key={variantIndex} w={'full'} spaceY={5}>
+                        {variant.variantOptions.map((option, optionIndex) => (
+                          <Box
+                            key={optionIndex}
+                            borderWidth="1px"
+                            borderRadius="md"
+                            p={4}
+                            spaceY={2}
+                          >
+                            <VStack align="flex-start">
+                              <Text fontWeight={'bold'}>{option.name}</Text>
+                            </VStack>
+                            <HStack w={'full'} gap={5}>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Box w={'96'}>
+                                  <Text fontWeight="600" fontSize="15px">
+                                    Price *
+                                  </Text>
+                                </Box>
+                                <Flex>
+                                  <InputAddon>Rp</InputAddon>
+                                  <Input placeholder="Enter price" />
+                                </Flex>
+                              </Flex>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Box w={'96'}>
+                                  <Text fontWeight="600" fontSize="15px">
+                                    SKU (Stock Keeping Unit) *
+                                  </Text>
+                                </Box>
+                                <Input placeholder="Enter SKU" />
+                              </Flex>
+                            </HStack>
+                            <HStack w={'full'} gap={5}>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Box w={'72'}>
+                                  <Text fontWeight="600" fontSize="15px">
+                                    Product Stock *
+                                  </Text>
+                                </Box>
+                                <Input placeholder="Enter stock" />
+                              </Flex>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Box w={'96'}>
+                                  <Text fontWeight="600" fontSize="15px">
+                                    Product Weight *
+                                  </Text>
+                                </Box>
+                                <Flex>
+                                  <Input placeholder="Enter weight" />
+                                  <InputAddon>Gram</InputAddon>
+                                </Flex>
+                              </Flex>
+                            </HStack>
+                          </Box>
+                        ))}
                       </Box>
-                      <Flex>
-                        <InputAddon>Rp</InputAddon>
-                        <Input placeholder="Enter price" />
-                      </Flex>
-                    </Flex>
-                    <Flex w={'40%'} direction={'column'}>
-                      <Box w={'96'}>
-                        <Text fontWeight="600" fontSize="15px">
-                          SKU (Stock Keeping Unit) *
-                        </Text>
-                      </Box>
-                      <Input placeholder="Enter SKU" />
-                    </Flex>
-                  </HStack>
-                  <HStack w={'full'} gap={5}>
-                    <Flex w={'40%'} direction={'column'}>
-                      <Box w={'72'}>
-                        <Text fontWeight="600" fontSize="15px">
-                          Product Stock *
-                        </Text>
-                      </Box>
-                      <Input placeholder="Enter stock" />
-                    </Flex>
-                    <Flex w={'40%'} direction={'column'}>
-                      <Box w={'96'}>
-                        <Text fontWeight="600" fontSize="15px">
-                          Product Weight *
-                        </Text>
-                      </Box>
-                      <Flex>
-                        <Input placeholder="Enter weight" />
-                        <InputAddon>Gram</InputAddon>
-                      </Flex>
-                    </Flex>
-                  </HStack>
-                </Box>
-              </Flex>
+                    ))}
+                  </Flex>
+                </>
+              )}
             </VStack>
 
             <VStack
