@@ -5,5 +5,5 @@ export interface Store {
   description: string;
   domain: string;
   logo_attachment: string;
-  banner_attachement: string;
+  banner_attachment: string;
 }

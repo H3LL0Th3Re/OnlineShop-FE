@@ -1,5 +1,5 @@
 import Information from '@/components/Settings/information-settings';
-import Location from '@/components/Settings/location-settings';
+import LocationSetting from '@/components/Settings/location-settings';
 import TemplateMessages from '@/components/Settings/template-messages-settings';
 import { Box, Tabs, Text, VStack } from '@chakra-ui/react';
 
@@ -21,7 +21,7 @@ export default function Settings() {
             <Information />
           </Tabs.Content>
           <Tabs.Content value="location">
-            <Location />
+            <LocationSetting/>
           </Tabs.Content>
           <Tabs.Content value="messages">
             <TemplateMessages />

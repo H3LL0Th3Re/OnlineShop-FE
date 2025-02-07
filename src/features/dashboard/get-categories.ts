@@ -1,11 +1,11 @@
 import axios from 'axios';
 import { apiURL } from '@/utils/api-url';
-import { Categories } from '@/types/categories';
-export const getCategories = async (token: string): Promise<Categories[]> => {
+import { Category } from '@/types/categories';
+export const getCategories = async (): Promise<Category[]> => {
   try {
     const response = await axios.get(apiURL + '/category/', {
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
     });
     return response.data.categories;
