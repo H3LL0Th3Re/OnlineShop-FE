@@ -31,6 +31,9 @@ import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from '../ui/menu';
 import { useAuthStore } from '@/hooks/authstore';
 import { useFetchProductStore } from '../tanstack/useProduct';
 import { DialogDeleteProduct } from './Dialog/dialog-delete-product';
+import { useToggleActiveProduct } from '../tanstack/useToggleActiveProduct';
+import { useDeleteProduct } from '../tanstack/useProduct';
+import { useState } from 'react';
 const categories = createListCollection({
   items: [
     { label: 'All', value: 'all' },
@@ -57,11 +60,68 @@ const ListProduct = () => {
     isLoading,
     error,
   } = useFetchProductStore(token || '');
+  const { mutate: toggleActive } = useToggleActiveProduct();
+  const { mutate: deleteProducts } = useDeleteProduct(token || '');
+  const [checkedProducts, setCheckedProducts] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
   console.log('Product Data:', products);
+
+  const handleToggleActive = (productId: string) => {
+    if (token) {
+      toggleActive({ id: productId, token });
+    }
+  };
+
+  const handleToggleAll = (isChecked: boolean) => {
+    if (isChecked) {
+      setCheckedProducts(
+        products?.map((product) => product.id!).filter(Boolean) || []
+      ); // Check all products
+    } else {
+      setCheckedProducts([]); // Uncheck all products
+    }
+  };
+
+  const handleToggleProduct = (productId: string) => {
+    setCheckedProducts(
+      (prev) =>
+        prev.includes(productId)
+          ? prev.filter((id) => id !== productId) // Uncheck the product
+          : [...prev, productId] // Check the product
+    );
+  };
+
+  const handleDeleteCheckedProducts = () => {
+    checkedProducts.forEach((productId) => {
+      deleteProducts(productId, {
+        onSuccess: () => {
+          setCheckedProducts([]);
+        },
+      });
+    });
+  };
+
+  const handleToggleActiveCheckedProducts = () => {
+    checkedProducts.forEach((productId) => {
+      if (products && products.find((p) => p.id === productId)) {
+        toggleActive({ id: productId, token: token || '' });
+      }
+    });
+    setCheckedProducts([]); // Clear checked products after toggling
+  };
+
+  const filteredProducts = products?.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.variants?.[0]?.Variant_options?.[0]?.Variant_option_values?.[0]?.sku
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Box>
@@ -104,8 +164,8 @@ const ListProduct = () => {
             <Input
               placeholder="Cari Pesanan"
               w={'50%'}
-              // value={searchQuery}
-              // onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
             <SelectRoot
               multiple
@@ -124,17 +184,7 @@ const ListProduct = () => {
                 ))}
               </SelectContent>
             </SelectRoot>
-            <SelectRoot
-              collection={sortbyOptions}
-              size="sm"
-              width="320px"
-              // onValueChange={(details) => {
-              //   const selectedSortBy = Array.isArray(details.value)
-              //     ? details.value[0]
-              //     : details.value;
-              //   setSortBy(selectedSortBy);
-              // }}
-            >
+            <SelectRoot collection={sortbyOptions} size="sm" width="320px">
               <SelectTrigger>
                 <SelectValueText placeholder="Sort By" />
               </SelectTrigger>
@@ -162,6 +212,9 @@ const ListProduct = () => {
                     rounded={'full'}
                     borderWidth={'1px'}
                     borderColor={'black'}
+                    onClick={handleDeleteCheckedProducts}
+                    colorScheme="red"
+                    disabled={checkedProducts.length === 0}
                   >
                     <Icon size={'lg'} color={'black'}>
                       <MdOutlineDelete />
@@ -175,18 +228,49 @@ const ListProduct = () => {
                       bg={'white'}
                       color={'black'}
                       h={9}
+                      onClick={handleToggleActiveCheckedProducts}
+                      disabled={
+                        checkedProducts.length === 0 ||
+                        (checkedProducts.length > 1 &&
+                          checkedProducts.some(
+                            (id) =>
+                              products?.find((p) => p.id === id)?.is_active
+                          ) &&
+                          checkedProducts.some(
+                            (id) =>
+                              !products?.find((p) => p.id === id)?.is_active
+                          ))
+                      }
                     >
-                      Nonaktifkan Produk
+                      {checkedProducts.length === 0
+                        ? 'Nonaktifkan Produk'
+                        : checkedProducts.every(
+                              (id) =>
+                                products?.find((p) => p.id === id)?.is_active
+                            )
+                          ? 'Nonaktifkan Produk'
+                          : checkedProducts.every(
+                                (id) =>
+                                  !products?.find((p) => p.id === id)?.is_active
+                              )
+                            ? 'Aktifkan Produk'
+                            : 'Nonaktifkan Produk'}
                     </Button>
                   </Box>
                   <Flex gap={2}>
-                    Pilih Semua
-                    <Checkbox />
+                    <Checkbox
+                      checked={checkedProducts.length === products?.length} // Check if all products are checked
+                      onChange={(e) =>
+                        handleToggleAll((e.target as HTMLInputElement).checked)
+                      } // Handle master checkbox
+                    >
+                      Pilih Semua
+                    </Checkbox>
                   </Flex>
                 </Flex>
               </Flex>
               <Stack gap="4">
-                {products?.map((product) => (
+                {filteredProducts?.map((product) => (
                   <Flex
                     key={product.id}
                     p="4"
@@ -210,26 +294,32 @@ const ListProduct = () => {
                     </Box>
                     <Flex direction={'column'} pl={5} w={'full'}>
                       <Box>
-                        <Text fontWeight="bold">
-                          {product.name} -{' '}
-                          {product.variants?.[0]?.variantOptions?.[0]?.name}
-                        </Text>
-                        {/* <Text fontSize="sm" color="gray.600">
-                          Rp
-                            product.variants[0]?.Variant_options[0]
-                              ?.Variant_option_values[0]?.price
-                          }{' '}
+                        <Flex justify={'space-between'}>
+                          <Text fontWeight="bold">
+                            {product.name} -{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.name || 'No Variant'}
+                          </Text>
+                          <Checkbox
+                            checked={checkedProducts.includes(product.id || '')} // Check if this product is checked
+                            onChange={() =>
+                              handleToggleProduct(product.id || '')
+                            } // Handle individual checkbox
+                          />
+                        </Flex>
+                        <Text fontSize="sm" color="gray.600">
+                          Rp{' '}
+                          {product.variants?.[0]?.Variant_options?.[0]
+                            ?.Variant_option_values?.[0]?.price ||
+                            product.price}{' '}
                           - Stock:{' '}
-                          {
-                            product.variants[0]?.Variant_options[0]
-                              ?.Variant_option_values[0]?.stock
-                          }{' '}
+                          {product.variants?.[0]?.Variant_options?.[0]
+                            ?.Variant_option_values?.[0]?.stock ||
+                            product.stock}{' '}
                           - SKU:{' '}
-                          {
-                            product.variants[0]?.Variant_options[0]
-                              ?.Variant_option_values[0]?.sku
-                          }
-                        </Text> */}
+                          {product.variants?.[0]?.Variant_options?.[0]
+                            ?.Variant_option_values?.[0]?.sku || product.sku}
+                        </Text>
                       </Box>
                       <Flex
                         align="center"
@@ -305,7 +395,11 @@ const ListProduct = () => {
                             </MenuContent>
                           </MenuRoot>
                         </HStack>
-                        <Switch colorScheme="blue" defaultChecked />
+                        <Switch
+                          colorScheme="blue"
+                          checked={product.is_active || false} // Assuming is_active is a boolean in your product
+                          onChange={() => handleToggleActive(product.id!)}
+                        />
                       </Flex>
                     </Flex>
                   </Flex>
@@ -318,7 +412,10 @@ const ListProduct = () => {
               <Flex align={'center'} justify={'space-between'}>
                 <Box>
                   <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
-                    {products?.filter((s) => s.is_active === true).length}{' '}
+                    {
+                      filteredProducts?.filter((s) => s.is_active === true)
+                        .length
+                    }{' '}
                     Product
                   </Text>
                 </Box>
@@ -329,6 +426,9 @@ const ListProduct = () => {
                     rounded={'full'}
                     borderWidth={'1px'}
                     borderColor={'black'}
+                    onClick={handleDeleteCheckedProducts}
+                    colorScheme="red"
+                    disabled={checkedProducts.length === 0}
                   >
                     <Icon size={'lg'} color={'black'}>
                       <MdOutlineDelete />
@@ -342,18 +442,49 @@ const ListProduct = () => {
                       bg={'white'}
                       color={'black'}
                       h={9}
+                      onClick={handleToggleActiveCheckedProducts}
+                      disabled={
+                        checkedProducts.length === 0 ||
+                        (checkedProducts.length > 1 &&
+                          checkedProducts.some(
+                            (id) =>
+                              products?.find((p) => p.id === id)?.is_active
+                          ) &&
+                          checkedProducts.some(
+                            (id) =>
+                              !products?.find((p) => p.id === id)?.is_active
+                          ))
+                      }
                     >
-                      Nonaktifkan Produk
+                      {checkedProducts.length === 0
+                        ? 'Nonaktifkan Produk'
+                        : checkedProducts.every(
+                              (id) =>
+                                products?.find((p) => p.id === id)?.is_active
+                            )
+                          ? 'Nonaktifkan Produk'
+                          : checkedProducts.every(
+                                (id) =>
+                                  !products?.find((p) => p.id === id)?.is_active
+                              )
+                            ? 'Aktifkan Produk'
+                            : 'Nonaktifkan Produk'}
                     </Button>
                   </Box>
                   <Flex gap={2}>
-                    Pilih Semua
-                    <Checkbox />
+                    <Checkbox
+                      checked={checkedProducts.length === products?.length} // Check if all products are checked
+                      onChange={(e) =>
+                        handleToggleAll((e.target as HTMLInputElement).checked)
+                      } // Handle master checkbox
+                    >
+                      Pilih Semua
+                    </Checkbox>
                   </Flex>
                 </Flex>
               </Flex>
               <Stack gap="4">
-                {products
+                {filteredProducts
                   ?.filter((product) => product.is_active === true)
                   .map((product) => (
                     <Flex
@@ -379,27 +510,34 @@ const ListProduct = () => {
                       </Box>
                       <Flex direction={'column'} pl={5} w={'full'}>
                         <Box>
-                          <Text fontWeight="bold">
-                            {product.name} -{' '}
-                            {product.variants?.[0]?.variantOptions?.[0]?.name}
-                          </Text>
-                          {/* <Text fontSize="sm" color="gray.600">
-                            Rp
-                            {
-                              product.variants[0]?.Variant_options[0]
-                                ?.Variant_option_values[0]?.price
-                            }{' '}
+                          <Flex justify={'space-between'}>
+                            <Text fontWeight="bold">
+                              {product.name} -{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.name || 'No Variant'}
+                            </Text>
+                            <Checkbox
+                              checked={checkedProducts.includes(
+                                product.id || ''
+                              )} // Check if this product is checked
+                              onChange={() =>
+                                handleToggleProduct(product.id || '')
+                              } // Handle individual checkbox
+                            />
+                          </Flex>
+                          <Text fontSize="sm" color="gray.600">
+                            Rp{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.price ||
+                              product.price}{' '}
                             - Stock:{' '}
-                            {
-                              product.variants[0]?.Variant_options[0]
-                                ?.Variant_option_values[0]?.stock
-                            }{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.stock ||
+                              product.stock}{' '}
                             - SKU:{' '}
-                            {
-                              product.variants[0]?.Variant_options[0]
-                                ?.Variant_option_values[0]?.sku
-                            }
-                          </Text> */}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.sku || product.sku}
+                          </Text>
                         </Box>
                         <Flex
                           align="center"
@@ -431,10 +569,55 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Text>Lihat Halaman</Text>
+                              <Link to={''}>
+                                <Icon>
+                                  <IoIosLink />
+                                </Icon>
+                                Lihat Halaman
+                              </Link>
                             </Button>
+                            <MenuRoot>
+                              <MenuTrigger asChild>
+                                <Button
+                                  size="xs"
+                                  rounded={'full'}
+                                  bg="white"
+                                  color={'black'}
+                                  borderWidth={'1px'}
+                                  borderColor={'black'}
+                                  p={1}
+                                  h={7}
+                                >
+                                  <Icon>
+                                    <HiDotsHorizontal />
+                                  </Icon>
+                                </Button>
+                              </MenuTrigger>
+                              <MenuContent>
+                                <MenuItem value="new-txt">
+                                  <HStack>
+                                    <Icon size={'sm'} color={'black'}>
+                                      <MdModeEditOutline />
+                                    </Icon>
+                                    <Text>Edit Product</Text>
+                                  </HStack>
+                                </MenuItem>
+                                <MenuItem value="new-file">
+                                  <HStack>
+                                    <DialogDeleteProduct
+                                      productId={product.id || ''}
+                                      productName={product.name || ''}
+                                    />
+                                  </HStack>
+                                </MenuItem>
+                              </MenuContent>
+                            </MenuRoot>
                           </HStack>
-                          <Switch colorScheme="blue" defaultChecked />
+                          <Switch
+                            colorScheme="blue"
+                            checked={product.is_active || false} // Assuming is_active is a boolean in your product
+                            onChange={() => handleToggleActive(product.id!)}
+                          />
                         </Flex>
                       </Flex>
                     </Flex>
@@ -447,7 +630,10 @@ const ListProduct = () => {
               <Flex align={'center'} justify={'space-between'}>
                 <Box>
                   <Text fontWeight={'medium'} fontSize={'2xl'} p={2}>
-                    {products?.filter((s) => s.is_active === false).length}{' '}
+                    {
+                      filteredProducts?.filter((s) => s.is_active === false)
+                        .length
+                    }{' '}
                     Product
                   </Text>
                 </Box>
@@ -458,6 +644,9 @@ const ListProduct = () => {
                     rounded={'full'}
                     borderWidth={'1px'}
                     borderColor={'black'}
+                    onClick={handleDeleteCheckedProducts}
+                    colorScheme="red"
+                    disabled={checkedProducts.length === 0}
                   >
                     <Icon size={'lg'} color={'black'}>
                       <MdOutlineDelete />
@@ -471,18 +660,49 @@ const ListProduct = () => {
                       bg={'white'}
                       color={'black'}
                       h={9}
+                      onClick={handleToggleActiveCheckedProducts}
+                      disabled={
+                        checkedProducts.length === 0 ||
+                        (checkedProducts.length > 1 &&
+                          checkedProducts.some(
+                            (id) =>
+                              products?.find((p) => p.id === id)?.is_active
+                          ) &&
+                          checkedProducts.some(
+                            (id) =>
+                              !products?.find((p) => p.id === id)?.is_active
+                          ))
+                      }
                     >
-                      Nonaktifkan Produk
+                      {checkedProducts.length === 0
+                        ? 'Nonaktifkan Produk'
+                        : checkedProducts.every(
+                              (id) =>
+                                products?.find((p) => p.id === id)?.is_active
+                            )
+                          ? 'Nonaktifkan Produk'
+                          : checkedProducts.every(
+                                (id) =>
+                                  !products?.find((p) => p.id === id)?.is_active
+                              )
+                            ? 'Aktifkan Produk'
+                            : 'Nonaktifkan Produk'}
                     </Button>
                   </Box>
                   <Flex gap={2}>
-                    Pilih Semua
-                    <Checkbox />
+                    <Checkbox
+                      checked={checkedProducts.length === products?.length} // Check if all products are checked
+                      onChange={(e) =>
+                        handleToggleAll((e.target as HTMLInputElement).checked)
+                      } // Handle master checkbox
+                    >
+                      Pilih Semua
+                    </Checkbox>
                   </Flex>
                 </Flex>
               </Flex>
               <Stack gap="4">
-                {products
+                {filteredProducts
                   ?.filter((product) => product.is_active === false)
                   .map((product) => (
                     <Flex
@@ -508,24 +728,34 @@ const ListProduct = () => {
                       </Box>
                       <Flex direction={'column'} pl={5} w={'full'}>
                         <Box>
-                          <Text fontWeight="bold">{product.name} -</Text>
-                          {/* <Text fontSize="sm" color="gray.600">
-                            Rp
-                            {
-                              product.Variant_options[0]
-                                ?.Variant_option_values[0]?.price
-                            }{' '}
+                          <Flex justify={'space-between'}>
+                            <Text fontWeight="bold">
+                              {product.name} -{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.name || 'No Variant'}
+                            </Text>
+                            <Checkbox
+                              checked={checkedProducts.includes(
+                                product.id || ''
+                              )} // Check if this product is checked
+                              onChange={() =>
+                                handleToggleProduct(product.id || '')
+                              } // Handle individual checkbox
+                            />
+                          </Flex>
+                          <Text fontSize="sm" color="gray.600">
+                            Rp{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.price ||
+                              product.price}{' '}
                             - Stock:{' '}
-                            {
-                              product.Variant_options[0]
-                                ?.Variant_option_values[0]?.stock
-                            }{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.stock ||
+                              product.stock}{' '}
                             - SKU:{' '}
-                            {
-                              product.Variant_options[0]
-                                ?.Variant_option_values[0]?.sku
-                            }
-                          </Text> */}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.sku || product.sku}
+                          </Text>
                         </Box>
                         <Flex
                           align="center"
@@ -557,10 +787,55 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Text>Lihat Halaman</Text>
+                              <Link to={''}>
+                                <Icon>
+                                  <IoIosLink />
+                                </Icon>
+                                Lihat Halaman
+                              </Link>
                             </Button>
+                            <MenuRoot>
+                              <MenuTrigger asChild>
+                                <Button
+                                  size="xs"
+                                  rounded={'full'}
+                                  bg="white"
+                                  color={'black'}
+                                  borderWidth={'1px'}
+                                  borderColor={'black'}
+                                  p={1}
+                                  h={7}
+                                >
+                                  <Icon>
+                                    <HiDotsHorizontal />
+                                  </Icon>
+                                </Button>
+                              </MenuTrigger>
+                              <MenuContent>
+                                <MenuItem value="new-txt">
+                                  <HStack>
+                                    <Icon size={'sm'} color={'black'}>
+                                      <MdModeEditOutline />
+                                    </Icon>
+                                    <Text>Edit Product</Text>
+                                  </HStack>
+                                </MenuItem>
+                                <MenuItem value="new-file">
+                                  <HStack>
+                                    <DialogDeleteProduct
+                                      productId={product.id || ''}
+                                      productName={product.name || ''}
+                                    />
+                                  </HStack>
+                                </MenuItem>
+                              </MenuContent>
+                            </MenuRoot>
                           </HStack>
-                          <Switch colorScheme="blue" defaultChecked />
+                          <Switch
+                            colorScheme="blue"
+                            checked={product.is_active || false} // Assuming is_active is a boolean in your product
+                            onChange={() => handleToggleActive(product.id!)}
+                          />
                         </Flex>
                       </Flex>
                     </Flex>

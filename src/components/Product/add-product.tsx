@@ -18,7 +18,11 @@ import { Checkbox } from '../ui/checkbox';
 import { useCreateProduct } from '../tanstack/useProduct';
 import { useCreateVariant } from '../tanstack/useVariant';
 import DialogAddVariant from './Dialog/dialog-add-variant';
-import { Variant } from '@/types/product-type';
+import {
+  Variant,
+  Variant_option_values,
+  VariantOption,
+} from '@/types/product-type';
 import Swal from 'sweetalert2';
 import DropdownCategory from './dropdown-category';
 import { useCreateVariantOptions } from '../tanstack/useVariantOptions';
@@ -36,6 +40,14 @@ function AddProduct() {
     description: '',
     categoryIds: [] as string[],
     subcategoryIds: [] as string[],
+    minimum_order: 0,
+    price: 0,
+    stock: 0,
+    sku: '',
+    length: 0,
+    height: 0,
+    width: 0,
+    weight: 0,
   });
 
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -47,7 +59,7 @@ function AddProduct() {
   >([]);
   const [showVariantList, setShowVariantList] = useState(false);
   const [variantOptionValues, setVariantOptionValues] = useState<
-    { sku: string; price: number; stock: number; weight: number }[]
+    Variant_option_values[]
   >([]);
 
   const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
@@ -140,13 +152,18 @@ function AddProduct() {
             // Buat variant options jika ada
             if (variant.variantOptions && variant.variantOptions.length > 0) {
               for (const option of variant.variantOptions) {
-                await createVariantOptionMutation.mutateAsync({
-                  token,
-                  variantOptionsData: {
-                    ...option,
-                    variantId: variantResponse.variant.id,
-                  },
-                });
+                const variantOptionResponse =
+                  await createVariantOptionMutation.mutateAsync({
+                    token,
+                    variantOptionsData: {
+                      ...option,
+                      variantId: variantResponse.variant.id,
+                    },
+                  });
+
+                if (!variantOptionResponse || !variantOptionResponse.id) {
+                  throw new Error('Gagal mendapatkan ID opsi varian');
+                }
 
                 // Create variant option values
                 for (const value of variantOptionValues) {
@@ -154,13 +171,13 @@ function AddProduct() {
                   await createVariantOptionValueMutation
                     .mutateAsync({
                       token,
-                      variantOptionValueData: {
+                      data: {
                         sku: value.sku,
                         price: value.price,
                         stock: value.stock,
                         weight: value.weight,
-                        variant_optionsId: variantResponse.variant.id,
-                        is_active: true,
+                        variant_optionsId: variantOptionResponse.id,
+                        is_active: false,
                       },
                     })
                     .then((response) => {
@@ -200,6 +217,14 @@ function AddProduct() {
         description: '',
         categoryIds: [],
         subcategoryIds: [],
+        minimum_order: 0,
+        price: 0,
+        stock: 0,
+        sku: '',
+        length: 0,
+        height: 0,
+        width: 0,
+        weight: 0,
       });
       setAttachments([]);
       setVariants([]);
@@ -436,13 +461,14 @@ function AddProduct() {
                               setVariantOptions(updatedOptions);
                               // Juga hapus dari varian yang sesuai
                               const updatedVariants = variants.map(
-                                (variant, variantIndex) => {
+                                (variant: Variant, variantIndex: number) => {
                                   if (selectedVariant === variantIndex) {
                                     return {
                                       ...variant,
                                       variantOptions:
                                         variant.variantOptions.filter(
-                                          (_, i) => i !== index
+                                          (_option: VariantOption, i: number) =>
+                                            i !== index
                                         ),
                                     };
                                   }
@@ -473,63 +499,112 @@ function AddProduct() {
                     borderRadius="10px"
                     align="flex-start"
                   >
-                    {variants.map((variant, variantIndex) => (
+                    {variants.map((variant: Variant, variantIndex: number) => (
                       <Box key={variantIndex} w={'full'} spaceY={5}>
-                        {variant.variantOptions.map((option, optionIndex) => (
-                          <Box
-                            key={optionIndex}
-                            borderWidth="1px"
-                            borderRadius="md"
-                            p={4}
-                            spaceY={2}
-                          >
-                            <VStack align="flex-start">
-                              <Text fontWeight={'bold'}>{option.name}</Text>
-                            </VStack>
-                            <HStack w={'full'} gap={5}>
-                              <Flex w={'40%'} direction={'column'}>
-                                <Box w={'96'}>
-                                  <Text fontWeight="600" fontSize="15px">
-                                    Price *
-                                  </Text>
-                                </Box>
-                                <Flex>
-                                  <InputAddon>Rp</InputAddon>
-                                  <Input placeholder="Enter price" />
+                        {variant.variantOptions.map(
+                          (option: VariantOption, optionIndex: number) => (
+                            <Box
+                              key={optionIndex}
+                              borderWidth="1px"
+                              borderRadius="md"
+                              p={4}
+                              spaceY={2}
+                            >
+                              <VStack align="flex-start">
+                                <Text fontWeight={'bold'}>{option.name}</Text>
+                              </VStack>
+                              <HStack w={'full'} gap={5}>
+                                <Flex w={'40%'} direction={'column'}>
+                                  <Box w={'96'}>
+                                    <Text fontWeight="600" fontSize="15px">
+                                      Price *
+                                    </Text>
+                                  </Box>
+                                  <Flex>
+                                    <InputAddon>Rp</InputAddon>
+                                    <Input
+                                      placeholder="Price"
+                                      type="number"
+                                      onChange={(e) =>
+                                        setVariantOptionValues((prev) => {
+                                          const updatedValue = {
+                                            ...prev[0],
+                                            price: Number(e.target.value),
+                                          };
+                                          return [updatedValue];
+                                        })
+                                      }
+                                    />
+                                  </Flex>
                                 </Flex>
-                              </Flex>
-                              <Flex w={'40%'} direction={'column'}>
-                                <Box w={'96'}>
-                                  <Text fontWeight="600" fontSize="15px">
-                                    SKU (Stock Keeping Unit) *
-                                  </Text>
-                                </Box>
-                                <Input placeholder="Enter SKU" />
-                              </Flex>
-                            </HStack>
-                            <HStack w={'full'} gap={5}>
-                              <Flex w={'40%'} direction={'column'}>
-                                <Box w={'72'}>
-                                  <Text fontWeight="600" fontSize="15px">
-                                    Product Stock *
-                                  </Text>
-                                </Box>
-                                <Input placeholder="Enter stock" />
-                              </Flex>
-                              <Flex w={'40%'} direction={'column'}>
-                                <Box w={'96'}>
-                                  <Text fontWeight="600" fontSize="15px">
-                                    Product Weight *
-                                  </Text>
-                                </Box>
-                                <Flex>
-                                  <Input placeholder="Enter weight" />
-                                  <InputAddon>Gram</InputAddon>
+                                <Flex w={'40%'} direction={'column'}>
+                                  <Box w={'96'}>
+                                    <Text fontWeight="600" fontSize="15px">
+                                      SKU (Stock Keeping Unit) *
+                                    </Text>
+                                  </Box>
+                                  <Input
+                                    placeholder="SKU"
+                                    onChange={(e) =>
+                                      setVariantOptionValues((prev) => {
+                                        const updatedValue = {
+                                          ...prev[0],
+                                          sku: e.target.value,
+                                        };
+                                        return [updatedValue];
+                                      })
+                                    }
+                                  />
                                 </Flex>
-                              </Flex>
-                            </HStack>
-                          </Box>
-                        ))}
+                              </HStack>
+                              <HStack w={'full'} gap={5}>
+                                <Flex w={'40%'} direction={'column'}>
+                                  <Box w={'72'}>
+                                    <Text fontWeight="600" fontSize="15px">
+                                      Product Stock *
+                                    </Text>
+                                  </Box>
+                                  <Input
+                                    placeholder="Stock"
+                                    type="number"
+                                    onChange={(e) =>
+                                      setVariantOptionValues((prev) => {
+                                        const updatedValue = {
+                                          ...prev[0],
+                                          stock: Number(e.target.value),
+                                        };
+                                        return [updatedValue];
+                                      })
+                                    }
+                                  />
+                                </Flex>
+                                <Flex w={'40%'} direction={'column'}>
+                                  <Box w={'96'}>
+                                    <Text fontWeight="600" fontSize="15px">
+                                      Product Weight *
+                                    </Text>
+                                  </Box>
+                                  <Flex>
+                                    <Input
+                                      placeholder="Weight"
+                                      type="number"
+                                      onChange={(e) =>
+                                        setVariantOptionValues((prev) => {
+                                          const updatedValue = {
+                                            ...prev[0],
+                                            weight: Number(e.target.value),
+                                          };
+                                          return [updatedValue];
+                                        })
+                                      }
+                                    />
+                                    <InputAddon>Gram</InputAddon>
+                                  </Flex>
+                                </Flex>
+                              </HStack>
+                            </Box>
+                          )
+                        )}
                       </Box>
                     ))}
                   </Flex>
@@ -537,197 +612,196 @@ function AddProduct() {
               )}
             </VStack>
 
-            <VStack
-              bgColor="white"
-              w={'full'}
-              p="7"
-              gap="10px"
-              mt="30px"
-              align="flex-start"
-              borderRadius="10px"
-            >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                Product Price
-              </Text>
-              <VStack gap="5px" w="full" align="flex-start">
-                <Text fontWeight="600" fontSize="15px">
-                  Price
-                </Text>
-                <Group>
-                  <InputAddon>Rp</InputAddon>
-                  <Input borderLeftRadius="0" placeholder="Harga produk ..." />
-                </Group>
-              </VStack>
-              <VStack gap="5px" w="full" align="flex-start">
-                <Text fontWeight="600" fontSize="15px">
-                  Minimum Order
-                </Text>
-                <Group>
-                  <Input
-                    placeholder="Jumlah produk ..."
-                    borderRightRadius="0"
-                  />
-                  <InputAddon borderLeftRadius="0" borderRightRadius="5px">
-                    Product
-                  </InputAddon>
-                </Group>
-              </VStack>
-            </VStack>
-
-            <VStack
-              bgColor="white"
-              w={'full'}
-              p="7"
-              gap="10px"
-              mt="30px"
-              align="flex-start"
-              borderRadius="10px"
-            >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                Product Management
-              </Text>
-              <HStack gap="10" width="full">
-                <VStack w="full" align="flex-start">
-                  <Text fontWeight="600" fontSize="15px">
-                    Product Stock
+            {variants.length === 0 && (
+              <>
+                <VStack
+                  bgColor="white"
+                  w={'full'}
+                  p="7"
+                  gap="10px"
+                  mt="30px"
+                  align="flex-start"
+                  borderRadius="10px"
+                >
+                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                    Product Price
                   </Text>
-                  <Group flex="1">
-                    <Input placeholder="Stock" />
-                  </Group>
+                  <VStack gap="5px" w="full" align="flex-start">
+                    <Text fontWeight="600" fontSize="15px">
+                      Price
+                    </Text>
+                    <Group>
+                      <InputAddon>Rp</InputAddon>
+                      <Input
+                        name="price"
+                        borderLeftRadius="0"
+                        placeholder="Harga produk ..."
+                        onChange={handleChange}
+                        value={formData.price}
+                        type="number"
+                      />
+                    </Group>
+                  </VStack>
+                  <VStack gap="5px" w="full" align="flex-start">
+                    <Text fontWeight="600" fontSize="15px">
+                      Minimum Order
+                    </Text>
+                    <Group>
+                      <Input
+                        name="minimum_order"
+                        placeholder="Jumlah produk ..."
+                        borderRightRadius="0"
+                        onChange={handleChange}
+                        value={formData.minimum_order}
+                        type="number"
+                      />
+                      <InputAddon borderLeftRadius="0" borderRightRadius="5px">
+                        Product
+                      </InputAddon>
+                    </Group>
+                  </VStack>
                 </VStack>
-                <VStack w="full" align="flex-start">
-                  <Text fontWeight="600" fontSize="15px">
-                    SKU (Stock Keeping Unit)
+
+                <VStack
+                  bgColor="white"
+                  w={'full'}
+                  p="7"
+                  gap="10px"
+                  mt="30px"
+                  align="flex-start"
+                  borderRadius="10px"
+                >
+                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                    Product Management
                   </Text>
-                  <Group flex="1">
-                    <Input placeholder="Sku" />
-                  </Group>
+                  <HStack gap="10" width="full">
+                    <VStack w="full" align="flex-start">
+                      <Text fontWeight="600" fontSize="15px">
+                        Product Stock
+                      </Text>
+                      <Group flex="1">
+                        <Input
+                          name="stock"
+                          placeholder="Stock"
+                          onChange={handleChange}
+                          value={formData.stock}
+                          type="number"
+                        />
+                      </Group>
+                    </VStack>
+                    <VStack w="full" align="flex-start">
+                      <Text fontWeight="600" fontSize="15px">
+                        SKU (Stock Keeping Unit)
+                      </Text>
+                      <Group flex="1">
+                        <Input
+                          name="sku"
+                          placeholder="Sku"
+                          onChange={handleChange}
+                          value={formData.sku}
+                        />
+                      </Group>
+                    </VStack>
+                  </HStack>
                 </VStack>
-              </HStack>
-            </VStack>
 
-            <VStack
-              bgColor="white"
-              w={'full'}
-              p="7"
-              gap="10px"
-              mt="30px"
-              align="flex-start"
-              borderRadius="10px"
-            >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                Weight & Dimension
-              </Text>
-              <VStack w="full" align="flex-start">
-                <Text fontWeight="600" fontSize="15px">
-                  Product Weight
-                </Text>
-                <Group>
-                  <Input borderLeftRadius="5px" borderRightRadius="0" />
-                  <InputAddon borderLeftRadius="0" borderRightRadius="5px">
-                    Grams
-                  </InputAddon>
-                </Group>
-              </VStack>
-              <VStack w="full" align="flex-start">
-                <Text fontWeight="600" fontSize="15px">
-                  Product Stock
-                </Text>
-                <HStack gap="10" width="full">
+                <VStack
+                  bgColor="white"
+                  w={'full'}
+                  p="7"
+                  gap="10px"
+                  mt="30px"
+                  align="flex-start"
+                  borderRadius="10px"
+                >
+                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                    Weight & Dimension
+                  </Text>
                   <VStack w="full" align="flex-start">
-                    <Group flex="1">
+                    <Text fontWeight="600" fontSize="15px">
+                      Product Weight
+                    </Text>
+                    <Group>
                       <Input
+                        name="weight"
                         borderLeftRadius="5px"
                         borderRightRadius="0"
-                        placeholder="Length"
+                        onChange={handleChange}
+                        value={formData.weight}
+                        type="number"
                       />
                       <InputAddon borderLeftRadius="0" borderRightRadius="5px">
-                        cm
+                        Grams
                       </InputAddon>
                     </Group>
                   </VStack>
                   <VStack w="full" align="flex-start">
-                    <Group flex="1">
-                      <Input
-                        borderLeftRadius="5px"
-                        borderRightRadius="0"
-                        placeholder="Width"
-                      />
-                      <InputAddon borderLeftRadius="0" borderRightRadius="5px">
-                        cm
-                      </InputAddon>
-                    </Group>
+                    <Text fontWeight="600" fontSize="15px">
+                      Product Stock
+                    </Text>
+                    <HStack gap="10" width="full">
+                      <VStack w="full" align="flex-start">
+                        <Group flex="1">
+                          <Input
+                            name="length"
+                            borderLeftRadius="5px"
+                            borderRightRadius="0"
+                            placeholder="Length"
+                            onChange={handleChange}
+                            value={formData.length}
+                            type="number"
+                          />
+                          <InputAddon
+                            borderLeftRadius="0"
+                            borderRightRadius="5px"
+                          >
+                            cm
+                          </InputAddon>
+                        </Group>
+                      </VStack>
+                      <VStack w="full" align="flex-start">
+                        <Group flex="1">
+                          <Input
+                            name="width"
+                            borderLeftRadius="5px"
+                            borderRightRadius="0"
+                            placeholder="Width"
+                            onChange={handleChange}
+                            value={formData.width}
+                            type="number"
+                          />
+                          <InputAddon
+                            borderLeftRadius="0"
+                            borderRightRadius="5px"
+                          >
+                            cm
+                          </InputAddon>
+                        </Group>
+                      </VStack>
+                      <VStack w="full" align="flex-start">
+                        <Group flex="1">
+                          <Input
+                            name="height"
+                            borderLeftRadius="5px"
+                            borderRightRadius="0"
+                            placeholder="Height"
+                            onChange={handleChange}
+                            value={formData.height}
+                            type="number"
+                          />
+                          <InputAddon
+                            borderLeftRadius="0"
+                            borderRightRadius="5px"
+                          >
+                            cm
+                          </InputAddon>
+                        </Group>
+                      </VStack>
+                    </HStack>
                   </VStack>
-                  <VStack w="full" align="flex-start">
-                    <Group flex="1">
-                      <Input
-                        borderLeftRadius="5px"
-                        borderRightRadius="0"
-                        placeholder="Height"
-                      />
-                      <InputAddon borderLeftRadius="0" borderRightRadius="5px">
-                        cm
-                      </InputAddon>
-                    </Group>
-                  </VStack>
-                </HStack>
-              </VStack>
-            </VStack>
-
-            <VStack
-              bgColor="white"
-              w={'full'}
-              p="7"
-              gap="10px"
-              mt="30px"
-              align="flex-start"
-              borderRadius="10px"
-            >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                Variant Option Values
-              </Text>
-              <HStack>
-                <Input
-                  placeholder="SKU"
-                  onChange={(e) =>
-                    setVariantOptionValues((prev) => [
-                      ...prev,
-                      { ...prev[0], sku: e.target.value },
-                    ])
-                  }
-                />
-                <Input
-                  placeholder="Price"
-                  type="number"
-                  onChange={(e) =>
-                    setVariantOptionValues((prev) => [
-                      ...prev,
-                      { ...prev[0], price: Number(e.target.value) },
-                    ])
-                  }
-                />
-                <Input
-                  placeholder="Stock"
-                  type="number"
-                  onChange={(e) =>
-                    setVariantOptionValues((prev) => [
-                      ...prev,
-                      { ...prev[0], stock: Number(e.target.value) },
-                    ])
-                  }
-                />
-                <Input
-                  placeholder="Weight"
-                  type="number"
-                  onChange={(e) =>
-                    setVariantOptionValues((prev) => [
-                      ...prev,
-                      { ...prev[0], weight: Number(e.target.value) },
-                    ])
-                  }
-                />
-              </HStack>
-            </VStack>
+                </VStack>
+              </>
+            )}
 
             <VStack
               bgColor="white"
