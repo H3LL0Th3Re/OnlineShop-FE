@@ -5,12 +5,16 @@ import { VariantOptionValue } from '@/types/product-type';
 
 export const createVariantOptionValue = async (
   token: string,
-  variantOptionValueData: VariantOptionValue
+  data: VariantOptionValue
 ) => {
   try {
+    if (!token) {
+      throw new Error('Token autentikasi tidak ditemukan');
+    }
+
     const response = await axios.post(
-      `${apiURL}/variant-option-values/create/`,
-      variantOptionValueData,
+      `${apiURL}/variant-option-values/create`,
+      data,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -18,13 +22,17 @@ export const createVariantOptionValue = async (
         },
       }
     );
-    return response.data.variant_option_values;
+
+    // Response dari backend berisi { message: string, variantOptionValue: VariantOptionValue }
+    return response.data.variantOptionValue;
   } catch (error) {
-    let errorMessage = 'Failed to create variant option value';
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage = error.response.data.error || errorMessage;
+    if (axios.isAxiosError(error)) {
+      const errorMessage =
+        error.response?.data?.message || 'Gagal membuat variant option value';
+      console.error('API Error:', error.response?.data);
+      throw new Error(errorMessage);
     }
-    throw new Error(errorMessage);
+    throw error;
   }
 };
 

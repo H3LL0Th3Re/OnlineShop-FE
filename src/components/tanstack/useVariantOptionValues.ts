@@ -8,15 +8,18 @@ export const useCreateVariantOptionValue = () => {
   return useMutation({
     mutationFn: ({
       token,
-      variantOptionValueData,
+      data,
     }: {
       token: string;
-      variantOptionValueData: VariantOptionValue;
-    }) => createVariantOptionValue(token, variantOptionValueData),
+      data: VariantOptionValue;
+    }) => createVariantOptionValue(token, data),
 
     onSuccess: () => {
       // Invalidasi cache agar data terbaru di-fetch kembali
       queryClient.invalidateQueries({ queryKey: ['variantOptionValues'] });
+    },
+    onError: (error) => {
+      console.error('Error creating variant option value:', error);
     },
   });
 };
