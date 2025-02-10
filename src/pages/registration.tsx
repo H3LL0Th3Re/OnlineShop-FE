@@ -112,7 +112,7 @@ function Registration() {
                   width="500px"
                   borderColor="#5F2EEA"
                   borderWidth="2px"
-                  h="400px"
+                  p="3"
                   justifyContent="center"
                   borderRadius="15px"
                   as="form"
@@ -207,7 +207,7 @@ function Registration() {
                     </Text>
                   </HStack>
 
-                  <VStack mt="40px">
+                  <VStack mt="10px">
                     <Text color="#222222" fontWeight="400" fontSize="12px">
                       Or sign up with social account
                     </Text>
