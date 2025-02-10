@@ -24,3 +24,11 @@ export const useCategories = (token: string) => {
     },
   });
 };
+
+export const useFilterCategories = (token: string) => {
+  return useQuery({
+    queryKey: ['Categories'],
+    queryFn: () => getAllCategory.getAllCategories(token),
+    select: (data) => data.categories,
+  });
+};

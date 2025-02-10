@@ -19,15 +19,27 @@ import {
   TileLayer,
   useMapEvents,
 } from 'react-leaflet';
-import { LatLng } from 'leaflet';
-import { Mutation, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from '@tanstack/react-query';
+import axios from 'axios';
+
+// interface DialogAddLocationProps {
+//   onAddLocation: (newLocation: any) => void; // Tambahkan callback
+// }
 
 interface DropdownOption {
   label: string;
   value: string;
   postCode?: string;
 }
+
+// export default function DialogAddLocation({
+//   onAddLocation,
+// }: DialogAddLocationProps) {
+
 export default function DialogAddLocation() {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
     null
@@ -38,6 +50,7 @@ export default function DialogAddLocation() {
   const [villages, setVillages] = useState<DropdownOption[]>([]);
   const [postalCodes, setPostalCodes] = useState<DropdownOption[]>([]);
   const [locationName, setLocationName] = useState<string>('');
+  const [locationAddress, setLocationAddress] = useState<string>('');
   const queryClient = useQueryClient();
 
   const [selectedProvince, setSelectedProvince] = useState<string | null>(null);
@@ -227,22 +240,47 @@ export default function DialogAddLocation() {
     );
   }
 
-  const addLocation = async (data: any) => {
-    const response = await fetch('http://localhost:3000/api/locations/create', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
-  
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to add location');
+  interface LocationData {
+    name: string;
+    province: string | null;
+    city: string | null;
+    district: string | null;
+    village: string | null;
+    postal_code: string;
+    address: string;
+    latitude: number | undefined;
+    longitude: number | undefined;
+  }
+
+  const addLocation = async (data: LocationData) => {
+    const response = await axios.post(
+      'http://localhost:3000/api/locations/create',
+      data,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.data) {
+      throw new Error('Failed to add location');
     }
-    return await response.json();
+    return response.data; // Langsung mengembalikan response
   };
+
+  const mutation: UseMutationResult<any, Error, LocationData> = useMutation({
+    mutationFn: addLocation, // Gunakan `mutationFn` untuk menentukan fungsi
+    onSuccess: (data: any) => {
+      console.log('Location added successfully:', data);
+      queryClient.invalidateQueries({ queryKey: ['location'] });
+      // onAddLocation(data);
+    },
+    onError: (error: Error) => {
+      console.error('Failed to add location:', error.message);
+    },
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,22 +290,30 @@ export default function DialogAddLocation() {
       !selectedCity ||
       !selectedDistrict ||
       !selectedVillage ||
-      !selectedPostalCode
+      !selectedPostalCode ||
+      !locationName ||
+      !locationAddress ||
+      !position
     ) {
       console.log('Please fill all required fields');
       return;
     }
+
     const data = {
-      locationName,
-      selectedProvince: getLabelByValue(provinces, selectedProvince),
-      selectedCity: getLabelByValue(cities, selectedCity),
-      selectedDistrict: getLabelByValue(districts, selectedDistrict),
-      selectedVillage: getLabelByValue(villages, selectedVillage),
-      position: { lat: position?.lat, lng: position?.lng },
-      selectedPostalCode,
+      name: locationName, // Sesuai dengan `req.body.name`
+      postal_code: selectedPostalCode, // Sesuai dengan `req.body.postal_code`
+      address: locationAddress, // Sesuai dengan `req.body.address`
+      village: getLabelByValue(villages, selectedVillage), // Sesuai dengan `req.body.village`
+      district: getLabelByValue(districts, selectedDistrict), // Sesuai dengan `req.body.district`
+      city: getLabelByValue(cities, selectedCity), // Sesuai dengan `req.body.city`
+      province: getLabelByValue(provinces, selectedProvince), // Sesuai dengan `req.body.province`
+      latitude: position.lat, // Sesuai dengan `req.body.latitude`
+      longitude: position.lng, // Sesuai dengan `req.body.longitude`
     };
+
     console.log(data);
-    
+
+    mutation.mutate(data);
   };
 
   return (
@@ -452,17 +498,23 @@ export default function DialogAddLocation() {
               <Text fontWeight="600" fontSize="15px" mb="7px">
                 Alamat Lengkap*
               </Text>
-              <Textarea mb="7px" />
+              <Textarea
+                mb="7px"
+                value={locationAddress}
+                onChange={(e) => setLocationAddress(e.target.value)}
+              />
               <Text fontWeight="600" fontSize="15px" mb="7px">
                 Pinpoint Lokasi*
               </Text>
 
               <Box
                 borderRadius="7px"
-                style={{ height: '100px', display: 'flex' }}
+                h="400px"
+                w="full"
+                bg="blue"
               >
                 <MapContainer
-                  center={{ lat: 51.505, lng: -0.09 }}
+                  center={{ lat: -6.2, lng: 106.8 }}
                   zoom={15}
                   scrollWheelZoom={false}
                 >
@@ -489,12 +541,7 @@ export default function DialogAddLocation() {
               <DialogActionTrigger asChild>
                 <Button variant="outline">Cancel</Button>
               </DialogActionTrigger>
-              <Button
-                bgColor="#2400FE"
-                color="white"
-                onClick={handleSubmit}
-
-              >
+              <Button bgColor="#2400FE" color="white" onClick={handleSubmit}>
                 Save
               </Button>
             </DialogFooter>

@@ -346,7 +346,7 @@ export function Order() {
                       </Button> */}
                       <DialogTemplateMessage
                         status={order.status}
-                        productid={'cm6k7x2gw0003wqmwan8jtl1m'}
+                        productid={'cm6td9xt30004uy5witpj9vze'}
                       />
                     </Box>
                   </Flex>
