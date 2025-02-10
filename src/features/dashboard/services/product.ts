@@ -59,7 +59,9 @@ export const getStoreProduct = async (token: string): Promise<Product[]> => {
 };
 export const getStorebyName = async (username: string): Promise<Product[]> => {
   try {
-    const response = await axios.get(`${apiURL}/product/${username}`);
+    const response = await axios.get(
+      `${apiURL}/product/get-product/${username}`
+    );
 
     console.log(response.data.product);
     return response.data.product;

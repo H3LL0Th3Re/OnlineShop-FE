@@ -276,8 +276,11 @@ export default function StoreProduct() {
                     >
                       <Image
                         src={
-                          typeof product.attachments === 'string'
-                            ? product.attachments
+                          Array.isArray(product.attachments) &&
+                          product.attachments.length > 0
+                            ? typeof product.attachments[0] === 'string'
+                              ? product.attachments[0]
+                              : URL.createObjectURL(product.attachments[0])
                             : ''
                         }
                         alt={product.name}
