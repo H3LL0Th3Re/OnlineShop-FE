@@ -42,7 +42,7 @@ export const getStoreProduct = async (token: string): Promise<Product[]> => {
       },
     });
 
-    console.log(response.data.product);
+    console.log('api response:', response.data.product);
     return response.data.product;
   } catch (error) {
     let errorMessage = 'Failed to fetch products';
@@ -86,6 +86,14 @@ export const createProducts = async (data: Product, token: string) => {
     const formData = new FormData();
     formData.append('name', data.name);
     formData.append('description', data.description);
+    formData.append('minimum_order', data.minimum_order.toString());
+    formData.append('price', data.price.toString());
+    formData.append('stock', data.stock.toString());
+    formData.append('sku', data.sku);
+    formData.append('length', data.length.toString());
+    formData.append('height', data.height.toString());
+    formData.append('width', data.width.toString());
+    formData.append('weight', data.weight.toString());
 
     if (data.categoryIds && data.categoryIds.length > 0) {
       formData.append('categoryIds', JSON.stringify(data.categoryIds));
@@ -94,6 +102,7 @@ export const createProducts = async (data: Product, token: string) => {
     if (data.subcategoryIds && data.subcategoryIds.length > 0) {
       formData.append('subcategoryIds', JSON.stringify(data.subcategoryIds));
     }
+
     if (data.attachments) {
       data.attachments.forEach((attachment) => {
         formData.append('attachments', attachment);
@@ -111,7 +120,6 @@ export const createProducts = async (data: Product, token: string) => {
       }
     );
 
-    // Response dari backend berisi { message: string, product: Product }
     return response.data.product;
   } catch (error) {
     if (axios.isAxiosError(error)) {
