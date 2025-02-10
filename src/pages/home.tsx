@@ -1,9 +1,9 @@
 import { Box, Grid, Image, Text, VStack } from '@chakra-ui/react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import Navbar from './navbar';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/features/dashboard/get-categories';
+import NavbarBuyer from './navbarBuyer';
 
 const backroundImages = [
   'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548208/1_scleah.png',
@@ -130,7 +130,7 @@ export function Home() {
   return (
     <Box>
       <Box position="sticky" top="0" right="0" overflow="auto" zIndex="2">
-        <Navbar />
+        <NavbarBuyer />
       </Box>
       <Box m="0" h="full" w="full" p="3">
         <Box bgColor="white" p="3">
@@ -141,9 +141,6 @@ export function Home() {
               alignItems="center"
               w="full"
             >
-              <Text fontWeight="700" fontSize="2xl" color="#2400FE">
-                Dashboard
-              </Text>
             </Box>
             <Carousel
               useKeyboardArrows={true}
