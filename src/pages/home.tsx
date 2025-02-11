@@ -11,7 +11,7 @@ const backroundImages = [
   'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548327/3_xydogw.png',
 ];
 
-// const categories = [
+// const data = [
 //   {
 //     name: 'Electronics',
 //     image:
@@ -110,6 +110,48 @@ const recommendations = [
       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
     price: 'Rp 950.000',
   },
+  {
+    name: 'Woman Clothes',
+    image:
+      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+    price: 'Rp 950.000',
+  },
+  {
+    name: 'Woman Clothes',
+    image:
+      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+    price: 'Rp 950.000',
+  },
+  {
+    name: 'Woman Clothes',
+    image:
+      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+    price: 'Rp 950.000',
+  },
+  {
+    name: 'Woman Clothes',
+    image:
+      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+    price: 'Rp 950.000',
+  },
+  {
+    name: 'Woman Clothes',
+    image:
+      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+    price: 'Rp 950.000',
+  },
+  {
+    name: 'Woman Clothes',
+    image:
+      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+    price: 'Rp 950.000',
+  },
+  {
+    name: 'Woman Clothes',
+    image:
+      'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
+    price: 'Rp 950.000',
+  },
 ];
 
 export function Home() {
@@ -133,15 +175,15 @@ export function Home() {
         <NavbarBuyer />
       </Box>
       <Box m="0" h="full" w="full" p="3">
-        <Box bgColor="white" p="3">
-          <VStack>
-            <Box
+        <Box bgColor="white" p="3" h="full" w="full">
+          <VStack h="full" w="full">
+            {/* <Box
               display="flex"
               justifyContent="flex-start"
               alignItems="center"
               w="full"
-            >
-            </Box>
+              h="200px"
+            ></Box> */}
             <Carousel
               useKeyboardArrows={true}
               showThumbs={false}
@@ -149,7 +191,7 @@ export function Home() {
             >
               {backroundImages.map((URL, index) => (
                 <div className="slide">
-                  <img alt="sample_file" src={URL} key={index} width={'60%'} />
+                  <img alt="sample_file" src={URL} key={index} />
                 </div>
               ))}
             </Carousel>
@@ -167,9 +209,19 @@ export function Home() {
           >
             Product Categories
           </Text>
-          <Box w="90%" mt="10px">
-            <Grid templateColumns="repeat(5, 1fr)" gap="1" gapY="5" mb="15px">
-              {isLoading && (
+
+
+          <Box
+            mt="10px"
+            id="scrollable-container"
+            w="full"
+            h="full"
+            overflowX="auto"
+            display="flex"
+            scrollbar="visible"
+          >
+            <Grid templateColumns="repeat(9, 1fr)" gap="4">
+              {/* {isLoading && (
                 <>
                   {' '}
                   <Text> Loading....</Text>{' '}
@@ -180,23 +232,19 @@ export function Home() {
                   {' '}
                   <Text> Error: {error.message}</Text>{' '}
                 </>
-              )}
-              {data
+              )} */}
+               {data
                 ?.filter((category) => !category.parentId)
-                .map((category) => (
-                  <Box
-                    bgColor="White"
-                    borderRadius="5px"
-                    w="90%"
-                    boxShadow="2px 2px 5px 1px grey"
-                  >
-                    <VStack
-                      m="15px"
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      {/* <Image
+                .map((category,index) => (
+                <Box
+                  bgColor="#F4F5F0"
+                  borderRadius="5px"
+                  w="full"
+                  h="140px"
+                  p="2"
+                >
+                  <VStack w="full" h="full" gap="1">
+                    {/* <Image
                       src={category.image}
                       borderRadius="5px"
                       w="full"
@@ -204,37 +252,39 @@ export function Home() {
                       objectFit="cover"
                       alt={`User uploaded image ${index + 1}`}
                     /> */}
-                      <Text fontWeight="600" textAlign="center">
-                        {category.name}
-                      </Text>
-                    </VStack>
-                  </Box>
-                ))}
+                    <Box borderRadius="5px"
+                      w="full"
+                      h="100px"
+                      objectFit="cover"
+                      bg="blue"
+                      >
+
+                    </Box>
+                    <Text
+                      fontWeight="500"
+                      fontSize="14px"
+                      textAlign="center"
+                      w="full"
+                      h="full"
+                      alignContent="center"
+                    >
+                      {category.name}
+                    </Text>
+                  </VStack>
+                </Box>
+              ))}
             </Grid>
           </Box>
         </VStack>
 
-        <VStack my="5" h="full" w="full" p="3" bgColor="white">
-          <Text
-            fontWeight="600"
-            fontSize="20px"
-            display="flex"
-            justifyContent="flex-start"
-            alignItems="center"
-            w="full"
-          >
+        <VStack my="5" h="full" w="full" p="3" bg="gray.100" borderRadius="5px">
+          <Text fontWeight="600" fontSize="20px" w="full">
             Recommendations
           </Text>
-          <Box w="90%" mt="10px">
-            <Grid templateColumns="repeat(4, 1fr)" gap="1" gapY="5" mb="15px">
+          <Box w="full" mt="10px">
+            <Grid templateColumns="repeat(5, 1fr)" gap="4">
               {recommendations.map((recommendation, index) => (
-                <Box
-                  bgColor="White"
-                  borderRadius="5px"
-                  w="90%"
-                  h="250px"
-                  boxShadow="2px 2px 5px 1px grey"
-                >
+                <Box bgColor="White" borderRadius="5px" w="100%" h="270px">
                   <VStack
                     display="flex"
                     justifyContent="center"
@@ -244,7 +294,7 @@ export function Home() {
                       src={recommendation.image}
                       borderTopRadius="5px"
                       w="full"
-                      h="170px"
+                      h="200px"
                       objectFit="cover"
                       alt={`User uploaded image ${index + 1}`}
                     />
