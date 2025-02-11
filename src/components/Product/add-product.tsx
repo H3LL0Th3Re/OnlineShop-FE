@@ -13,20 +13,22 @@ import {
 } from '@chakra-ui/react';
 import { FileUploadProduct } from './file-upload-product';
 import { useAuthStore } from '@/hooks/authstore';
-import { useState } from 'react';
-import { Checkbox } from '../ui/checkbox';
+import { useState, useEffect } from 'react';
 import { useCreateProduct } from '../tanstack/useProduct';
 import { useCreateVariant } from '../tanstack/useVariant';
 import DialogAddVariant from './Dialog/dialog-add-variant';
-import {
-  Variant,
-  Variant_option_values,
-  VariantOption,
-} from '@/types/product-type';
 import Swal from 'sweetalert2';
 import DropdownCategory from './dropdown-category';
 import { useCreateVariantOptions } from '../tanstack/useVariantOptions';
 import { useCreateVariantOptionValue } from '../tanstack/useVariantOptionValues';
+import { Variant } from '@/types/product-type';
+
+// Define the type for variant options
+interface VariantOption {
+  id: string; // or the appropriate type for your ID
+  name: string;
+  // Add other properties if needed
+}
 
 function AddProduct() {
   const { token } = useAuthStore();
@@ -52,14 +54,15 @@ function AddProduct() {
 
   const [attachments, setAttachments] = useState<File[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [selectedVariant, setSelectedVariant] = useState<number | null>(null);
-  const [variantOptionInput, setVariantOptionInput] = useState('');
   const [variantOptions, setVariantOptions] = useState<
-    { name: string; variantId: string }[]
+    { name: string; variantId: string }[][]
   >([]);
-  const [showVariantList, setShowVariantList] = useState(false);
   const [variantOptionValues, setVariantOptionValues] = useState<
-    Variant_option_values[]
+    { price: number; sku: string; stock: number; weight: number }[]
+  >([]);
+  const [variantOptionInputs, setVariantOptionInputs] = useState<string[]>([]);
+  const [variantCombinations, setVariantCombinations] = useState<
+    VariantOption[][]
   >([]);
 
   const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
@@ -133,7 +136,12 @@ function AddProduct() {
 
       // Buat varian dan variant options
       if (variants.length > 0) {
-        for (const variant of variants) {
+        for (
+          let variantIndex = 0;
+          variantIndex < variants.length;
+          variantIndex++
+        ) {
+          const variant = variants[variantIndex]; // Get the current variant
           try {
             const variantResponse = await createVariantMutation.mutateAsync({
               productId: productResponse.id,
@@ -150,48 +158,63 @@ function AddProduct() {
             }
 
             // Buat variant options jika ada
-            if (variant.variantOptions && variant.variantOptions.length > 0) {
-              for (const option of variant.variantOptions) {
+            if (
+              variantOptions[variantIndex] &&
+              variantOptions[variantIndex].length > 0
+            ) {
+              for (const option of variantOptions[variantIndex]) {
                 const variantOptionResponse =
                   await createVariantOptionMutation.mutateAsync({
                     token,
                     variantOptionsData: {
-                      ...option,
-                      variantId: variantResponse.variant.id,
+                      name: option.name,
+                      variantId: variantResponse.variant.id, // Use the current variant's ID
+                      values: [],
                     },
                   });
 
+                console.log('Variant option response:', variantOptionResponse); // Log the response
                 if (!variantOptionResponse || !variantOptionResponse.id) {
                   throw new Error('Gagal mendapatkan ID opsi varian');
                 }
 
                 // Create variant option values
                 for (const value of variantOptionValues) {
-                  console.log('Sending variant option value:', value);
-                  await createVariantOptionValueMutation
-                    .mutateAsync({
-                      token,
-                      data: {
-                        sku: value.sku,
-                        price: value.price,
-                        stock: value.stock,
-                        weight: value.weight,
-                        variant_optionsId: variantOptionResponse.id,
-                        is_active: false,
-                      },
-                    })
-                    .then((response) => {
-                      console.log(
-                        'Response from createVariantOptionValue:',
-                        response
-                      );
-                    })
-                    .catch((error) => {
-                      console.error(
-                        'Error creating variant option value:',
-                        error
-                      );
-                    });
+                  const variantOptionIds = variantOptions[variantIndex].map(
+                    (opt) => opt.variantId
+                  ); // Collect IDs of variant options
+
+                  // Log the data being sent
+                  console.log('Sending variant option value:', {
+                    sku: value.sku,
+                    price: value.price,
+                    stock: value.stock,
+                    weight: value.weight,
+                    variant_options: variantOptionIds,
+                  });
+
+                  // Validasi data sebelum mengirim
+                  if (
+                    !value.sku ||
+                    !value.weight ||
+                    !value.stock ||
+                    !value.price ||
+                    variantOptionIds.length === 0
+                  ) {
+                    throw new Error('All fields required');
+                  }
+
+                  await createVariantOptionValueMutation.mutateAsync({
+                    token,
+                    data: {
+                      sku: value.sku,
+                      price: value.price,
+                      stock: value.stock,
+                      weight: value.weight,
+                      is_active: false,
+                      variant_optionsId: variantOptionIds.join(','), // Convert array of variant option IDs to a string
+                    },
+                  });
                 }
               }
             }
@@ -238,6 +261,107 @@ function AddProduct() {
       });
     }
   };
+
+  const handleVariantOptionInputChange = (index: number, value: string) => {
+    setVariantOptionInputs((prev) => {
+      const updatedInputs = [...prev];
+      updatedInputs[index] = value;
+      return updatedInputs;
+    });
+  };
+
+  const handleAddVariantOption = (variantIndex: number) => {
+    const optionName = variantOptionInputs[variantIndex];
+    if (optionName) {
+      setVariantOptions((prev) => {
+        const updatedOptions = [...prev];
+        if (!updatedOptions[variantIndex]) {
+          updatedOptions[variantIndex] = [];
+        }
+        if (
+          !updatedOptions[variantIndex].some(
+            (option) => option.name === optionName
+          )
+        ) {
+          updatedOptions[variantIndex].push({
+            name: optionName,
+            variantId: `${Date.now()}`,
+          });
+        }
+        return updatedOptions;
+      });
+      setVariantOptionInputs((prev) => {
+        const updatedInputs = [...prev];
+        updatedInputs[variantIndex] = '';
+        return updatedInputs;
+      });
+    }
+  };
+
+  const handleRemoveVariantOption = (
+    variantIndex: number,
+    variantId: string
+  ) => {
+    setVariantOptions((prev) => {
+      const updatedOptions = { ...prev };
+      updatedOptions[variantIndex] = updatedOptions[variantIndex].filter(
+        (option) => option.variantId !== variantId
+      );
+      return updatedOptions;
+    });
+  };
+
+  const handleRemoveVariant = (index: number) => {
+    setVariants((prev) => prev.filter((_, i) => i !== index));
+    setVariantOptions((prev) => {
+      const newOptions = [...prev];
+      newOptions.splice(index, 1); // Remove options for the variant being deleted
+      return newOptions;
+    });
+  };
+
+  // Function to generate combinations of selected variants
+  // const generateCombinations = (
+  //   options: { name: string; variantId: string }[][]
+  // ) => {
+  //   const combinations = options.reduce(
+  //     (acc, curr) => {
+  //       return acc.flatMap((accItem) =>
+  //         curr.map((option) => [...accItem, option])
+  //       );
+  //     },
+  //     [[]] as { name: string; variantId: string }[][]
+  //   );
+
+  //   return combinations;
+  // };
+
+  const generateVariantCombinations = () => {
+    const combinations: VariantOption[][] = [];
+    const variantOptionsLength = variantOptions.length;
+
+    const generate = (currentCombination: VariantOption[], index: number) => {
+      if (index === variantOptionsLength) {
+        combinations.push(currentCombination);
+        return;
+      }
+      for (const option of variantOptions[index]) {
+        generate(
+          [...currentCombination, { ...option, id: option.variantId }],
+          index + 1
+        );
+      }
+    };
+
+    generate([], 0);
+    setVariantCombinations(combinations);
+  };
+
+  useEffect(() => {
+    if (variantOptions.length > 0) {
+      generateVariantCombinations();
+    }
+  }, [variantOptions]);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -347,269 +471,209 @@ function AddProduct() {
                 </Text>
                 <DialogAddVariant
                   onAddVariant={(newVariant) =>
-                    setVariants([...variants, newVariant])
+                    setVariants((prevVariants) => [...prevVariants, newVariant])
                   }
                 />
               </HStack>
 
               {variants.map((variant, variantIndex) => (
-                <Button
+                <VStack
                   key={variantIndex}
                   gap="5px"
-                  bg={'white'}
-                  color={'black'}
-                  border={'1px solid rgb(87, 87, 87)'}
-                  borderRadius={'10px'}
+                  w="full"
+                  align="flex-start"
                 >
-                  <HStack gap="2">
-                    <Text fontWeight="500" fontSize="14px">
-                      {variant.name}
+                  <HStack>
+                    <Text fontWeight="600" fontSize="15px">
+                      Variant: {variant.name}
                     </Text>
-                    <Checkbox
-                      size="sm"
-                      onCheckedChange={(details) => {
-                        console.log(
-                          'Checkbox changed:',
-                          details.checked,
-                          variantIndex
-                        );
-                        setSelectedVariant(
-                          details.checked ? variantIndex : null
-                        );
-                      }}
-                      checked={selectedVariant === variantIndex}
-                    />
+                    <Button
+                      onClick={() => handleRemoveVariant(variantIndex)}
+                      colorScheme="red"
+                      size="xs"
+                    >
+                      Remove
+                    </Button>
                   </HStack>
-                </Button>
-              ))}
-
-              {selectedVariant !== null && (
-                <VStack gap="5px" w="full" align="flex-start">
-                  <Text fontWeight="600" fontSize="15px">
-                    Variant Options *
-                  </Text>
                   <HStack>
                     <Input
-                      placeholder="Variant Options..."
-                      value={variantOptionInput}
-                      onChange={(e) => setVariantOptionInput(e.target.value)}
+                      placeholder="Enter option..."
+                      value={variantOptionInputs[variantIndex] || ''}
+                      onChange={(e) =>
+                        handleVariantOptionInputChange(
+                          variantIndex,
+                          e.target.value
+                        )
+                      }
                     />
                     <Button
-                      onClick={() => {
-                        // Validasi sebelum menambahkan opsi varian
-                        if (!variantOptionInput || selectedVariant === null) {
-                          Swal.fire({
-                            icon: 'warning',
-                            title: 'Perhatian',
-                            text: 'Semua field wajib diisi!',
-                          });
-                          return;
-                        }
-
-                        const newOption = {
-                          name: variantOptionInput,
-                          variantId: selectedVariant.toString(),
-                          values: [],
-                        };
-
-                        const updatedVariants = variants.map(
-                          (variant, variantIndex) => {
-                            if (selectedVariant === variantIndex) {
-                              return {
-                                ...variant,
-                                variantOptions: [
-                                  ...variant.variantOptions,
-                                  newOption,
-                                ],
-                              };
-                            }
-                            return variant;
-                          }
-                        );
-
-                        setVariants(updatedVariants);
-                        setVariantOptions([...variantOptions, newOption]);
-                        setVariantOptionInput('');
-                        setShowVariantList(true);
-                      }}
+                      onClick={() => handleAddVariantOption(variantIndex)}
+                      colorScheme="blue"
                     >
                       Add Option
                     </Button>
                   </HStack>
-                  {variantOptions.length > 0 && (
-                    <Flex gap={2} justify={'center'} align={'center'}>
-                      {variantOptions.map((option, index) => (
-                        <HStack
-                          key={index}
-                          justify="space-between"
-                          rounded={'md'}
-                          pl={2}
-                          bg={'blackAlpha.300'}
-                          w="full"
+                  <HStack align="flex-start">
+                    {variantOptions[variantIndex]?.map((option) => (
+                      <HStack key={option.variantId} spaceY={2}>
+                        <Text fontSize="14px">{option.name}</Text>
+                        <Button
+                          onClick={() =>
+                            handleRemoveVariantOption(
+                              variantIndex,
+                              option.variantId
+                            )
+                          }
+                          colorScheme="red"
+                          size="xs"
                         >
-                          <Text>{option.name}</Text>
-                          <Button
-                            color={'black'}
-                            bg={'blackAlpha.300'}
-                            size={'xs'}
-                            fontSize={'medium'}
-                            onClick={() => {
-                              // Hapus opsi varian dari state
-                              const updatedOptions = variantOptions.filter(
-                                (_, i) => i !== index
-                              );
-                              setVariantOptions(updatedOptions);
-                              // Juga hapus dari varian yang sesuai
-                              const updatedVariants = variants.map(
-                                (variant: Variant, variantIndex: number) => {
-                                  if (selectedVariant === variantIndex) {
-                                    return {
-                                      ...variant,
-                                      variantOptions:
-                                        variant.variantOptions.filter(
-                                          (_option: VariantOption, i: number) =>
-                                            i !== index
-                                        ),
-                                    };
-                                  }
-                                  return variant;
-                                }
-                              );
-                              setVariants(updatedVariants);
-                            }}
-                          >
-                            x
-                          </Button>
-                        </HStack>
-                      ))}
-                    </Flex>
-                  )}
+                          X
+                        </Button>
+                      </HStack>
+                    ))}
+                  </HStack>
                 </VStack>
-              )}
+              ))}
 
-              {showVariantList && variants.length > 0 && (
-                <>
-                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
-                    Variant List
-                  </Text>
-                  <Flex
-                    bgColor="white"
-                    w={'full'}
-                    gap="10px"
-                    borderRadius="10px"
-                    align="flex-start"
-                  >
-                    {variants.map((variant: Variant, variantIndex: number) => (
-                      <Box key={variantIndex} w={'full'} spaceY={5}>
-                        {variant.variantOptions.map(
-                          (option: VariantOption, optionIndex: number) => (
-                            <Box
-                              key={optionIndex}
-                              borderWidth="1px"
-                              borderRadius="md"
-                              p={4}
-                              spaceY={2}
-                            >
-                              <VStack align="flex-start">
-                                <Text fontWeight={'bold'}>{option.name}</Text>
-                              </VStack>
-                              <HStack w={'full'} gap={5}>
-                                <Flex w={'40%'} direction={'column'}>
-                                  <Box w={'96'}>
-                                    <Text fontWeight="600" fontSize="15px">
-                                      Price *
-                                    </Text>
-                                  </Box>
-                                  <Flex>
-                                    <InputAddon>Rp</InputAddon>
-                                    <Input
-                                      placeholder="Price"
-                                      type="number"
-                                      onChange={(e) =>
-                                        setVariantOptionValues((prev) => {
-                                          const updatedValue = {
-                                            ...prev[0],
-                                            price: Number(e.target.value),
-                                          };
-                                          return [updatedValue];
-                                        })
-                                      }
-                                    />
-                                  </Flex>
-                                </Flex>
-                                <Flex w={'40%'} direction={'column'}>
-                                  <Box w={'96'}>
-                                    <Text fontWeight="600" fontSize="15px">
-                                      SKU (Stock Keeping Unit) *
-                                    </Text>
-                                  </Box>
-                                  <Input
-                                    placeholder="SKU"
-                                    onChange={(e) =>
-                                      setVariantOptionValues((prev) => {
-                                        const updatedValue = {
-                                          ...prev[0],
-                                          sku: e.target.value,
-                                        };
-                                        return [updatedValue];
-                                      })
-                                    }
-                                  />
-                                </Flex>
-                              </HStack>
-                              <HStack w={'full'} gap={5}>
-                                <Flex w={'40%'} direction={'column'}>
-                                  <Box w={'72'}>
-                                    <Text fontWeight="600" fontSize="15px">
-                                      Product Stock *
-                                    </Text>
-                                  </Box>
-                                  <Input
-                                    placeholder="Stock"
-                                    type="number"
-                                    onChange={(e) =>
-                                      setVariantOptionValues((prev) => {
-                                        const updatedValue = {
-                                          ...prev[0],
-                                          stock: Number(e.target.value),
-                                        };
-                                        return [updatedValue];
-                                      })
-                                    }
-                                  />
-                                </Flex>
-                                <Flex w={'40%'} direction={'column'}>
-                                  <Box w={'96'}>
-                                    <Text fontWeight="600" fontSize="15px">
-                                      Product Weight *
-                                    </Text>
-                                  </Box>
-                                  <Flex>
-                                    <Input
-                                      placeholder="Weight"
-                                      type="number"
-                                      onChange={(e) =>
-                                        setVariantOptionValues((prev) => {
-                                          const updatedValue = {
-                                            ...prev[0],
-                                            weight: Number(e.target.value),
-                                          };
-                                          return [updatedValue];
-                                        })
-                                      }
-                                    />
-                                    <InputAddon>Gram</InputAddon>
-                                  </Flex>
-                                </Flex>
-                              </HStack>
-                            </Box>
-                          )
-                        )}
+              <VStack spaceY={2} align="flex-start" mt={4}>
+                <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                  All Variant Options
+                </Text>
+                <Flex
+                  bgColor="white"
+                  w={'full'}
+                  gap="10px"
+                  borderRadius="10px"
+                  align="flex-start"
+                >
+                  {Object.values(variantOptions)
+                    .flat()
+                    .map((option, index) => (
+                      <Box
+                        key={index}
+                        borderWidth="1px"
+                        borderRadius="md"
+                        p={2}
+                      >
+                        <Text fontWeight={'bold'}>{option.name}</Text>
                       </Box>
                     ))}
-                  </Flex>
-                </>
-              )}
+                </Flex>
+              </VStack>
+
+              <VStack spaceY={2} align="flex-start" mt={4} w={'100%'}>
+                {variants.length > 0 && (
+                  <>
+                    <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                      Variant Option Values
+                    </Text>
+                    {variantCombinations.length > 0 &&
+                      variantCombinations.map((combination, index) => (
+                        <Box
+                          key={index}
+                          bg={'green.100'}
+                          borderWidth="1px"
+                          borderRadius="md"
+                          p={4}
+                        >
+                          <VStack align="flex-start">
+                            <Text fontWeight={'bold'}>
+                              Combination {index + 1}:{' '}
+                              {combination
+                                .map((opt: VariantOption) => opt.name)
+                                .join(', ')}
+                            </Text>
+                            <HStack w={'full'} gap={5}>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Text fontWeight="600" fontSize="15px">
+                                  Price *
+                                </Text>
+                                <Input
+                                  placeholder="Price"
+                                  type="number"
+                                  onChange={(e) => {
+                                    const updatedValue = {
+                                      price: Number(e.target.value),
+                                      sku: '',
+                                      stock: 0,
+                                      weight: 0,
+                                    };
+                                    setVariantOptionValues((prev) => {
+                                      const newValues = [...prev];
+                                      newValues[index] = updatedValue;
+                                      return newValues;
+                                    });
+                                  }}
+                                />
+                              </Flex>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Text fontWeight="600" fontSize="15px">
+                                  SKU *
+                                </Text>
+                                <Input
+                                  placeholder="SKU"
+                                  onChange={(e) => {
+                                    const updatedValue = {
+                                      ...variantOptionValues[index],
+                                      sku: e.target.value,
+                                    };
+                                    setVariantOptionValues((prev) => {
+                                      const newValues = [...prev];
+                                      newValues[index] = updatedValue;
+                                      return newValues;
+                                    });
+                                  }}
+                                />
+                              </Flex>
+                            </HStack>
+                            <HStack w={'full'} gap={5}>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Text fontWeight="600" fontSize="15px">
+                                  Product Stock *
+                                </Text>
+                                <Input
+                                  placeholder="Stock"
+                                  type="number"
+                                  onChange={(e) => {
+                                    const updatedValue = {
+                                      ...variantOptionValues[index],
+                                      stock: Number(e.target.value),
+                                    };
+                                    setVariantOptionValues((prev) => {
+                                      const newValues = [...prev];
+                                      newValues[index] = updatedValue;
+                                      return newValues;
+                                    });
+                                  }}
+                                />
+                              </Flex>
+                              <Flex w={'40%'} direction={'column'}>
+                                <Text fontWeight="600" fontSize="15px">
+                                  Product Weight *
+                                </Text>
+                                <Input
+                                  placeholder="Weight"
+                                  type="number"
+                                  onChange={(e) => {
+                                    const updatedValue = {
+                                      ...variantOptionValues[index],
+                                      weight: Number(e.target.value),
+                                    };
+                                    setVariantOptionValues((prev) => {
+                                      const newValues = [...prev];
+                                      newValues[index] = updatedValue;
+                                      return newValues;
+                                    });
+                                  }}
+                                />
+                              </Flex>
+                            </HStack>
+                          </VStack>
+                        </Box>
+                      ))}
+                  </>
+                )}
+              </VStack>
             </VStack>
 
             {variants.length === 0 && (

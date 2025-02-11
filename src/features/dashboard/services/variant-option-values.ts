@@ -1,11 +1,11 @@
 // services/variantOptionValuesService.ts
 import axios from 'axios';
 import { apiURL } from '@/utils/api-url';
-import { VariantOptionValue } from '@/types/product-type';
+import { Variant_option_values } from '@/types/product-type';
 
 export const createVariantOptionValue = async (
   token: string,
-  data: VariantOptionValue
+  data: Variant_option_values
 ) => {
   try {
     if (!token) {
@@ -73,7 +73,7 @@ export const getVariantOptionValueById = async (token: string, id: string) => {
 export const updateVariantOptionValue = async (
   token: string,
   id: string,
-  variantOptionValueData: VariantOptionValue
+  variantOptionValueData: Variant_option_values
 ) => {
   try {
     const response = await axios.put(
