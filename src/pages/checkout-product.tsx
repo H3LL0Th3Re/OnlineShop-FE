@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
+import { apiURL } from '@/utils/api-url';
 import {
   Box,
   Flex,
@@ -17,8 +18,12 @@ import {
   Textarea,
   VStack,
 } from '@chakra-ui/react';
+import axios from 'axios';
+// import { useState } from 'react';
 import { RiShoppingBag4Line } from 'react-icons/ri';
-
+import Cookies from 'js-cookie';
+import { useEffect, useState } from 'react';
+import 'midtrans-snap';
 // const products = [
 //   {
 //     id: 1,
@@ -47,6 +52,146 @@ import { RiShoppingBag4Line } from 'react-icons/ri';
 // ];
 
 export default function CheckoutProduct() {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone_number, setPhone_number] = useState('');
+  const [province, setProvince] = useState('');
+  const [city, setCity] = useState('');
+  const [district, setDistrict] = useState('');
+  const [sub_district, setSub_district] = useState('');
+  const [postal_code, setPostal_code] = useState('');
+  const [detail_address, setDetail_address] = useState('');
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+    script.setAttribute('data-client-key', 'SB-Mid-client-4omBGFxKlAqOqhRu'); // Replace with actual client key
+    document.body.appendChild(script);
+  }, []);
+  const token = Cookies.get('token');
+  // initSnap('SB-Mid-client-4omBGFxKlAqOqhRu', 'sandbox'/* or 'production' */)
+
+  async function onSubmit(
+    id: string,
+    productName: string,
+    price: number,
+    quantity: number
+  ) {
+    try {
+      console.log({
+        status: false,
+        prices: price * quantity,
+        service_charge: (price * quantity * 1) / 100,
+        receiver_city: city,
+        receiver_province: province,
+        receiver_subDistrict: sub_district,
+        receiver_district: district,
+        receiver_phone: phone_number,
+        receiver_name: name,
+        receiver_postalCode: postal_code,
+        receiver_detailAddress: detail_address,
+        receiver_email: email,
+        // cartsId: "cdqdwir39232",
+        userId: 'cm6iuhgwl0001tat8bgmz4wkc',
+        // paymentsId: "joewjfiewjfiwf",
+        // courierId: "wqeijeiqejei"
+      });
+
+      const invoice_response = await axios.post(
+        apiURL + '/invoice/create-invoice',
+        {
+          status: false,
+          prices: price * quantity,
+          service_charge: (price * quantity * 1) / 100,
+          receiver_city: city,
+          receiver_province: province,
+          receiver_subDistrict: sub_district,
+          receiver_district: district,
+          receiver_phone: phone_number,
+          receiver_name: name,
+          receiver_postalCode: postal_code,
+          receiver_detailAddress: detail_address,
+          receiver_email: email,
+          cartsId: 'cdqdwir39232',
+          userId: 'cm6iuhgwl0001tat8bgmz4wkc',
+          paymentsId: 'joewjfiewjfiwf',
+          courierId: 'wqeijeiqejei',
+        },
+        {
+          headers: {
+            Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const response = await axios.post(
+        apiURL + '/transaction/create-transaction',
+        {
+          id,
+          productName,
+          price,
+          quantity,
+        },
+        {
+          headers: {
+            Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      console.log(invoice_response.data);
+      const snapToken = response.data.token; // Expect snapToken from backend
+      console.log(snapToken);
+      if (window.snap) {
+        window.snap.pay(snapToken, {
+          onSuccess: async function (result) {
+            console.log('Payment Success:', result);
+
+            await axios.post(
+              apiURL + '/payment/create-payment',
+              {
+                bank: result.bank,
+                gross_amount: price * quantity,
+                status_code: result.status_code,
+                midtrans_transaction_id: result.transaction_id,
+              },
+              {
+                headers: {
+                  Authorization: `bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+            alert('Payment successful!');
+            // console.log(Midtransresponse);
+
+            window.location.href = 'http://localhost:5173/home';
+          },
+          onPending: function (result) {
+            console.log('Payment Pending:', result);
+            alert('Payment pending. Complete the payment to continue.');
+          },
+          onError: function (result) {
+            console.log('Payment Error:', result);
+            alert('Payment failed. Try again.');
+          },
+          onClose: function () {
+            alert('Payment window closed.');
+          },
+        });
+      } else {
+        alert('Midtrans SDK not loaded.');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return {
+          message: error.response?.data.message || 'Error updating message',
+        };
+      } else {
+        return { message: 'An error occurred while updating message.' };
+      }
+    }
+  }
   return (
     <Box p="0" m="0">
       <Box p="2" m="5px" bg="white">
@@ -66,42 +211,67 @@ export default function CheckoutProduct() {
               <HStack w="full">
                 <VStack w="50%">
                   <Field textAlign="left" w="full" required label="Nama">
-                    <Input />
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                    />
                   </Field>
                 </VStack>
                 <VStack w="50%">
                   <Field textAlign="left" w="full" required label="Email">
-                    <Input type="email" />
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
                   </Field>
                 </VStack>
               </HStack>
               <VStack w="full">
                 <Field textAlign="left" w="full" required label="Phone Number">
-                  <Input type="number" />
+                  <Input
+                    type="number"
+                    value={phone_number}
+                    onChange={(e) => setPhone_number(e.target.value)}
+                  />
                 </Field>
               </VStack>
               <Field textAlign="left" w="full" required label="Province">
-                <Input />
+                <Input
+                  value={province}
+                  onChange={(e) => setProvince(e.target.value)}
+                />
               </Field>
 
               <Field textAlign="left" w="full" required label="City">
-                <Input />
+                <Input value={city} onChange={(e) => setCity(e.target.value)} />
               </Field>
 
               <Field textAlign="left" w="full" required label="District">
-                <Input />
+                <Input
+                  value={district}
+                  onChange={(e) => setDistrict(e.target.value)}
+                />
               </Field>
               <Field textAlign="left" w="full" required label="Subdistrict">
-                <Input />
+                <Input
+                  value={sub_district}
+                  onChange={(e) => setSub_district(e.target.value)}
+                />
               </Field>
               <Field textAlign="left" w="full" required label="Postal Code">
-                <Input type="number" />
-              </Field>
-              <Field textAlign="left" w="full" required label="Subdistrict">
-                <Input />
+                <Input
+                  type="number"
+                  value={postal_code}
+                  onChange={(e) => setPostal_code(e.target.value)}
+                />
               </Field>
               <Field textAlign="left" w="full" required label="Detail Address">
-                <Textarea h="150px" />
+                <Textarea
+                  h="150px"
+                  value={detail_address}
+                  onChange={(e) => setDetail_address(e.target.value)}
+                />
               </Field>
             </Box>
           </Box>
@@ -199,7 +369,18 @@ export default function CheckoutProduct() {
               </Field>
             </Box>
             <Box p="2" w="full" display="flex" justifyContent="flex-end">
-              <Button bgColor="#2400FE" color="white">
+              <Button
+                bgColor="#2400FE"
+                color="white"
+                onClick={() =>
+                  onSubmit(
+                    'ORDER-147', // Replace with dynamic order ID
+                    'hp murah', // Replace with dynamic product name
+                    10000, // Replace with dynamic price
+                    1 // Replace with dynamic quantity
+                  )
+                }
+              >
                 Checkout Now
               </Button>
             </Box>

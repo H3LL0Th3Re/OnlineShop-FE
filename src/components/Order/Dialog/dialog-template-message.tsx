@@ -18,7 +18,7 @@ import { useMessages } from '@/features/message_tanstack';
 import { useState } from 'react';
 
 const token = Cookies.get('token');
-
+console.log(token);
 const getButtonStatus = (status: string) => {
   switch (status) {
     case 'Belum Dibayar':
@@ -48,7 +48,7 @@ export default function DialogTemplateMessage({
   const queryClient = useQueryClient();
 
   const sendViaWhatsApp = (message: string, phoneNumber: string) => {
-    const formattedMessage = encodeURIComponent(message); // Encode message for URL
+    const formattedMessage = encodeURIComponent(message);
     console.log(formattedMessage);
     const whatsappURL = `https://wa.me/${phoneNumber}?text=${formattedMessage}`;
     window.open(whatsappURL, '_blank'); // Open WhatsApp chat in a new tab
