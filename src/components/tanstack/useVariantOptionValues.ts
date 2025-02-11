@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { VariantOptionValue } from '@/types/product-type';
 import { createVariantOptionValue } from '@/features/dashboard/services/variant-option-values';
+import { Variant_option_values } from '@/types/product-type';
 
 export const useCreateVariantOptionValue = () => {
   const queryClient = useQueryClient();
@@ -11,7 +11,7 @@ export const useCreateVariantOptionValue = () => {
       data,
     }: {
       token: string;
-      data: VariantOptionValue;
+      data: Variant_option_values;
     }) => createVariantOptionValue(token, data),
 
     onSuccess: () => {

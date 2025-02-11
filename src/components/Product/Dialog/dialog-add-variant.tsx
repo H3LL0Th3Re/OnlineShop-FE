@@ -25,6 +25,7 @@ function DialogAddVariant({ onAddVariant }: DialogAddVariantProps) {
         name: variantName,
         id: '',
         variantOptions: [],
+        Variant_options: [],
       };
       onAddVariant(newVariant);
       setVariantName('');
