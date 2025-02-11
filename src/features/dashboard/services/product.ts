@@ -78,6 +78,28 @@ export const getStorebyName = async (username: string): Promise<Product[]> => {
     throw new Error(errorMessage);
   }
 };
+export const getProductByUrl = async (
+  username: string,
+  url: string
+): Promise<Product> => {
+  try {
+    const response = await axios.get(`${apiURL}/product/${username}/${url}`);
+
+    console.log(response.data.product);
+    return response.data.product;
+  } catch (error) {
+    let errorMessage = 'Failed to fetch products';
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        errorMessage = 'Username or Url Not Found';
+      } else {
+        errorMessage = error.response?.data?.message || errorMessage;
+      }
+    }
+
+    throw new Error(errorMessage);
+  }
+};
 
 export const createProducts = async (data: Product, token: string) => {
   try {

@@ -1,8 +1,7 @@
 import { Box, Flex, Grid, Image, Text, VStack } from '@chakra-ui/react';
 
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
-import { useQuery } from '@tanstack/react-query';
-import { getCategories } from '@/features/dashboard/get-categories';
+
 import { Link, useParams } from 'react-router';
 import { useStoreName } from '@/components/tanstack/useProduct';
 import { useFetchStoreName } from '@/components/tanstack/useStore';
@@ -12,14 +11,7 @@ import { formatPrice } from '@/utils/format-price';
 
 export default function StoreProduct() {
   const { username } = useParams();
-  const useFetchCategory = () => {
-    return useQuery({
-      queryKey: ['Category'],
-      queryFn: () => getCategories(),
-    });
-  };
 
-  const { data, isLoading, error } = useFetchCategory();
   const { data: products } = useStoreName(String(username));
   const {
     data: store,
@@ -108,16 +100,16 @@ export default function StoreProduct() {
               bg="gray.100"
               p="4"
             >
-              {isLoading && (
+              {loadingStore && (
                 <>
                   {' '}
                   <Text> Loading....</Text>{' '}
                 </>
               )}
-              {error && (
+              {storeError && (
                 <>
                   {' '}
-                  <Text> Error: {error.message}</Text>{' '}
+                  <Text> Error: {storeError.message}</Text>{' '}
                 </>
               )}
               {products?.map((product, index) => (
@@ -151,13 +143,15 @@ export default function StoreProduct() {
                       </Text>
                       <Text fontWeight="400" textAlign="center" fontSize="15px">
                         Rp.{' '}
-                        {product.variants?.[0].variantOptions[0].values?.[0]
-                          .price
-                          ? formatPrice(
-                              product.variants?.[0].variantOptions[0].values[0]
-                                .price
-                            )
-                          : '-'}
+                        {product.price
+                          ? formatPrice(product.price)
+                          : product.variants?.[0].Variant_options[0]
+                                .Variant_option_values?.[0].price
+                            ? formatPrice(
+                                product.variants?.[0].Variant_options[0]
+                                  .Variant_option_values?.[0].price
+                              )
+                            : '-'}
                       </Text>
                     </VStack>
                   </Link>
@@ -182,7 +176,7 @@ export default function StoreProduct() {
   );
 }
 
-  /* <Box> */
+/* <Box> */
 //   <Box position="sticky" top="0" right="0" overflow="auto" zIndex="2">
 //     <Navbar />
 //   </Box>
