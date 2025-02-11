@@ -23,9 +23,6 @@ export default function NavbarBuyer() {
         <Box>
           <HStack gap={10} color={'whiteAlpha.900'}>
             <Box _hover={{ color: '#5F2EEA' }}>
-              <Link to={'/'}>Templates</Link>
-            </Box>
-            <Box _hover={{ color: '#5F2EEA' }}>
               <Link to={'/'}>Pricing</Link>
             </Box>
             <Box _hover={{ color: '#5F2EEA' }}>

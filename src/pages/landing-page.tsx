@@ -14,9 +14,7 @@ export function LandingPage() {
             LAKOE APP
           </Text>
           <HStack gap={10} color={'whiteAlpha.900'}>
-            <Box _hover={{ color: '#5F2EEA' }}>
-              <Link to={'/'}>Templates</Link>
-            </Box>
+
             <Box _hover={{ color: '#5F2EEA' }}>
               <Link to={'/'}>Pricing</Link>
             </Box>
@@ -40,14 +38,15 @@ export function LandingPage() {
             fontWeight={'bold'}
             color={'whiteAlpha.900'}
           >
-            Turn Your Templates into Profit
+            A Better Way to Shop and Sell
           </Text>
           <Text textAlign={'center'} fontSize={'xl'} color={'whiteAlpha.900'}>
-            Join thousands of creators selling their premium templates, themes,
-            and digital assets to a global audience.
+          Join thousands of stores offering premium products, unbeatable deals, 
+          and exclusive offers crafted just for you!
           </Text>
         </Box>
         <Box spaceX={5} pt={10}>
+        <Link to={'/home'}>
           <Button
             size={'xl'}
             bg={'whiteAlpha.900'}
@@ -56,8 +55,9 @@ export function LandingPage() {
             fontSize={'xl'}
             _hover={{ bg: '#5F2EEA', color: 'white' }}
           >
-            GET STARTED <FaLongArrowAltRight />
+            START BUYING <FaLongArrowAltRight />
           </Button>
+          </Link>
           <Button
             rounded={'full'}
             size={'xl'}
