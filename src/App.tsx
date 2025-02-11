@@ -42,7 +42,7 @@ function App() {
       HydrateFallback: Fallback,
     },
     {
-      path: '/detail-product',
+      path: '/:username/:url',
       Component: DetailProduct,
       HydrateFallback: Fallback,
     },

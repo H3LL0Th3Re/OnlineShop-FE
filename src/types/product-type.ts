@@ -12,7 +12,7 @@ export interface Product {
   weight: number;
   categoryIds: string[];
   subcategoryIds: string[];
-  attachments: File[] | null;
+  attachments: File[];
   variants?: Variant[];
   is_active?: boolean;
 }

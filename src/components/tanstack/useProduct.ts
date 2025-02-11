@@ -4,6 +4,7 @@ import {
   getAllProducts,
   getStoreProduct,
   getStorebyName,
+  getProductByUrl,
 } from '@/features/dashboard/services/product';
 import { Product } from '@/types/product-type';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -34,6 +35,12 @@ export const useFetchProductStore = (token: string) => {
     queryKey: ['Products'],
     queryFn: () => getStoreProduct(token),
     enabled: !!token,
+  });
+};
+export const useFetchProductUrl = (username: string, url: string) => {
+  return useQuery({
+    queryKey: ['Products'],
+    queryFn: () => getProductByUrl(username, url),
   });
 };
 
