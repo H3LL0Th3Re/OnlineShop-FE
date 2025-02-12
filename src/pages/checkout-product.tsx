@@ -71,35 +71,49 @@ export default function CheckoutProduct() {
   // initSnap('SB-Mid-client-4omBGFxKlAqOqhRu', 'sandbox'/* or 'production' */)
 
   async function onSubmit(
-    id: string,
     productName: string,
     price: number,
     quantity: number
   ) {
     try {
-      console.log({
-        status: false,
-        prices: price * quantity,
-        service_charge: (price * quantity * 1) / 100,
-        receiver_city: city,
-        receiver_province: province,
-        receiver_subDistrict: sub_district,
-        receiver_district: district,
-        receiver_phone: phone_number,
-        receiver_name: name,
-        receiver_postalCode: postal_code,
-        receiver_detailAddress: detail_address,
-        receiver_email: email,
-        // cartsId: "cdqdwir39232",
-        userId: 'cm6iuhgwl0001tat8bgmz4wkc',
-        // paymentsId: "joewjfiewjfiwf",
-        // courierId: "wqeijeiqejei"
+      const order_response = await axios.post(apiURL + '/order/add-order', {
+        shipper_contact_name: 'jack', //replace with store owner.
+        shipper_contact_phone: '40239403',
+        shipper_contact_email: 'jack@mail.com',
+        shipper_organization: 'los pollos hermanos', //replace with store name
+        origin_contact_name: 'jack',
+        origin_contact_phone: '939328492',
+        origin_address: '20 jeet street', //replace with store location
+        // origin_note: orderData.origin_note,
+        origin_postal_code: '12330', //replace with store postal code
+        destination_contact_name: name,
+        destination_contact_phone: phone_number,
+        destination_contact_email: email,
+        destination_address: `${detail_address}, ${province}, ${district}, ${sub_district}, ${city}`,
+        destination_postal_code: postal_code,
+        // destination_note: orderData.destination_note,
+        courier_company: 'jne', //replace with courier selector
+        courier_type: 'reg',
+        // courier_insurance: ,
+        delivery_type: 'now',
+        // order_note: orderData.order_note,
+        // metadata: orderData.metadata,
+        items: [
+          {
+            name: productName, // change to product name product quantity and etc.
+            quantity: quantity,
+            weight: 200,
+            value: price,
+          },
+        ],
       });
+
+      console.log(order_response.data.orderId);
 
       const invoice_response = await axios.post(
         apiURL + '/invoice/create-invoice',
         {
-          status: false,
+          status: 'pending',
           prices: price * quantity,
           service_charge: (price * quantity * 1) / 100,
           receiver_city: city,
@@ -111,10 +125,10 @@ export default function CheckoutProduct() {
           receiver_postalCode: postal_code,
           receiver_detailAddress: detail_address,
           receiver_email: email,
-          cartsId: 'cdqdwir39232',
-          userId: 'cm6iuhgwl0001tat8bgmz4wkc',
-          paymentsId: 'joewjfiewjfiwf',
-          courierId: 'wqeijeiqejei',
+          // cartsId: 'cdqdwir39232',
+          userId: 'cm704zh6c0001tabccpqrjsmh',
+          // paymentsId: 'joewjfiewjfiwf',
+          // courierId: 'wqeijeiqejei',
         },
         {
           headers: {
@@ -127,7 +141,7 @@ export default function CheckoutProduct() {
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',
         {
-          id,
+          id: order_response.data.orderId,
           productName,
           price,
           quantity,
@@ -374,7 +388,7 @@ export default function CheckoutProduct() {
                 color="white"
                 onClick={() =>
                   onSubmit(
-                    'ORDER-147', // Replace with dynamic order ID
+                    // Replace with dynamic order ID
                     'hp murah', // Replace with dynamic product name
                     10000, // Replace with dynamic price
                     1 // Replace with dynamic quantity
