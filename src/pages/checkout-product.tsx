@@ -24,32 +24,6 @@ import { RiShoppingBag4Line } from 'react-icons/ri';
 import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 import 'midtrans-snap';
-// const products = [
-//   {
-//     id: 1,
-//     name: 'Hp iphone 13',
-//     image:
-//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-//     price: '10000000',
-//     variant: [{ color: 'blue' }, { memory: '126 GB' }],
-//   },
-//   {
-//     id: 2,
-//     name: 'Hp iphone 11',
-//     image:
-//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-//     price: '20000000',
-//     variant: [{ color: 'white' }, { memory: '256 GB' }],
-//   },
-//   {
-//     id: 3,
-//     name: 'Hp iphone 13',
-//     image:
-//       'https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg',
-//     price: '30000000',
-//     variant: [{ color: 'grey' }, { memory: '512 GB' }],
-//   },
-// ];
 
 export default function CheckoutProduct() {
   const [name, setName] = useState('');
@@ -68,7 +42,6 @@ export default function CheckoutProduct() {
     document.body.appendChild(script);
   }, []);
   const token = Cookies.get('token');
-  // initSnap('SB-Mid-client-4omBGFxKlAqOqhRu', 'sandbox'/* or 'production' */)
 
   async function onSubmit(
     productName: string,
@@ -77,45 +50,42 @@ export default function CheckoutProduct() {
   ) {
     try {
       const order_response = await axios.post(apiURL + '/order/add-order', {
-        shipper_contact_name: 'jack', //replace with store owner.
-        shipper_contact_phone: '40239403',
-        shipper_contact_email: 'jack@mail.com',
-        shipper_organization: 'los pollos hermanos', //replace with store name
         origin_contact_name: 'jack',
-        origin_contact_phone: '939328492',
-        origin_address: '20 jeet street', //replace with store location
-        // origin_note: orderData.origin_note,
-        origin_postal_code: '12330', //replace with store postal code
+        origin_contact_phone: '029319321',
+        origin_contact_email: 'jack@mail.com',
+        origin_address: 'pajeet street',
+        origin_postal_code: '12240',
         destination_contact_name: name,
         destination_contact_phone: phone_number,
         destination_contact_email: email,
         destination_address: `${detail_address}, ${province}, ${district}, ${sub_district}, ${city}`,
         destination_postal_code: postal_code,
-        // destination_note: orderData.destination_note,
-        courier_company: 'jne', //replace with courier selector
+        courier_company: 'jne',
         courier_type: 'reg',
-        // courier_insurance: ,
         delivery_type: 'now',
-        // order_note: orderData.order_note,
-        // metadata: orderData.metadata,
+        order_note: 'please be Careful',
         items: [
           {
-            name: productName, // change to product name product quantity and etc.
-            quantity: quantity,
-            weight: 200,
+            name: 'pajeet food',
+            description: 'cow is sacred saar',
             value: price,
+            quantity: quantity,
+            height: 200,
+            length: 200,
+            weight: 200,
+            width: 200,
           },
         ],
       });
 
-      console.log(order_response.data.orderId);
+      const service_charge = (price * quantity * 1) / 100;
 
       const invoice_response = await axios.post(
         apiURL + '/invoice/create-invoice',
         {
           status: 'pending',
           prices: price * quantity,
-          service_charge: (price * quantity * 1) / 100,
+          service_charge: service_charge,
           receiver_city: city,
           receiver_province: province,
           receiver_subDistrict: sub_district,
@@ -126,7 +96,8 @@ export default function CheckoutProduct() {
           receiver_detailAddress: detail_address,
           receiver_email: email,
           // cartsId: 'cdqdwir39232',
-          userId: 'cm704zh6c0001tabccpqrjsmh',
+          userId: 'cm71m960c0007tarc0pnj62eb',
+          order_id: order_response.data.orderId,
           // paymentsId: 'joewjfiewjfiwf',
           // courierId: 'wqeijeiqejei',
         },
@@ -137,6 +108,14 @@ export default function CheckoutProduct() {
           },
         }
       );
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: invoice_response.data.invoice_created.id,
+        }
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
 
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',
@@ -153,33 +132,19 @@ export default function CheckoutProduct() {
           },
         }
       );
-      console.log(invoice_response.data);
+
       const snapToken = response.data.token; // Expect snapToken from backend
       console.log(snapToken);
       if (window.snap) {
         window.snap.pay(snapToken, {
           onSuccess: async function (result) {
-            console.log('Payment Success:', result);
-
-            await axios.post(
-              apiURL + '/payment/create-payment',
-              {
-                bank: result.bank,
-                gross_amount: price * quantity,
-                status_code: result.status_code,
-                midtrans_transaction_id: result.transaction_id,
-              },
-              {
-                headers: {
-                  Authorization: `bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
-            alert('Payment successful!');
-            // console.log(Midtransresponse);
-
-            window.location.href = 'http://localhost:5173/home';
+            try {
+              console.log('Payment Success:', result);
+              alert('Payment successful!');
+            } catch (error) {
+              console.error('Error processing payment:', error);
+              // Handle error appropriately
+            }
           },
           onPending: function (result) {
             console.log('Payment Pending:', result);
@@ -390,8 +355,8 @@ export default function CheckoutProduct() {
                   onSubmit(
                     // Replace with dynamic order ID
                     'hp murah', // Replace with dynamic product name
-                    10000, // Replace with dynamic price
-                    1 // Replace with dynamic quantity
+                    700000, // Replace with dynamic price
+                    2 // Replace with dynamic quantity
                   )
                 }
               >
