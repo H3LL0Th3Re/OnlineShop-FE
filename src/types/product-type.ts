@@ -1,6 +1,7 @@
 export interface Product {
   id?: string;
   name: string;
+  url: string;
   description: string;
   minimum_order: number;
   price: number;
@@ -37,7 +38,7 @@ export interface Variant_option_values {
   stock: number;
   price: number;
   is_active: boolean;
-  variant_optionsId: string;
+  variant_optionsId: string[];
 }
 
 export interface Variant {

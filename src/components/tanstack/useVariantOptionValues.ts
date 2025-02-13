@@ -11,7 +11,7 @@ export const useCreateVariantOptionValue = () => {
       data,
     }: {
       token: string;
-      data: Variant_option_values;
+      data: Variant_option_values[];
     }) => createVariantOptionValue(token, data),
 
     onSuccess: () => {

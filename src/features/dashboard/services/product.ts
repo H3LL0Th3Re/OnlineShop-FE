@@ -42,7 +42,7 @@ export const getStoreProduct = async (token: string): Promise<Product[]> => {
       },
     });
 
-    console.log('api response:', response.data.product);
+    // console.log('api response:', response.data.product);
     return response.data.product;
   } catch (error) {
     let errorMessage = 'Failed to fetch products';
@@ -109,6 +109,7 @@ export const createProducts = async (data: Product, token: string) => {
 
     const formData = new FormData();
     formData.append('name', data.name);
+    formData.append('url', data.url);
     formData.append('description', data.description);
     formData.append('minimum_order', data.minimum_order.toString());
     formData.append('price', data.price.toString());

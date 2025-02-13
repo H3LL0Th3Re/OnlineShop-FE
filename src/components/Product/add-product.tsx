@@ -21,7 +21,8 @@ import Swal from 'sweetalert2';
 import DropdownCategory from './dropdown-category';
 import { useCreateVariantOptions } from '../tanstack/useVariantOptions';
 import { useCreateVariantOptionValue } from '../tanstack/useVariantOptionValues';
-import { Variant } from '@/types/product-type';
+import { Variant, Variant_option_values } from '@/types/product-type';
+import cuid from 'cuid';
 
 // Define the type for variant options
 interface VariantOption {
@@ -39,6 +40,7 @@ function AddProduct() {
 
   const [formData, setFormData] = useState({
     name: '',
+    url: '',
     description: '',
     categoryIds: [] as string[],
     subcategoryIds: [] as string[],
@@ -55,7 +57,11 @@ function AddProduct() {
   const [attachments, setAttachments] = useState<File[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
   const [variantOptions, setVariantOptions] = useState<
-    { name: string; variantId: string }[][]
+    {
+      id: string;
+      name: string;
+      variantId: string;
+    }[][]
   >([]);
   const [variantOptionValues, setVariantOptionValues] = useState<
     { price: number; sku: string; stock: number; weight: number }[]
@@ -64,6 +70,20 @@ function AddProduct() {
   const [variantCombinations, setVariantCombinations] = useState<
     VariantOption[][]
   >([]);
+
+  useEffect(() => {
+    // Pastikan variantOptionValues memiliki panjang sesuai jumlah kombinasi
+    if (variantOptionValues.length !== variantCombinations.length) {
+      setVariantOptionValues(
+        variantCombinations.map(() => ({
+          price: 0,
+          sku: '',
+          stock: 0,
+          weight: 0,
+        }))
+      );
+    }
+  }, [variantCombinations]);
 
   const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
     setFormData({
@@ -82,6 +102,13 @@ function AddProduct() {
   const handleFileSelect = (files: File[]) => {
     setAttachments((prev) => [...prev, ...files]);
   };
+
+  function generateCombinations<T>(arrays: T[][]): T[][] {
+    return arrays.reduce<T[][]>(
+      (acc, curr) => acc.flatMap((a) => curr.map((b) => [...a, b] as T[])),
+      [[]] as T[][]
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +141,6 @@ function AddProduct() {
         return;
       }
 
-      // Loading state
       Swal.fire({
         title: 'Sedang memproses...',
         allowOutsideClick: false,
@@ -123,107 +149,119 @@ function AddProduct() {
         },
       });
 
-      // Buat produk
+      // Buat produk terlebih dahulu
       const productResponse = await createProductMutation.mutateAsync({
         ...formData,
         attachments,
       });
 
-      // Pastikan productResponse valid
       if (!productResponse || !productResponse.id) {
         throw new Error('Gagal mendapatkan ID produk');
       }
 
-      // Buat varian dan variant options
-      if (variants.length > 0) {
-        for (
-          let variantIndex = 0;
-          variantIndex < variants.length;
-          variantIndex++
+      // Jika tidak ada varian, langsung selesai
+      if (variants.length === 0) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Berhasil!',
+          text: 'Produk berhasil dibuat',
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        // Reset form
+        resetForm();
+        return;
+      }
+
+      // Proses untuk varian dan opsi varian
+      const createdVariantOptions: Record<string, VariantOption[]> = {};
+
+      for (
+        let variantIndex = 0;
+        variantIndex < variants.length;
+        variantIndex++
+      ) {
+        const variant = variants[variantIndex];
+
+        const variantResponse = await createVariantMutation.mutateAsync({
+          productId: productResponse.id,
+          data: { ...variant },
+        });
+
+        if (!variantResponse || !variantResponse.variant.id) {
+          throw new Error('Gagal mendapatkan ID varian');
+        }
+
+        const variantId = variantResponse.variant.id;
+
+        if (
+          variantOptions[variantIndex] &&
+          variantOptions[variantIndex].length > 0
         ) {
-          const variant = variants[variantIndex]; // Get the current variant
-          try {
-            const variantResponse = await createVariantMutation.mutateAsync({
-              productId: productResponse.id,
-              data: {
-                ...variant,
-              },
-            });
+          const createdOptions = await Promise.all(
+            variantOptions[variantIndex].map(async (option) => {
+              const variantOptionResponse =
+                await createVariantOptionMutation.mutateAsync({
+                  token,
+                  variantOptionsData: {
+                    name: option.name,
+                    variantId: variantId,
+                    values: [],
+                  },
+                });
 
-            console.log('variant response:', variantResponse);
-
-            // Pastikan variantResponse valid
-            if (!variantResponse || !variantResponse.variant.id) {
-              throw new Error('Gagal mendapatkan ID varian');
-            }
-
-            // Buat variant options jika ada
-            if (
-              variantOptions[variantIndex] &&
-              variantOptions[variantIndex].length > 0
-            ) {
-              for (const option of variantOptions[variantIndex]) {
-                const variantOptionResponse =
-                  await createVariantOptionMutation.mutateAsync({
-                    token,
-                    variantOptionsData: {
-                      name: option.name,
-                      variantId: variantResponse.variant.id, // Use the current variant's ID
-                      values: [],
-                    },
-                  });
-
-                console.log('Variant option response:', variantOptionResponse); // Log the response
-                if (!variantOptionResponse || !variantOptionResponse.id) {
-                  throw new Error('Gagal mendapatkan ID opsi varian');
-                }
-
-                // Create variant option values
-                for (const value of variantOptionValues) {
-                  const variantOptionIds = variantOptions[variantIndex].map(
-                    (opt) => opt.variantId
-                  ); // Collect IDs of variant options
-
-                  // Log the data being sent
-                  console.log('Sending variant option value:', {
-                    sku: value.sku,
-                    price: value.price,
-                    stock: value.stock,
-                    weight: value.weight,
-                    variant_options: variantOptionIds,
-                  });
-
-                  // Validasi data sebelum mengirim
-                  if (
-                    !value.sku ||
-                    !value.weight ||
-                    !value.stock ||
-                    !value.price ||
-                    variantOptionIds.length === 0
-                  ) {
-                    throw new Error('All fields required');
-                  }
-
-                  await createVariantOptionValueMutation.mutateAsync({
-                    token,
-                    data: {
-                      sku: value.sku,
-                      price: value.price,
-                      stock: value.stock,
-                      weight: value.weight,
-                      is_active: false,
-                      variant_optionsId: variantOptionIds.join(','), // Convert array of variant option IDs to a string
-                    },
-                  });
-                }
+              if (!variantOptionResponse || !variantOptionResponse.id) {
+                throw new Error('Gagal mendapatkan ID opsi varian');
               }
-            }
-          } catch (error) {
-            console.error('Error creating variant or options:', error);
-            throw error;
-          }
+
+              return {
+                id: variantOptionResponse.id,
+                name: option.name,
+                variantId: variantId,
+              };
+            })
+          );
+
+          createdVariantOptions[variantId] = createdOptions;
         }
       }
+
+      // Proses untuk variantOptionValues
+      const allVariantOptions = Object.values(createdVariantOptions);
+      const allCombinations = generateCombinations(
+        allVariantOptions.map((options) => options.map((opt) => opt.id))
+      );
+
+      const variantOptionValuesToSend: Variant_option_values[] =
+        allCombinations.map((variantOptionIds, index) => {
+          const value = variantOptionValues[index];
+
+          if (
+            !value ||
+            !value.sku ||
+            !value.weight ||
+            !value.stock ||
+            !value.price
+          ) {
+            throw new Error(
+              `Semua field opsi varian untuk kombinasi ke-${index + 1} harus diisi`
+            );
+          }
+
+          return {
+            sku: value.sku,
+            weight: value.weight,
+            stock: value.stock,
+            price: value.price,
+            is_active: true,
+            variant_optionsId: variantOptionIds,
+          };
+        });
+
+      await createVariantOptionValueMutation.mutateAsync({
+        token,
+        data: variantOptionValuesToSend,
+      });
 
       // Sukses
       Swal.fire({
@@ -235,23 +273,7 @@ function AddProduct() {
       });
 
       // Reset form
-      setFormData({
-        name: '',
-        description: '',
-        categoryIds: [],
-        subcategoryIds: [],
-        minimum_order: 0,
-        price: 0,
-        stock: 0,
-        sku: '',
-        length: 0,
-        height: 0,
-        width: 0,
-        weight: 0,
-      });
-      setAttachments([]);
-      setVariants([]);
-      setVariantOptionValues([]);
+      resetForm();
     } catch (error) {
       console.error('Error creating product:', error);
       Swal.fire({
@@ -260,6 +282,28 @@ function AddProduct() {
         text: error instanceof Error ? error.message : 'Gagal membuat produk',
       });
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      url: '',
+      description: '',
+      categoryIds: [],
+      subcategoryIds: [],
+      minimum_order: 0,
+      price: 0,
+      stock: 0,
+      sku: '',
+      length: 0,
+      height: 0,
+      width: 0,
+      weight: 0,
+    });
+    setAttachments([]);
+    setVariants([]);
+    setVariantOptions([]);
+    setVariantOptionValues([]);
   };
 
   const handleVariantOptionInputChange = (index: number, value: string) => {
@@ -275,21 +319,28 @@ function AddProduct() {
     if (optionName) {
       setVariantOptions((prev) => {
         const updatedOptions = [...prev];
+
         if (!updatedOptions[variantIndex]) {
           updatedOptions[variantIndex] = [];
         }
+
+        const variantId = variants[variantIndex]?.id || ''; // ✅ Ambil ID varian yang benar
+
         if (
           !updatedOptions[variantIndex].some(
             (option) => option.name === optionName
           )
         ) {
           updatedOptions[variantIndex].push({
+            id: cuid(), // ✅ Buat ID unik
             name: optionName,
-            variantId: `${Date.now()}`,
+            variantId: variantId, // ✅ Gunakan ID varian yang benar
           });
         }
         return updatedOptions;
       });
+
+      // Reset input setelah menambahkan opsi
       setVariantOptionInputs((prev) => {
         const updatedInputs = [...prev];
         updatedInputs[variantIndex] = '';
@@ -320,29 +371,16 @@ function AddProduct() {
     });
   };
 
-  // Function to generate combinations of selected variants
-  // const generateCombinations = (
-  //   options: { name: string; variantId: string }[][]
-  // ) => {
-  //   const combinations = options.reduce(
-  //     (acc, curr) => {
-  //       return acc.flatMap((accItem) =>
-  //         curr.map((option) => [...accItem, option])
-  //       );
-  //     },
-  //     [[]] as { name: string; variantId: string }[][]
-  //   );
-
-  //   return combinations;
-  // };
-
   const generateVariantCombinations = () => {
-    const combinations: VariantOption[][] = [];
-    const variantOptionsLength = variantOptions.length;
+    if (variantOptions.length === 0) {
+      setVariantCombinations([]);
+      return;
+    }
 
+    const combinations: VariantOption[][] = [];
     const generate = (currentCombination: VariantOption[], index: number) => {
-      if (index === variantOptionsLength) {
-        combinations.push(currentCombination);
+      if (index === variantOptions.length) {
+        combinations.push([...currentCombination]);
         return;
       }
       for (const option of variantOptions[index]) {
@@ -394,7 +432,11 @@ function AddProduct() {
                 <Text fontWeight="600" fontSize="15px">
                   Product URL
                 </Text>
-                <Input placeholder="Enter your URL" />
+                <Input
+                  placeholder="Enter your URL"
+                  onChange={handleChange}
+                  value={formData.url}
+                />
               </VStack>
               <VStack gap="5px" w={'full'} align="flex-start">
                 <Text fontWeight="600" fontSize="15px">
@@ -591,17 +633,17 @@ function AddProduct() {
                                 <Input
                                   placeholder="Price"
                                   type="number"
+                                  value={
+                                    variantOptionValues[index]?.price || ''
+                                  }
                                   onChange={(e) => {
-                                    const updatedValue = {
-                                      price: Number(e.target.value),
-                                      sku: '',
-                                      stock: 0,
-                                      weight: 0,
-                                    };
                                     setVariantOptionValues((prev) => {
                                       const newValues = [...prev];
-                                      newValues[index] = updatedValue;
-                                      return newValues;
+                                      newValues[index] = {
+                                        ...newValues[index],
+                                        price: Number(e.target.value),
+                                      };
+                                      return [...newValues];
                                     });
                                   }}
                                 />
@@ -612,15 +654,15 @@ function AddProduct() {
                                 </Text>
                                 <Input
                                   placeholder="SKU"
+                                  value={variantOptionValues[index]?.sku || ''}
                                   onChange={(e) => {
-                                    const updatedValue = {
-                                      ...variantOptionValues[index],
-                                      sku: e.target.value,
-                                    };
                                     setVariantOptionValues((prev) => {
                                       const newValues = [...prev];
-                                      newValues[index] = updatedValue;
-                                      return newValues;
+                                      newValues[index] = {
+                                        ...newValues[index],
+                                        sku: e.target.value,
+                                      };
+                                      return [...newValues];
                                     });
                                   }}
                                 />
@@ -634,15 +676,17 @@ function AddProduct() {
                                 <Input
                                   placeholder="Stock"
                                   type="number"
+                                  value={
+                                    variantOptionValues[index]?.stock || ''
+                                  }
                                   onChange={(e) => {
-                                    const updatedValue = {
-                                      ...variantOptionValues[index],
-                                      stock: Number(e.target.value),
-                                    };
                                     setVariantOptionValues((prev) => {
                                       const newValues = [...prev];
-                                      newValues[index] = updatedValue;
-                                      return newValues;
+                                      newValues[index] = {
+                                        ...newValues[index],
+                                        stock: Number(e.target.value),
+                                      };
+                                      return [...newValues];
                                     });
                                   }}
                                 />
@@ -654,15 +698,17 @@ function AddProduct() {
                                 <Input
                                   placeholder="Weight"
                                   type="number"
+                                  value={
+                                    variantOptionValues[index]?.weight || ''
+                                  }
                                   onChange={(e) => {
-                                    const updatedValue = {
-                                      ...variantOptionValues[index],
-                                      weight: Number(e.target.value),
-                                    };
                                     setVariantOptionValues((prev) => {
                                       const newValues = [...prev];
-                                      newValues[index] = updatedValue;
-                                      return newValues;
+                                      newValues[index] = {
+                                        ...newValues[index],
+                                        weight: Number(e.target.value),
+                                      };
+                                      return [...newValues];
                                     });
                                   }}
                                 />

@@ -5,7 +5,7 @@ import { Variant_option_values } from '@/types/product-type';
 
 export const createVariantOptionValue = async (
   token: string,
-  data: Variant_option_values
+  data: Variant_option_values[]
 ) => {
   try {
     if (!token) {
