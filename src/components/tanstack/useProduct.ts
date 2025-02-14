@@ -5,9 +5,18 @@ import {
   getStoreProduct,
   getStorebyName,
   getProductByUrl,
+  fetchVariants,
 } from '@/features/dashboard/services/product';
 import { Product } from '@/types/product-type';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+export const useFetchVariants = (productId: string) => {
+  return useQuery({
+    queryKey: ['variants', productId],
+    queryFn: () => fetchVariants(productId),
+    enabled: !!productId, // Hanya fetch jika productId tersedia
+  });
+};
 
 export const useFetchProduct = (token: string) => {
   return useQuery({

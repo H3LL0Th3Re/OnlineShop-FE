@@ -181,3 +181,17 @@ export const deleteProducts = async (
     throw new Error(errorMessage);
   }
 };
+
+export const fetchVariants = async (productId: string) => {
+  try {
+    console.log('Fetching variants for productId:', productId);
+
+    const response = await axios.get(`${apiURL}/product/variants/${productId}`);
+
+    console.log('Response:', response.data);
+    return response.data.variant_combinations || [];
+  } catch (error) {
+    console.error('Error fetching variants:', error);
+    throw error;
+  }
+};

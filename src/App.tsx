@@ -14,6 +14,7 @@ import { LandingPage } from './pages/landing-page';
 import CheckoutProduct from './pages/checkout-product';
 import AddProduct from './components/Product/add-product';
 import StoreProduct from './pages/store-product';
+import UpdatedProduct from './components/Product/updated-product';
 function App() {
   const router = createBrowserRouter([
     {
@@ -64,6 +65,11 @@ function App() {
         {
           path: '/add-product',
           Component: AddProduct,
+          HydrateFallback: Fallback,
+        },
+        {
+          path: '/updated-product',
+          Component: UpdatedProduct,
           HydrateFallback: Fallback,
         },
         {
