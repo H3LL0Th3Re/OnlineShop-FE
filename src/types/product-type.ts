@@ -39,6 +39,12 @@ export interface Variant_option_values {
   price: number;
   is_active: boolean;
   variant_optionsId: string[];
+  options?: Option[];
+}
+
+export interface Option {
+  id: string;
+  name: string;
 }
 
 export interface Variant {

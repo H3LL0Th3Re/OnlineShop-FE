@@ -34,6 +34,7 @@ import { DialogDeleteProduct } from './Dialog/dialog-delete-product';
 import { useToggleActiveProduct } from '../tanstack/useToggleActiveProduct';
 import { useDeleteProduct } from '../tanstack/useProduct';
 import { useState } from 'react';
+import { DialogVariants } from './Dialog/dialog-variants';
 const categories = createListCollection({
   items: [
     { label: 'All', value: 'all' },
@@ -296,30 +297,32 @@ const ListProduct = () => {
                       <Box>
                         <Flex justify={'space-between'}>
                           <Text fontWeight="bold">
-                            {product.name} -{' '}
-                            {product.variants?.[0]?.Variant_options?.[0]
-                              ?.name || 'No Variant'}
+                            {product.name}
+                            {/* {product.variants?.[0]?.Variant_options?.[0]
+                              ?.name || 'No Variant'} */}
                           </Text>
                           <Checkbox
-                            checked={checkedProducts.includes(product.id || '')} // Check if this product is checked
+                            checked={checkedProducts.includes(product.id || '')}
                             onChange={() =>
                               handleToggleProduct(product.id || '')
-                            } // Handle individual checkbox
+                            }
                           />
                         </Flex>
-                        <Text fontSize="sm" color="gray.600">
-                          Rp{' '}
-                          {product.variants?.[0]?.Variant_options?.[0]
-                            ?.Variant_option_values?.[0]?.price ||
-                            product.price}{' '}
-                          - Stock:{' '}
-                          {product.variants?.[0]?.Variant_options?.[0]
-                            ?.Variant_option_values?.[0]?.stock ||
-                            product.stock}{' '}
-                          - SKU:{' '}
-                          {product.variants?.[0]?.Variant_options?.[0]
-                            ?.Variant_option_values?.[0]?.sku || product.sku}
-                        </Text>
+                        {product.variants?.length === 0 && (
+                          <Text fontSize="sm" color="gray.600">
+                            Rp{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.price ||
+                              product.price}{' '}
+                            - Stock:{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.stock ||
+                              product.stock}{' '}
+                            - SKU:{' '}
+                            {product.variants?.[0]?.Variant_options?.[0]
+                              ?.Variant_option_values?.[0]?.sku || product.sku}
+                          </Text>
+                        )}
                       </Box>
                       <Flex
                         align="center"
@@ -351,13 +354,18 @@ const ListProduct = () => {
                             p={1}
                             h={7}
                           >
-                            <Link to={''}>
+                            <Link to={'/checkout-product'}>
                               <Icon>
                                 <IoIosLink />
                               </Icon>
                               Lihat Halaman
                             </Link>
                           </Button>
+                          {product.variants &&
+                            product.variants.length > 0 &&
+                            product.id && (
+                              <DialogVariants productId={product.id} />
+                            )}
                           <MenuRoot>
                             <MenuTrigger asChild>
                               <Button
@@ -525,19 +533,22 @@ const ListProduct = () => {
                               } // Handle individual checkbox
                             />
                           </Flex>
-                          <Text fontSize="sm" color="gray.600">
-                            Rp{' '}
-                            {product.variants?.[0]?.Variant_options?.[0]
-                              ?.Variant_option_values?.[0]?.price ||
-                              product.price}{' '}
-                            - Stock:{' '}
-                            {product.variants?.[0]?.Variant_options?.[0]
-                              ?.Variant_option_values?.[0]?.stock ||
-                              product.stock}{' '}
-                            - SKU:{' '}
-                            {product.variants?.[0]?.Variant_options?.[0]
-                              ?.Variant_option_values?.[0]?.sku || product.sku}
-                          </Text>
+                          {product.variants?.length === 0 && (
+                            <Text fontSize="sm" color="gray.600">
+                              Rp{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.Variant_option_values?.[0]?.price ||
+                                product.price}{' '}
+                              - Stock:{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.Variant_option_values?.[0]?.stock ||
+                                product.stock}{' '}
+                              - SKU:{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.Variant_option_values?.[0]?.sku ||
+                                product.sku}
+                            </Text>
+                          )}
                         </Box>
                         <Flex
                           align="center"
@@ -569,13 +580,18 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Link to={''}>
+                              <Link to={'/checkout-product'}>
                                 <Icon>
                                   <IoIosLink />
                                 </Icon>
                                 Lihat Halaman
                               </Link>
                             </Button>
+                            {product.variants &&
+                              product.variants.length > 0 &&
+                              product.id && (
+                                <DialogVariants productId={product.id} />
+                              )}
                             <MenuRoot>
                               <MenuTrigger asChild>
                                 <Button
@@ -743,19 +759,22 @@ const ListProduct = () => {
                               } // Handle individual checkbox
                             />
                           </Flex>
-                          <Text fontSize="sm" color="gray.600">
-                            Rp{' '}
-                            {product.variants?.[0]?.Variant_options?.[0]
-                              ?.Variant_option_values?.[0]?.price ||
-                              product.price}{' '}
-                            - Stock:{' '}
-                            {product.variants?.[0]?.Variant_options?.[0]
-                              ?.Variant_option_values?.[0]?.stock ||
-                              product.stock}{' '}
-                            - SKU:{' '}
-                            {product.variants?.[0]?.Variant_options?.[0]
-                              ?.Variant_option_values?.[0]?.sku || product.sku}
-                          </Text>
+                          {product.variants?.length === 0 && (
+                            <Text fontSize="sm" color="gray.600">
+                              Rp{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.Variant_option_values?.[0]?.price ||
+                                product.price}{' '}
+                              - Stock:{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.Variant_option_values?.[0]?.stock ||
+                                product.stock}{' '}
+                              - SKU:{' '}
+                              {product.variants?.[0]?.Variant_options?.[0]
+                                ?.Variant_option_values?.[0]?.sku ||
+                                product.sku}
+                            </Text>
+                          )}
                         </Box>
                         <Flex
                           align="center"
@@ -787,13 +806,18 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Link to={''}>
+                              <Link to={'/checkout-product'}>
                                 <Icon>
                                   <IoIosLink />
                                 </Icon>
                                 Lihat Halaman
                               </Link>
                             </Button>
+                            {product.variants &&
+                              product.variants.length > 0 &&
+                              product.id && (
+                                <DialogVariants productId={product.id} />
+                              )}
                             <MenuRoot>
                               <MenuTrigger asChild>
                                 <Button
