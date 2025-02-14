@@ -78,44 +78,44 @@ export default function CheckoutProduct() {
         ],
       });
 
-      const service_charge = (price * quantity * 1) / 100;
+      // const service_charge = (price * quantity * 1) / 100;
 
-      const invoice_response = await axios.post(
-        apiURL + '/invoice/create-invoice',
-        {
-          status: 'pending',
-          prices: price * quantity,
-          service_charge: service_charge,
-          receiver_city: city,
-          receiver_province: province,
-          receiver_subDistrict: sub_district,
-          receiver_district: district,
-          receiver_phone: phone_number,
-          receiver_name: name,
-          receiver_postalCode: postal_code,
-          receiver_detailAddress: detail_address,
-          receiver_email: email,
-          // cartsId: 'cdqdwir39232',
-          userId: 'cm71m960c0007tarc0pnj62eb',
-          order_id: order_response.data.orderId,
-          // paymentsId: 'joewjfiewjfiwf',
-          // courierId: 'wqeijeiqejei',
-        },
-        {
-          headers: {
-            Authorization: `bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // const invoice_response = await axios.post(
+      //   apiURL + '/invoice/create-invoice',
+      //   {
+      //     status: 'pending',
+      //     prices: price * quantity,
+      //     service_charge: service_charge,
+      //     receiver_city: city,
+      //     receiver_province: province,
+      //     receiver_subDistrict: sub_district,
+      //     receiver_district: district,
+      //     receiver_phone: phone_number,
+      //     receiver_name: name,
+      //     receiver_postalCode: postal_code,
+      //     receiver_detailAddress: detail_address,
+      //     receiver_email: email,
+      //     // cartsId: 'cdqdwir39232',
+      //     userId: 'cm71m960c0007tarc0pnj62eb',
+      //     order_id: order_response.data.orderId,
+      //     // paymentsId: 'joewjfiewjfiwf',
+      //     // courierId: 'wqeijeiqejei',
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `bearer ${token}`,
+      //       'Content-Type': 'application/json',
+      //     },
+      //   }
+      // );
 
-      const invoice_history_response = await axios.post(
-        apiURL + '/invoice-history/create-invoice-history',
-        {
-          invoice_id: invoice_response.data.invoice_created.id,
-        }
-      );
-      console.log('invoice_history created: ', invoice_history_response.data);
+      // const invoice_history_response = await axios.post(
+      //   apiURL + '/invoice-history/create-invoice-history',
+      //   {
+      //     invoice_id: invoice_response.data.invoice_created.id,
+      //   }
+      // );
+      // console.log('invoice_history created: ', invoice_history_response.data);
 
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',
@@ -355,7 +355,7 @@ export default function CheckoutProduct() {
                   onSubmit(
                     // Replace with dynamic order ID
                     'hp murah', // Replace with dynamic product name
-                    700000, // Replace with dynamic price
+                    800000, // Replace with dynamic price
                     2 // Replace with dynamic quantity
                   )
                 }
