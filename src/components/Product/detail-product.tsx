@@ -1,3 +1,5 @@
+// Adjusted frontend code to integrate with the backend for fetching product by URL and username
+
 import {
   AccordionItem,
   AccordionItemContent,
@@ -14,277 +16,243 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react';
-import { useState } from 'react';
-import { useParams } from 'react-router';
-import { useFetchProductUrl } from '../tanstack/useProduct';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router';
 import { formatPrice } from '@/utils/format-price';
 import { ChevronRightIcon, ChevronLeftIcon } from 'lucide-react';
+import { Product, Variant, Variant_options } from '@/types/product-type';
+import { getProductForCheckout } from '@/features/dashboard/services/product';
+
 export default function DetailProduct() {
   const { username, url } = useParams();
-  const [selected, setSelected] = useState<string | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const {
-    data: products,
-    isLoading,
-    isError,
-    error,
-  } = useFetchProductUrl(String(username), String(url));
-  const imageUrls =
-    products?.attachments?.map((attachment) => {
-      // If attachment is a File object, create an Object URL
-      if (attachment instanceof File) {
-        return URL.createObjectURL(attachment);
-      }
-      // If attachment is already a URL (string), just return it
-      return attachment;
-    }) || [];
-  const nextImage = () => {
-    if (imageUrls.length === 0) return;
+  const navigate = useNavigate();
 
-    setCurrentImageIndex((prevIndex) => {
-      if (prevIndex < imageUrls.length - 1) {
-        return prevIndex + 1;
-      } else {
-        return 0; // Loop back to the first image
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const data = await getProductForCheckout(
+          username!,
+          url!,
+          selectedOptions
+        );
+        setProduct(data);
+      } catch (error) {
+        console.error('Failed to fetch product:', error);
       }
-    });
+    };
+    fetchProduct();
+  }, [username, url, selectedOptions]);
+
+  const imageUrls =
+    product?.attachments?.map((attachment) =>
+      attachment instanceof File ? URL.createObjectURL(attachment) : attachment
+    ) || [];
+
+  const handleOptionSelect = (optionId: string) => {
+    setSelectedOptions((prev) =>
+      prev.includes(optionId)
+        ? prev.filter((id) => id !== optionId)
+        : [...prev, optionId]
+    );
+  };
+
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % imageUrls.length);
   };
 
   const prevImage = () => {
-    if (imageUrls.length === 0) return;
-
-    setCurrentImageIndex((prevIndex) => {
-      if (prevIndex > 0) {
-        return prevIndex - 1;
-      } else {
-        return imageUrls.length - 1; // Loop back to the last image
-      }
-    });
+    setCurrentImageIndex(
+      (prev) => (prev - 1 + imageUrls.length) % imageUrls.length
+    );
   };
+
+  const handleBuyNow = () => {
+    if (product) {
+      const selectedVariant = selectedOptions;
+      localStorage.setItem(
+        'checkoutData',
+        JSON.stringify({
+          productId: product.id,
+          productName: product.name,
+          selectedVariant,
+        })
+      );
+      navigate('/checkout-product');
+    }
+  };
+
   return (
     <Box bg="white" w="full" h="full" m="0" p="3">
-      {isLoading && (
-        <>
-          <Text>Loading...</Text>
-        </>
-      )}
-      {isError && (
-        <>
-          <Text>{error.message}</Text>
-        </>
-      )}
-      <HStack w="full" h="full" gap="6" mt="20px">
-        <Box
-          w="60%"
-          h="full"
-          position="sticky"
-          top="0"
-          left="0"
-          overflow="auto"
-        >
-          {imageUrls.length > 0 && (
-            <Image
-              h="full"
-              width={'auto'}
-              src={imageUrls[currentImageIndex]}
-              alt="Product Image"
-            />
-          )}
-          {imageUrls.length > 1 && (
-            <>
-              <Button
-                position="absolute"
-                top="50%"
-                right="10px"
-                transform="translateY(-50%)"
-                size="lg"
-                onClick={nextImage}
-                aria-label="Next Image"
-              >
-                {' '}
-                <ChevronRightIcon />
-              </Button>
-              <Button
-                position="absolute"
-                top="50%"
-                left="10px"
-                transform="translateY(-50%)"
-                size="lg"
-                onClick={prevImage}
-                aria-label="Next Image"
-              >
-                {' '}
-                <ChevronLeftIcon />
-              </Button>
-            </>
-          )}
-        </Box>
-        <VStack
-          w="40%"
-          height="90vh"
-          overflowY="auto"
-          scrollbar="hidden"
-          mb="7px"
-        >
-          <VStack w="full" borderBottomWidth="3px" mb="">
-            <Text fontSize="30px" fontWeight="700" w="full">
-              {products?.name}
-            </Text>
-            <Text fontSize="20px" fontWeight="600" w="full" mb="15px">
-              {products?.price
-                ? formatPrice(products.price)
-                : products?.variants?.[0].Variant_options[0]
-                      .Variant_option_values?.[0].price
-                  ? formatPrice(
-                      products.variants?.[0].Variant_options[0]
-                        .Variant_option_values?.[0].price
-                    )
-                  : '-'}
-            </Text>
-          </VStack>
-          <Box w="full" mt="15px">
-            <VStack w="full" display="flex" alignItems="flex-start">
-              <Text fontSize="15px" fontWeight="600" w="full">
-                Select Variant
-              </Text>
-              <Grid templateColumns="repeat(6, 1fr)" gap="2" mb="5px">
-                {['Biru', 'Hitam', 'Merah', 'Kuning'].map((warna) => (
-                  <Button
-                    borderWidth="1px"
-                    borderColor="black"
-                    borderRadius="4px"
-                    p="7px"
-                    fontWeight="500"
-                    textAlign="center"
-                    bg={selected === warna ? 'black' : 'white'}
-                    color={selected === warna ? 'white' : 'black'}
-                    onClick={() => setSelected(warna)}
-                  >
-                    {warna}
-                  </Button>
-                ))}
-              </Grid>
-
-              <Text fontSize="15px" fontWeight="600" w="full">
-                Select Size
-              </Text>
-              <Grid templateColumns="repeat(6, 1fr)" gap="2" mb="5px">
-                {['S', 'M', 'L', 'XL'].map((size) => (
-                  <Button
-                    borderWidth="1px"
-                    borderColor="black"
-                    borderRadius="4px"
-                    p="7px"
-                    fontWeight="500"
-                    textAlign="center"
-                    bg={selected === size ? 'black' : 'white'}
-                    color={selected === size ? 'white' : 'black'}
-                    onClick={() => setSelected(size)}
-                  >
-                    {size}
-                  </Button>
-                ))}
-              </Grid>
-
-              <Text fontSize="15px" fontWeight="600" w="full">
-                Select Variant
-              </Text>
-              <Grid templateColumns="repeat(6, 1fr)" gap="2" mb="5px">
-                {['Panjang', 'Pendek'].map((variant) => (
-                  <Box
-                    borderWidth="1px"
-                    borderColor="black"
-                    borderRadius="4px"
-                    p="7px"
-                    fontWeight="500"
-                    textAlign="center"
-                    bg={selected === variant ? 'black' : 'white'}
-                    color={selected === variant ? 'white' : 'black'}
-                    onClick={() => setSelected(variant)}
-                  >
-                    {variant}
-                  </Box>
-                ))}
-              </Grid>
-              <Text fontSize="15px" fontWeight="600" w="full">
-                Quantity
-              </Text>
-              <StepperInput defaultValue="1" min={1} max={50} />
-              <HStack w="full" mt="15px">
+      {!product && <Text>Loading...</Text>}
+      {product && (
+        <HStack w="full" h="full" gap="6" mt="20px">
+          <Box w="60%" h="full" position="sticky" top="0" left="0">
+            {imageUrls.length > 0 && (
+              <Image
+                h="full"
+                width={'auto'}
+                src={imageUrls[currentImageIndex]}
+                alt="Product Image"
+              />
+            )}
+            {imageUrls.length > 1 && (
+              <>
                 <Button
-                  w="50%"
-                  p="7"
-                  borderWidth="2px"
-                  borderColor="black"
-                  bg="white"
-                  color="black"
+                  position="absolute"
+                  top="50%"
+                  right="10px"
+                  transform="translateY(-50%)"
+                  onClick={nextImage}
                 >
-                  Add to Cart
+                  <ChevronRightIcon />
                 </Button>
-                <Button w="50%" p="7">
-                  Buy it Now
+                <Button
+                  position="absolute"
+                  top="50%"
+                  left="10px"
+                  transform="translateY(-50%)"
+                  onClick={prevImage}
+                >
+                  <ChevronLeftIcon />
                 </Button>
-              </HStack>
-
-              <AccordionRoot collapsible defaultValue={['specification']}>
-                <AccordionItem value="specification">
-                  <AccordionItemTrigger>
-                    Product Specification
-                  </AccordionItemTrigger>
-                  <AccordionItemContent p="3">
-                    <HStack gapX="10">
-                      <VStack>
-                        <Text color="grey" w="full">
-                          Category
-                        </Text>
-                        <Text color="grey" w="full">
-                          Stock
-                        </Text>
-                        <Text color="grey" w="full">
-                          Weight
-                        </Text>
-                        <Text color="grey" w="full">
-                          Length
-                        </Text>
-                        <Text color="grey" w="full">
-                          Width
-                        </Text>
-                        <Text color="grey" w="full">
-                          Height
-                        </Text>
-                        <Text color="grey" w="full">
-                          SKU
-                        </Text>
-                      </VStack>
-
-                      <VStack>
-                        <Text w="full">Category</Text>
-                        <Text w="full">Stock</Text>
-                        <Text w="full">Weight</Text>
-                        <Text w="full">Length</Text>
-                        <Text w="full">Width</Text>
-                        <Text w="full">Height</Text>
-                        <Text w="full">SKU</Text>
-                      </VStack>
-                    </HStack>
-                  </AccordionItemContent>
-                </AccordionItem>
-              </AccordionRoot>
-
-              <AccordionRoot collapsible defaultValue={['description']}>
-                <AccordionItem value="description">
-                  <AccordionItemTrigger>
-                    Product Description
-                  </AccordionItemTrigger>
-                  <AccordionItemContent>
-                    {products?.description || 'No description'}
-                  </AccordionItemContent>
-                </AccordionItem>
-              </AccordionRoot>
-            </VStack>
+              </>
+            )}
           </Box>
-        </VStack>
-      </HStack>
+          <VStack w="40%" height="90vh" overflowY="auto">
+            <VStack w="full" borderBottomWidth="3px">
+              <Text fontSize="30px" fontWeight="700">
+                {product.name}
+              </Text>
+              <Text fontSize="20px" fontWeight="600">
+                {product.variants?.length === 0 ? (
+                  <div>{formatPrice(product.price)}</div>
+                ) : selectedOptions.length === product.variants?.length &&
+                  product.price !== null ? (
+                  <div>{formatPrice(product.price)}</div>
+                ) : (
+                  <div>
+                    {product.priceRange && product.priceRange.min !== undefined
+                      ? `${formatPrice(product.priceRange.min)} - ${formatPrice(product.priceRange.max)}`
+                      : 'No price available'}
+                  </div>
+                )}
+              </Text>
+            </VStack>
+
+            {product.variants?.map((variant: Variant) => (
+              <Box key={variant.id} w="full" mt="15px">
+                <Text fontSize="15px" fontWeight="600">
+                  {variant.name}
+                </Text>
+                <Grid templateColumns="repeat(6, 1fr)" gap="2">
+                  {variant.Variant_options.map((option: Variant_options) => (
+                    <Button
+                      key={option.id}
+                      borderWidth="1px"
+                      borderColor="black"
+                      borderRadius="4px"
+                      p="7px"
+                      fontWeight="500"
+                      textAlign="center"
+                      bg={
+                        selectedOptions.includes(option.id!) ? 'black' : 'white'
+                      }
+                      color={
+                        selectedOptions.includes(option.id!) ? 'white' : 'black'
+                      }
+                      onClick={() => handleOptionSelect(option.id!)}
+                    >
+                      {option.name}
+                    </Button>
+                  ))}
+                </Grid>
+              </Box>
+            ))}
+
+            <Text fontSize="15px" fontWeight="600" w="full">
+              Quantity
+            </Text>
+            <StepperInput defaultValue="1" min={1} max={50} />
+
+            <HStack w="full" mt="15px">
+              <Button
+                w="50%"
+                p="7"
+                borderWidth="2px"
+                borderColor="black"
+                bg="white"
+                color="black"
+              >
+                Add to Cart
+              </Button>
+              <Button w="50%" p="7" onClick={handleBuyNow}>
+                Buy it Now
+              </Button>
+            </HStack>
+
+            <AccordionRoot collapsible defaultValue={['specification']}>
+              <AccordionItem value="specification">
+                <AccordionItemTrigger>
+                  Product Specification
+                </AccordionItemTrigger>
+                <AccordionItemContent p="3">
+                  <HStack gapX="10">
+                    <VStack>
+                      <Text color="grey" w="full">
+                        Category
+                      </Text>
+                      <Text color="grey" w="full">
+                        Stock
+                      </Text>
+                      <Text color="grey" w="full">
+                        Weight
+                      </Text>
+                      <Text color="grey" w="full">
+                        Length
+                      </Text>
+                      <Text color="grey" w="full">
+                        Width
+                      </Text>
+                      <Text color="grey" w="full">
+                        Height
+                      </Text>
+                      <Text color="grey" w="full">
+                        SKU
+                      </Text>
+                    </VStack>
+
+                    <VStack>
+                      <Text w="full">Category</Text>
+                      <Text w="full">{product.stock}</Text>
+                      <Text w="full">{product.weight} </Text>
+                      <Text w="full">{product.length}</Text>
+                      <Text w="full">{product.width}</Text>
+                      <Text w="full">{product.height}</Text>
+                      <Text w="full">{product.sku}</Text>
+                    </VStack>
+                  </HStack>
+                </AccordionItemContent>
+              </AccordionItem>
+            </AccordionRoot>
+
+            <AccordionRoot collapsible defaultValue={['specification']}>
+              <AccordionItem value="specification">
+                <AccordionItemTrigger>
+                  Product Specification
+                </AccordionItemTrigger>
+                <AccordionItemContent p="3">
+                  <Text>
+                    {product.description || 'No description available'}
+                  </Text>
+                </AccordionItemContent>
+              </AccordionItem>
+            </AccordionRoot>
+          </VStack>
+        </HStack>
+      )}
     </Box>
   );
 }

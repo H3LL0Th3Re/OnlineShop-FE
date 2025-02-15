@@ -16,6 +16,7 @@ export interface Product {
   attachments: File[];
   variants?: Variant[];
   is_active?: boolean;
+  priceRange: { min: number; max: number };
 }
 
 // export interface Variant {
@@ -56,6 +57,7 @@ export interface Variant {
 }
 
 export interface Variant_options {
+  id?: string;
   name: string;
   Variant_option_values: Variant_option_values[];
   variantId: string;
@@ -63,6 +65,7 @@ export interface Variant_options {
 
 // Example of defining a specific type for variant options
 export interface VariantOption {
+  id?: string;
   name: string;
   variantId: string;
   values: string[]; // Adjust based on your actual structure
