@@ -195,3 +195,40 @@ export const fetchVariants = async (productId: string) => {
     throw error;
   }
 };
+
+export const fetchProductForCheckout = async (
+  productId: string,
+  selectedOptions?: string[]
+) => {
+  try {
+    const response = await axios.post(
+      `${apiURL}/product/checkout/${productId}`,
+      {
+        selectedOptions,
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch product for checkout:', error);
+    throw error;
+  }
+};
+
+export const getProductForCheckout = async (
+  username: string,
+  url: string,
+  selectedOptions?: string[]
+): Promise<Product> => {
+  try {
+    const response = await axios.post(`${apiURL}/product/${username}/${url}`, {
+      selectedOptions,
+    });
+
+    console.log('product:', response.data);
+
+    return response.data; // Return the product data
+  } catch (error) {
+    console.error('Error fetching product for checkout:', error);
+    throw error; // Rethrow the error for further handling
+  }
+};
