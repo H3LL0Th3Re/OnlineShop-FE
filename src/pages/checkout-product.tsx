@@ -22,7 +22,7 @@ import axios from 'axios';
 // import { useState } from 'react';
 import { RiShoppingBag4Line } from 'react-icons/ri';
 import Cookies from 'js-cookie';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import 'midtrans-snap';
 
 export default function CheckoutProduct() {
@@ -35,12 +35,13 @@ export default function CheckoutProduct() {
   const [sub_district, setSub_district] = useState('');
   const [postal_code, setPostal_code] = useState('');
   const [detail_address, setDetail_address] = useState('');
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-    script.setAttribute('data-client-key', 'SB-Mid-client-4omBGFxKlAqOqhRu'); // Replace with actual client key
-    document.body.appendChild(script);
-  }, []);
+  const [paymentLink, setPaymentLink] = useState('');
+  // useEffect(() => {
+  //   const script = document.createElement('script');
+  //   script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
+  //   script.setAttribute('data-client-key', 'SB-Mid-client-4omBGFxKlAqOqhRu'); // Replace with actual client key
+  //   document.body.appendChild(script);
+  // }, []);
   const token = Cookies.get('token');
 
   async function onSubmit(
@@ -133,34 +134,43 @@ export default function CheckoutProduct() {
         }
       );
 
-      const snapToken = response.data.token; // Expect snapToken from backend
+      const snapToken = response.data.token.token; // Expect snapToken from backend
+      const redirect_pay = response.data.token.redirect_url;
       console.log(snapToken);
-      if (window.snap) {
-        window.snap.pay(snapToken, {
-          onSuccess: async function (result) {
-            try {
-              console.log('Payment Success:', result);
-              alert('Payment successful!');
-            } catch (error) {
-              console.error('Error processing payment:', error);
-              // Handle error appropriately
-            }
-          },
-          onPending: function (result) {
-            console.log('Payment Pending:', result);
-            alert('Payment pending. Complete the payment to continue.');
-          },
-          onError: function (result) {
-            console.log('Payment Error:', result);
-            alert('Payment failed. Try again.');
-          },
-          onClose: function () {
-            alert('Payment window closed.');
-          },
-        });
+      console.log(redirect_pay);
+
+      if (redirect_pay) {
+        setPaymentLink(redirect_pay); // Store the link in state
+        alert('payment link created');
       } else {
-        alert('Midtrans SDK not loaded.');
+        alert('Failed to generate payment link.');
       }
+      // if (window.snap) {
+      //   window.snap.pay(snapToken, {
+      //     onSuccess: async function (result) {
+      //       try {
+      //         console.log('Payment Success:', result);
+      //         alert('Payment successful!');
+      //       } catch (error) {
+      //         console.error('Error processing payment:', error);
+      //         // Handle error appropriately
+      //       }
+      //     },
+      //     onPending: function (result) {
+      //       console.log('Payment Pending:', result);
+      //       alert('Payment pending. Complete the payment to continue.');
+      //     },
+      //     onError: function (result) {
+      //       console.log('Payment Error:', result);
+      //       alert('Payment failed. Try again.');
+      //     },
+      //     onClose: function () {
+      //       alert('Payment window closed.');
+      //     },
+      //   });
+      // } else {
+      //   alert('Midtrans SDK not loaded.');
+      // }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return {
@@ -362,6 +372,20 @@ export default function CheckoutProduct() {
               >
                 Checkout Now
               </Button>
+
+              {paymentLink && (
+                <Box mt="4" p="2" bg="gray.100" borderRadius="md">
+                  <Text fontWeight="bold">Payment Link:</Text>
+                  <a
+                    href={paymentLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'blue', textDecoration: 'underline' }}
+                  >
+                    Click Here to Pay
+                  </a>
+                </Box>
+              )}
             </Box>
           </Box>
         </HStack>
