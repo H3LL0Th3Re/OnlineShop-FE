@@ -1,6 +1,7 @@
 import Information from '@/components/Settings/information-settings';
 import LocationSetting from '@/components/Settings/location-settings';
 import TemplateMessages from '@/components/Settings/template-messages-settings';
+// import Withdrawal from '@/components/Settings/withdraw-request';
 import { Box, Tabs, Text, VStack } from '@chakra-ui/react';
 
 export default function Settings() {
@@ -15,17 +16,19 @@ export default function Settings() {
             <Tabs.Trigger value="information">Information</Tabs.Trigger>
             <Tabs.Trigger value="location">Location</Tabs.Trigger>
             <Tabs.Trigger value="messages">Template Messages</Tabs.Trigger>
+            <Tabs.Trigger value="withdrawal">Withdrawal</Tabs.Trigger>
           </Tabs.List>
 
           <Tabs.Content value="information">
             <Information />
           </Tabs.Content>
           <Tabs.Content value="location">
-            <LocationSetting/>
+            <LocationSetting />
           </Tabs.Content>
           <Tabs.Content value="messages">
             <TemplateMessages />
           </Tabs.Content>
+          <Tabs.Content value="withdrawal">{/* <Withdrawal /> */}</Tabs.Content>
         </Tabs.Root>
       </VStack>
     </Box>

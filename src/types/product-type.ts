@@ -16,7 +16,7 @@ export interface Product {
   attachments: File[];
   variants?: Variant[];
   is_active?: boolean;
-  priceRange: { min: number; max: number };
+  priceRange?: { min: number; max: number };
 }
 
 export interface Checkout_Product {
