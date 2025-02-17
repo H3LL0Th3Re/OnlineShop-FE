@@ -7,7 +7,6 @@ import {
 } from '@/components/ui/select';
 import {
   Box,
-  Button,
   createListCollection,
   Flex,
   Image,
@@ -115,22 +114,22 @@ export const getStatusColor = (status: string | undefined) => {
   }
 };
 
-const getButtonStatus = (status: string) => {
-  switch (status) {
-    case 'Belum Dibayar':
-      return 'Hubungi Pembeli';
-    case 'Pesanan Baru':
-      return 'Proses Pesanan';
-    case 'Siap Dikirim':
-      return 'Kabari Pembeli';
-    case 'Dalam Pengiriman':
-      return ' Lihat Rincian Pengiriman';
-    case 'Pesanan Selesai':
-      return 'Hubungi Pembeli';
-    case 'Dibatalkan':
-      return 'Hubungi Pembeli';
-  }
-};
+// const getButtonStatus = (status: string) => {
+//   switch (status) {
+//     case 'Belum Dibayar':
+//       return 'Hubungi Pembeli';
+//     case 'Pesanan Baru':
+//       return 'Proses Pesanan';
+//     case 'Siap Dikirim':
+//       return 'Kabari Pembeli';
+//     case 'Dalam Pengiriman':
+//       return ' Lihat Rincian Pengiriman';
+//     case 'Pesanan Selesai':
+//       return 'Hubungi Pembeli';
+//     case 'Dibatalkan':
+//       return 'Hubungi Pembeli';
+//   }
+// };
 
 const courier = createListCollection({
   items: [
@@ -346,7 +345,7 @@ export function Order() {
                       </Button> */}
                       <DialogTemplateMessage
                         status={order.status}
-                        productid={'cm6td9xt30004uy5witpj9vze'}
+                        productid={'cm78j2zii0000tagcf9zftzki'}
                       />
                     </Box>
                   </Flex>
@@ -405,9 +404,13 @@ export function Order() {
                         </Box>
                       </Box>
                       <Box maxWidth={'60'} textAlign={'center'}>
-                        <Button rounded="full" bg={'blue.600'}>
+                        {/* <Button rounded="full" bg={'blue.600'}>
                           {getButtonStatus(order.status)}
-                        </Button>
+                        </Button> */}
+                        <DialogTemplateMessage
+                          status={order.status}
+                          productid={'cm78j2zii0000tagcf9zftzki'}
+                        />
                       </Box>
                     </Flex>
                     <Flex onClick={() => handleClickOrder(order.id)}>
@@ -465,9 +468,13 @@ export function Order() {
                         </Box>
                       </Box>
                       <Box maxWidth={'60'} textAlign={'center'}>
-                        <Button rounded="full" bg={'blue.600'}>
+                        {/* <Button rounded="full" bg={'blue.600'}>
                           {getButtonStatus(order.status)}
-                        </Button>
+                        </Button> */}
+                        <DialogTemplateMessage
+                          status={order.status}
+                          productid={'cm78j2zii0000tagcf9zftzki'}
+                        />
                       </Box>
                     </Flex>
                     <Flex onClick={() => handleClickOrder(order.id)}>
@@ -525,9 +532,13 @@ export function Order() {
                         </Box>
                       </Box>
                       <Box maxWidth={'60'} textAlign={'center'}>
-                        <Button rounded="full" bg={'blue.600'}>
+                        {/* <Button rounded="full" bg={'blue.600'}>
                           {getButtonStatus(order.status)}
-                        </Button>
+                        </Button> */}
+                        <DialogTemplateMessage
+                          status={order.status}
+                          productid={'cm78j2zii0000tagcf9zftzki'}
+                        />
                       </Box>
                     </Flex>
                     <Flex onClick={() => handleClickOrder(order.id)}>
@@ -585,9 +596,10 @@ export function Order() {
                         </Box>
                       </Box>
                       <Box maxWidth={'60'} textAlign={'center'}>
-                        <Button rounded="full" bg={'blue.600'}>
-                          {getButtonStatus(order.status)}
-                        </Button>
+                        <DialogTemplateMessage
+                          status={order.status}
+                          productid={'cm78j2zii0000tagcf9zftzki'}
+                        />
                       </Box>
                     </Flex>
                     <Flex onClick={() => handleClickOrder(order.id)}>
@@ -645,9 +657,10 @@ export function Order() {
                         </Box>
                       </Box>
                       <Box maxWidth={'60'} textAlign={'center'}>
-                        <Button rounded="full" bg={'blue.600'}>
-                          {getButtonStatus(order.status)}
-                        </Button>
+                        <DialogTemplateMessage
+                          status={order.status}
+                          productid={'cm78j2zii0000tagcf9zftzki'}
+                        />
                       </Box>
                     </Flex>
                     <Flex onClick={() => handleClickOrder(order.id)}>
@@ -705,9 +718,10 @@ export function Order() {
                         </Box>
                       </Box>
                       <Box maxWidth={'60'} textAlign={'center'}>
-                        <Button rounded="full" bg={'blue.600'}>
-                          {getButtonStatus(order.status)}
-                        </Button>
+                        <DialogTemplateMessage
+                          status={order.status}
+                          productid={'cm78j2zii0000tagcf9zftzki'}
+                        />
                       </Box>
                     </Flex>
                     <Flex onClick={() => handleClickOrder(order.id)}>
