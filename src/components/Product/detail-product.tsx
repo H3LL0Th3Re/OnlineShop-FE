@@ -1,12 +1,10 @@
-// Adjusted frontend code to integrate with the backend for fetching product by URL and username
+// import {
+//   AccordionItem,
+//   AccordionItemContent,
+//   AccordionItemTrigger,
+//   AccordionRoot,
+// } from '@/components/ui/accordion';
 
-import {
-  AccordionItem,
-  AccordionItemContent,
-  AccordionItemTrigger,
-  AccordionRoot,
-} from '@/components/ui/accordion';
-import { StepperInput } from '@/components/ui/stepper-input';
 import {
   Box,
   Button,
@@ -27,6 +25,7 @@ export default function DetailProduct() {
   const { username, url } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
 
@@ -46,6 +45,19 @@ export default function DetailProduct() {
     fetchProduct();
   }, [username, url, selectedOptions]);
 
+  useEffect(() => {
+    if (product && selectedOptions.length === product.variants?.length) {
+      localStorage.setItem(
+        'selectedProduct',
+        JSON.stringify({
+          ...product,
+          selectedOptions,
+          quantity,
+        })
+      );
+    }
+  }, [product, selectedOptions, quantity]);
+
   const imageUrls =
     product?.attachments?.map((attachment) =>
       attachment instanceof File ? URL.createObjectURL(attachment) : attachment
@@ -59,6 +71,13 @@ export default function DetailProduct() {
     );
   };
 
+  const increaseQty = () => {
+    setQuantity(quantity + 1);
+  };
+  const decreaseQty = () => {
+    setQuantity(quantity - 1);
+  };
+
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % imageUrls.length);
   };
@@ -70,18 +89,7 @@ export default function DetailProduct() {
   };
 
   const handleBuyNow = () => {
-    if (product) {
-      const selectedVariant = selectedOptions;
-      localStorage.setItem(
-        'checkoutData',
-        JSON.stringify({
-          productId: product.id,
-          productName: product.name,
-          selectedVariant,
-        })
-      );
-      navigate('/checkout-product');
-    }
+    navigate('/checkout-product');
   };
 
   return (
@@ -175,8 +183,15 @@ export default function DetailProduct() {
             <Text fontSize="15px" fontWeight="600" w="full">
               Quantity
             </Text>
-            <StepperInput defaultValue="1" min={1} max={50} />
-
+            <HStack>
+              <Button variant={'outline'} onClick={decreaseQty}>
+                -
+              </Button>
+              <Text>{quantity}</Text>
+              <Button variant={'outline'} onClick={increaseQty}>
+                +
+              </Button>
+            </HStack>
             <HStack w="full" mt="15px">
               <Button
                 w="50%"
@@ -192,64 +207,6 @@ export default function DetailProduct() {
                 Buy it Now
               </Button>
             </HStack>
-
-            <AccordionRoot collapsible defaultValue={['specification']}>
-              <AccordionItem value="specification">
-                <AccordionItemTrigger>
-                  Product Specification
-                </AccordionItemTrigger>
-                <AccordionItemContent p="3">
-                  <HStack gapX="10">
-                    <VStack>
-                      <Text color="grey" w="full">
-                        Category
-                      </Text>
-                      <Text color="grey" w="full">
-                        Stock
-                      </Text>
-                      <Text color="grey" w="full">
-                        Weight
-                      </Text>
-                      <Text color="grey" w="full">
-                        Length
-                      </Text>
-                      <Text color="grey" w="full">
-                        Width
-                      </Text>
-                      <Text color="grey" w="full">
-                        Height
-                      </Text>
-                      <Text color="grey" w="full">
-                        SKU
-                      </Text>
-                    </VStack>
-
-                    <VStack>
-                      <Text w="full">Category</Text>
-                      <Text w="full">{product.stock}</Text>
-                      <Text w="full">{product.weight} </Text>
-                      <Text w="full">{product.length}</Text>
-                      <Text w="full">{product.width}</Text>
-                      <Text w="full">{product.height}</Text>
-                      <Text w="full">{product.sku}</Text>
-                    </VStack>
-                  </HStack>
-                </AccordionItemContent>
-              </AccordionItem>
-            </AccordionRoot>
-
-            <AccordionRoot collapsible defaultValue={['specification']}>
-              <AccordionItem value="specification">
-                <AccordionItemTrigger>
-                  Product Specification
-                </AccordionItemTrigger>
-                <AccordionItemContent p="3">
-                  <Text>
-                    {product.description || 'No description available'}
-                  </Text>
-                </AccordionItemContent>
-              </AccordionItem>
-            </AccordionRoot>
           </VStack>
         </HStack>
       )}

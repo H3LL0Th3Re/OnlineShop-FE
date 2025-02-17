@@ -24,6 +24,8 @@ import { RiShoppingBag4Line } from 'react-icons/ri';
 import Cookies from 'js-cookie';
 import { useEffect, useState } from 'react';
 import 'midtrans-snap';
+import { formatPrice } from '@/utils/format-price';
+import { Checkout_Product } from '@/types/product-type';
 
 export default function CheckoutProduct() {
   const [name, setName] = useState('');
@@ -35,6 +37,30 @@ export default function CheckoutProduct() {
   const [sub_district, setSub_district] = useState('');
   const [postal_code, setPostal_code] = useState('');
   const [detail_address, setDetail_address] = useState('');
+  const [product, setProduct] = useState<Checkout_Product | null>(null);
+
+  useEffect(() => {
+    const productData = localStorage.getItem('selectedProduct');
+    if (productData) {
+      setProduct(JSON.parse(productData)); // Set the product from localStorage
+    }
+  }, []);
+
+  const image = product?.attachments;
+  const productName = product?.name || ''; // Default to empty string if no product
+  const price = product?.price || 0;
+  const quantity = product?.quantity || 1;
+  const variants = product?.selectedOptions;
+  const totalPrice = price * quantity;
+  const shipping = 15000;
+  const serviceFee = (1 / 100) * totalPrice;
+  const subTotalPrice = totalPrice + shipping + serviceFee;
+
+  useEffect(() => {
+    // Optionally update product details from localStorage if needed
+    // This ensures that if localStorage changes, the state is updated accordingly
+  }, [product]);
+
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
@@ -66,7 +92,7 @@ export default function CheckoutProduct() {
         order_note: 'please be Careful',
         items: [
           {
-            name: 'pajeet food',
+            name: productName,
             description: 'cow is sacred saar',
             value: price,
             quantity: quantity,
@@ -279,23 +305,22 @@ export default function CheckoutProduct() {
                 <Image
                   height="130px"
                   width="100px"
-                  src="https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg"
+                  src={image}
                   borderRadius="5px"
                 />
                 <VStack gap="1" align="flex-start">
                   <Text fontSize="14px" fontWeight="500">
-                    HAPE BAGUS BAGUS NIH SILAHKAN DIPILIH
+                    {productName}
                   </Text>
                   <HStack w="full">
-                    <Text>Variant 1</Text>
-                    <Text>|</Text>
-                    <Text>Variant 2</Text>
-                    <Text>|</Text>
-                    <Text>Variant 3</Text>
+                    <Text color={'blue.700'}>
+                      {variants?.length} Variants Selected
+                    </Text>
                   </HStack>
                   <Text fontSize="15px" fontWeight="700" w="full">
-                    Rp 7.500.000
+                    Rp {formatPrice(price)}
                   </Text>
+                  <Text>Quantity: {quantity}</Text>
                   <DialogShipmentCheckout />
                   {/* <Button>Select Shipment</Button> */}
                 </VStack>
@@ -313,26 +338,26 @@ export default function CheckoutProduct() {
                   <AccordionItemTrigger p="2">
                     <Flex w="full" h="full" justify="space-between">
                       <Text>Subtotal</Text>
-                      <Text>Rp 7.500.000</Text>
+                      <Text>Rp {formatPrice(subTotalPrice)}</Text>
                     </Flex>
                   </AccordionItemTrigger>
                   <AccordionItemContent>
                     <Box w="full" h="full" p="2">
                       <Flex w="full" h="full" justify="space-between">
                         <Text>Item Price</Text>
-                        <Text>Rp 7.500.000</Text>
+                        <Text>Rp {formatPrice(totalPrice)}</Text>
                       </Flex>
                     </Box>
                     <Box w="full" h="full" p="2">
                       <Flex w="full" h="full" justify="space-between">
                         <Text>Shipping subtotal</Text>
-                        <Text>Rp 7.500.000</Text>
+                        <Text>Rp {formatPrice(shipping)}</Text>
                       </Flex>
                     </Box>
                     <Box w="full" h="full" p="2">
                       <Flex w="full" h="full" justify="space-between">
                         <Text>Buyer Service Fee(1%)</Text>
-                        <Text>Rp 7.500.000</Text>
+                        <Text>Rp {formatPrice(serviceFee)}</Text>
                       </Flex>
                     </Box>
                   </AccordionItemContent>
@@ -351,14 +376,7 @@ export default function CheckoutProduct() {
               <Button
                 bgColor="#2400FE"
                 color="white"
-                onClick={() =>
-                  onSubmit(
-                    // Replace with dynamic order ID
-                    'hp murah', // Replace with dynamic product name
-                    800000, // Replace with dynamic price
-                    2 // Replace with dynamic quantity
-                  )
-                }
+                onClick={() => onSubmit(productName, price, quantity)}
               >
                 Checkout Now
               </Button>
