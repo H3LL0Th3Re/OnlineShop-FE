@@ -19,18 +19,13 @@ export interface Product {
   priceRange: { min: number; max: number };
 }
 
-// export interface Variant {
-//   id?: string;
-//   name: string;
-//   productId?: string;
-//   variantOptions: Variant_options[];
-// }
-
-// export interface Variant_options {
-//   name: string;
-//   values: Variant_option_values[];
-//   variantId: string;
-// }
+export interface Checkout_Product {
+  price: number;
+  quantity: number;
+  selectedOptions: string;
+  name: string;
+  attachments: string;
+}
 
 export interface Variant_option_values {
   id?: string;
