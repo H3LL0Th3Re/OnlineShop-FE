@@ -27,3 +27,16 @@ export const storeName = async (username: string): Promise<Store> => {
     throw new Error('Failed to fetch Store');
   }
 };
+export const getAllStore = async (): Promise<Store[]> => {
+  try {
+    const response = await axios.get(apiURL + '/stores', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    return response.data.stores;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to fetch Store');
+  }
+};

@@ -29,6 +29,7 @@ import { HiDotsHorizontal } from 'react-icons/hi';
 import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from '../ui/menu';
 
 import { useAuthStore } from '@/hooks/authstore';
+import { useFetchStore } from '../tanstack/useStore';
 import { useFetchProductStore } from '../tanstack/useProduct';
 import { DialogDeleteProduct } from './Dialog/dialog-delete-product';
 import { useToggleActiveProduct } from '../tanstack/useToggleActiveProduct';
@@ -61,6 +62,7 @@ const ListProduct = () => {
     isLoading,
     error,
   } = useFetchProductStore(token || '');
+  const { data: store } = useFetchStore(token || '');
   const { mutate: toggleActive } = useToggleActiveProduct();
   const { mutate: deleteProducts } = useDeleteProduct(token || '');
   const [checkedProducts, setCheckedProducts] = useState<string[]>([]);
@@ -354,7 +356,7 @@ const ListProduct = () => {
                             p={1}
                             h={7}
                           >
-                            <Link to={'/checkout-product'}>
+                            <Link to={`/${store?.username}/${product.url}`}>
                               <Icon>
                                 <IoIosLink />
                               </Icon>
@@ -580,7 +582,7 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Link to={'/checkout-product'}>
+                              <Link to={`/${store?.username}/${product.url}`}>
                                 <Icon>
                                   <IoIosLink />
                                 </Icon>
@@ -806,7 +808,7 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Link to={'/checkout-product'}>
+                              <Link to={`/${store?.username}/${product.url}`}>
                                 <Icon>
                                   <IoIosLink />
                                 </Icon>
