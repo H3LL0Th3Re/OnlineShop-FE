@@ -96,7 +96,18 @@ function AddProduct() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Jika field yang diubah adalah nama produk, update URL secara otomatis
+    if (name === 'name') {
+      const formattedUrl = value
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Ganti spasi dengan dash
+        .replace(/[^a-z0-9-]/g, ''); // Hapus karakter yang tidak valid
+      setFormData({ ...formData, [name]: value, url: formattedUrl });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleFileSelect = (files: File[]) => {
@@ -354,13 +365,29 @@ function AddProduct() {
     variantId: string
   ) => {
     setVariantOptions((prev) => {
-      const updatedOptions = { ...prev };
+      const updatedOptions = [...prev];
       updatedOptions[variantIndex] = updatedOptions[variantIndex].filter(
         (option) => option.variantId !== variantId
       );
       return updatedOptions;
     });
+
+    // Hapus kombinasi varian yang terkait dengan opsi yang dihapus
+    setVariantCombinations((prev) => {
+      const updatedCombinations = prev.filter((combination) => {
+        return !combination.some((option) => option.id === variantId);
+      });
+      return updatedCombinations;
+    });
   };
+
+  useEffect(() => {
+    if (variantOptions.length > 0) {
+      generateVariantCombinations();
+    } else {
+      setVariantCombinations([]); // Reset kombinasi jika tidak ada opsi
+    }
+  }, [variantOptions]);
 
   const handleRemoveVariant = (index: number) => {
     setVariants((prev) => prev.filter((_, i) => i !== index));
@@ -398,6 +425,8 @@ function AddProduct() {
   useEffect(() => {
     if (variantOptions.length > 0) {
       generateVariantCombinations();
+    } else {
+      setVariantCombinations([]); // Reset kombinasi jika tidak ada opsi
     }
   }, [variantOptions]);
 
