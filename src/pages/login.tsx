@@ -73,7 +73,7 @@ function Login() {
   };
   return (
     <Box
-      bgColor="#E5E5E5"
+      bgColor="#F3F4F6"
       h="100vh"
       w="100vw"
       display="flex"
@@ -89,7 +89,7 @@ function Login() {
           display="flex"
           alignItems="center"
           justifyContent="center"
-          rounded="10px"
+          rounded="5px"
         >
           <VStack>
             <HStack gap="50px" marginLeft="40px" marginRight="40px">
@@ -97,11 +97,11 @@ function Login() {
                 <Stack
                   align="center"
                   width="500px"
-                  borderColor="#5F2EEA"
-                  borderWidth="2px"
+                  // borderRightColor="#5F2EEA"
+                  // borderRightWidth="4px"
                   h="400px"
                   justifyContent="center"
-                  borderRadius="15px"
+                  // borderRadius="15px"
                   as="form"
                   onSubmit={handleSubmit(onSubmit)}
                 >
@@ -125,7 +125,7 @@ function Login() {
                       {...register('email')}
                     />
                     {errors.email && (
-                      <Text color="red.500" fontSize="sm">
+                      <Text color="red.500" fontSize="sm" mb="10px" ml="10px" textAlign="center">
                         {errors.email.message}
                       </Text>
                     )}
@@ -163,7 +163,7 @@ function Login() {
                     </Text>
                   </HStack>
 
-                  <VStack mt="40px">
+                  <VStack mt="20px">
                     <Text color="#222222" fontWeight="400" fontSize="12px">
                       Or sign in with social account
                     </Text>
