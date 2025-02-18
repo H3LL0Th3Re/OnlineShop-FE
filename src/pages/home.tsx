@@ -1,10 +1,11 @@
-import { Box, Grid, Image, Text, VStack } from '@chakra-ui/react';
+import { Box, Grid, HStack, Image, Text, VStack } from '@chakra-ui/react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/features/dashboard/get-categories';
 import NavbarBuyer from './navbarBuyer';
 import { useAllStore } from '@/components/tanstack/useStore';
+import { Link } from 'react-router';
 
 const backroundImages = [
   'https://res.cloudinary.com/dbavdkhmz/image/upload/v1737548208/1_scleah.png',
@@ -59,16 +60,26 @@ export function Home() {
         </Box>
 
         <VStack my="5" h="full" w="full" p="3" bgColor="white">
-          <Text
-            fontWeight="600"
-            fontSize="20px"
-            display="flex"
-            justifyContent="flex-start"
-            alignItems="center"
-            w="full"
-          >
-            Product Categories
-          </Text>
+          <HStack h="full" w="full">
+            <Box
+              w="15px"
+              h="35px"
+              color="blue"
+              bgColor="#5F2EEA"
+              borderRadius="5px"
+            ></Box>
+            <Text
+              fontWeight="600"
+              fontSize="20px"
+              display="flex"
+              justifyContent="flex-start"
+              alignItems="center"
+              w="full"
+              color="#5F2EEA"
+            >
+              Product Categories
+            </Text>
+          </HStack>
 
           <Box
             mt="10px"
@@ -96,19 +107,20 @@ export function Home() {
                 ?.filter((category) => !category.parentId)
                 .map((category, index) => (
                   <Box
-                    bgColor="#F4F5F0"
+                    // bgColor="#F3F4F6"
                     borderRadius="5px"
+                    borderWidth="2px"
+                    borderColor="#F3F4F6"
                     w="full"
-                    h="140px"
+                    h="100px"
                     p="2"
                   >
-                    <VStack w="full" h="full" gap="1">
+                    <VStack w="full" h="full" gap="0">
                       <Image
                         src={category.icon}
-                        borderRadius="5px"
                         w="full"
-                        h="100px"
-                        objectFit="cover"
+                        h="40px"
+                        objectFit="contain"
                         alt={`User uploaded image ${index + 1}`}
                       />
 
@@ -129,43 +141,52 @@ export function Home() {
           </Box>
         </VStack>
 
-        <VStack my="5" h="full" w="full" p="3" bg="#F3F4F6" borderRadius="5px">
-          <Text fontWeight="600" fontSize="20px" w="full">
+        <VStack
+          my="5"
+          h="full"
+          w="full"
+          p="3"
+          backgroundImage="linear-gradient(to right, white 1%, #F3F4F6 50%, white 99%)"
+          borderRadius="5px"
+        >
+          <Text fontWeight="600" fontSize="20px" w="full" textAlign="center">
             Our Partner Store
           </Text>
           <Box w="full" mt="10px">
-            <Grid templateColumns="repeat(5, 1fr)" gap="4">
+            <Grid templateColumns="repeat(7, 1fr)" gap="4">
               {!store && (
                 <>
                   <Text>No Stores Available</Text>
                 </>
               )}
               {store?.map((stores, index) => (
-                <Box bgColor="White" borderRadius="5px" w="100%" h="270px">
-                  <VStack
-                    display="flex"
-                    justifyContent="center"
-                    alignItems="center"
-                  >
-                    <Image
-                      src={
-                        stores?.logo_attachment ||
-                        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
-                      }
-                      borderTopRadius="5px"
-                      w="full"
-                      h="200px"
-                      objectFit="cover"
-                      alt={`User uploaded image ${index + 1}`}
-                    />
-                    <Text fontWeight="600" textAlign="center">
-                      {stores.name}
-                    </Text>
-                    <Text fontWeight="400" textAlign="center" fontSize="15px">
-                      {stores.slogan}
-                    </Text>
-                  </VStack>
-                </Box>
+                <Link to={`/store/${stores.username}`}>
+                  <Box borderRadius="5px" w="full" h="160px">
+                    <VStack
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      p="2"
+                      gap="1"
+                    >
+                      <Image
+                        src={
+                          stores?.logo_attachment ||
+                          'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'
+                        }
+                        h="50px"
+                        objectFit="contain"
+                        alt={`User uploaded image ${index + 1}`}
+                      />
+                      <Text fontWeight="600" textAlign="center">
+                        {stores.name}
+                      </Text>
+                      <Text fontWeight="400" textAlign="center" fontSize="12px">
+                        {stores.slogan}
+                      </Text>
+                    </VStack>
+                  </Box>
+                </Link>
               ))}
             </Grid>
           </Box>

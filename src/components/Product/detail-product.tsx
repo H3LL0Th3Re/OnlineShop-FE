@@ -20,6 +20,7 @@ import { formatPrice } from '@/utils/format-price';
 import { ChevronRightIcon, ChevronLeftIcon } from 'lucide-react';
 import { Product, Variant, Variant_options } from '@/types/product-type';
 import { getProductForCheckout } from '@/features/dashboard/services/product';
+import Loading from '../Loading/loading';
 
 export default function DetailProduct() {
   const { username, url } = useParams();
@@ -94,7 +95,7 @@ export default function DetailProduct() {
 
   return (
     <Box bg="white" w="full" h="full" m="0" p="3">
-      {!product && <Text>Loading...</Text>}
+      {!product && <Loading />}
       {product && (
         <HStack w="full" h="full" gap="6" mt="20px">
           <Box w="60%" h="full" position="sticky" top="0" left="0">
