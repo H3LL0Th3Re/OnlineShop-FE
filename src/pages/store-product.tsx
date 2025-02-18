@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, Image, Text, VStack } from '@chakra-ui/react';
+import { Box, Grid, Image, Text, VStack } from '@chakra-ui/react';
 
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
@@ -8,6 +8,7 @@ import { useFetchStoreName } from '@/components/tanstack/useStore';
 import { Button } from '@/components/ui/button';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/format-price';
+import NavbarBuyer from './navbarBuyer';
 
 export default function StoreProduct() {
   const { username } = useParams();
@@ -27,27 +28,15 @@ export default function StoreProduct() {
 
   return (
     <Box>
-      <Box
-        bg="gray.100"
-        w="full"
-        h="60px"
-        position="sticky"
-        top="0"
-        zIndex="1"
-        overflow="auto"
-        p="3"
-      >
-        <Flex w="full" justify="space-between" alignItems="center" h="full">
-          <Text color="#5F2EEA" fontWeight="900" fontSize="25px" mb="0">
-            LAKOE APP
-          </Text>
-        </Flex>
+      <Box position="sticky" top="0" right="0" overflow="auto" zIndex="2">
+        <NavbarBuyer />
       </Box>
-      <Box w="full" p="3" bg="">
+
+      <Box w="full" p="3">
         <Box w="full" h="full" mb="15px">
           <Image
             w="full"
-            h="300px"
+            h="350px"
             borderRadius="5px"
             src={
               store?.banner_attachment
@@ -91,19 +80,19 @@ export default function StoreProduct() {
             overflowX="auto"
             display="flex"
             scrollbar="visible"
+            bg="gray.100"
           >
             <Grid
               templateColumns={`repeat(${products?.length}, 220px)`}
               gap="3"
               gapY="1"
               w="max-content"
-              bg="gray.100"
               p="4"
             >
               {loadingStore && (
                 <>
                   {' '}
-                  <Text> Loading....</Text>{' '}
+                  <Text> Loading store....</Text>{' '}
                 </>
               )}
               {storeError && (

@@ -11,11 +11,19 @@ export default function NavbarBuyer() {
       alignItems="center"
       w="full"
       justifyContent="center"
-      bgGradient="to-r" gradientFrom="red.300" gradientTo="blue.500"
+      bgGradient="to-r"
+      gradientFrom="red.300"
+      gradientTo="blue.500"
     >
       <Flex w="full" justify="space-between" alignItems="center">
         <Box>
-          <Text color="#5F2EEA" fontWeight="900" fontSize="25px" mb="0">
+          <Text
+            color="#5F2EEA"
+            fontWeight="900"
+            fontSize="25px"
+            mb="0"
+            onClick={() => (window.location.href = '/home')}
+          >
             LAKOE APP
           </Text>
         </Box>

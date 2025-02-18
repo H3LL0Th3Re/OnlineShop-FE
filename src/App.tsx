@@ -53,6 +53,11 @@ function App() {
       HydrateFallback: Fallback,
     },
     {
+      path: '/Fallback',
+      Component: Fallback,
+      HydrateFallback: Fallback,
+    },
+    {
       path: '/',
       Component: PrivateLayout,
       HydrateFallback: Fallback,
