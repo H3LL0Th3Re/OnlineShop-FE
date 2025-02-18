@@ -37,14 +37,14 @@ export default function Information() {
     isError,
     error,
   } = useQuery<Store, Error>({
-    queryKey: ['store'],
+    queryKey: ['Store'],
     queryFn: () => currentStore(token || ''),
     enabled: !!token, // Only fetch if token exists
   });
   const mutation = useMutation({
     mutationFn: updateStore,
     onSuccess: (data) => {
-      queryClient.setQueryData(['store'], data.store); // Update the cache
+      queryClient.setQueryData(['Store'], data.store); // Update the cache
       alert('Store Updated!');
     },
     onError: (error) => {
