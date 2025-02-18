@@ -22,21 +22,33 @@ import axios from 'axios';
 // import { useState } from 'react';
 import { RiShoppingBag4Line } from 'react-icons/ri';
 import Cookies from 'js-cookie';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import 'midtrans-snap';
 import { formatPrice } from '@/utils/format-price';
 import { Checkout_Product } from '@/types/product-type';
+// import { NumberDomain } from 'recharts/types/util/types';
 
 export default function CheckoutProduct() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone_number, setPhone_number] = useState('');
-  const [province, setProvince] = useState('');
-  const [city, setCity] = useState('');
-  const [district, setDistrict] = useState('');
-  const [sub_district, setSub_district] = useState('');
-  const [postal_code, setPostal_code] = useState('');
-  const [detail_address, setDetail_address] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone_number: '',
+    province: '',
+    city: '',
+    district: '',
+    sub_district: '',
+    postal_code: '',
+    detail_address: '',
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const [product, setProduct] = useState<Checkout_Product | null>(null);
 
@@ -75,7 +87,9 @@ export default function CheckoutProduct() {
   async function onSubmit(
     productName: string,
     price: number,
-    quantity: number
+    quantity: number,
+    shipping: number,
+    serviceFee: number
   ) {
     try {
       const order_response = await axios.post(apiURL + '/order/add-order', {
@@ -84,11 +98,11 @@ export default function CheckoutProduct() {
         origin_contact_email: 'jack@mail.com',
         origin_address: 'pajeet street',
         origin_postal_code: '12240',
-        destination_contact_name: name,
-        destination_contact_phone: phone_number,
-        destination_contact_email: email,
-        destination_address: `${detail_address}, ${province}, ${district}, ${sub_district}, ${city}`,
-        destination_postal_code: postal_code,
+        destination_contact_name: formData.name,
+        destination_contact_phone: formData.phone_number,
+        destination_contact_email: formData.email,
+        destination_address: `${formData.detail_address}, ${formData.province}, ${formData.district}, ${formData.sub_district}, ${formData.city}`,
+        destination_postal_code: formData.postal_code,
         courier_company: 'jne',
         courier_type: 'reg',
         delivery_type: 'now',
@@ -106,6 +120,12 @@ export default function CheckoutProduct() {
           },
         ],
       });
+
+      // if (formData) {
+      //   axios.post("http://localhost:3000/api/save-data", JSON.stringify(formData))
+      //     .then(response => console.log("Data sent successfully:", response.data))
+      //     .catch(error => console.error("Error sending data:", error));
+      // }
 
       // const service_charge = (price * quantity * 1) / 100;
 
@@ -153,6 +173,8 @@ export default function CheckoutProduct() {
           productName,
           price,
           quantity,
+          shipment: shipping,
+          service_charge: serviceFee,
         },
         {
           headers: {
@@ -229,8 +251,9 @@ export default function CheckoutProduct() {
                 <VStack w="50%">
                   <Field textAlign="left" w="full" required label="Nama">
                     <Input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                     />
                   </Field>
                 </VStack>
@@ -238,8 +261,9 @@ export default function CheckoutProduct() {
                   <Field textAlign="left" w="full" required label="Email">
                     <Input
                       type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                     />
                   </Field>
                 </VStack>
@@ -248,46 +272,56 @@ export default function CheckoutProduct() {
                 <Field textAlign="left" w="full" required label="Phone Number">
                   <Input
                     type="number"
-                    value={phone_number}
-                    onChange={(e) => setPhone_number(e.target.value)}
+                    name="phone_number"
+                    value={formData.phone_number}
+                    onChange={handleInputChange}
                   />
                 </Field>
               </VStack>
               <Field textAlign="left" w="full" required label="Province">
                 <Input
-                  value={province}
-                  onChange={(e) => setProvince(e.target.value)}
+                  name="province"
+                  value={formData.province}
+                  onChange={handleInputChange}
                 />
               </Field>
 
               <Field textAlign="left" w="full" required label="City">
-                <Input value={city} onChange={(e) => setCity(e.target.value)} />
+                <Input
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                />
               </Field>
 
               <Field textAlign="left" w="full" required label="District">
                 <Input
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
+                  name="district"
+                  value={formData.district}
+                  onChange={handleInputChange}
                 />
               </Field>
               <Field textAlign="left" w="full" required label="Subdistrict">
                 <Input
-                  value={sub_district}
-                  onChange={(e) => setSub_district(e.target.value)}
+                  name="sub_district"
+                  value={formData.sub_district}
+                  onChange={handleInputChange}
                 />
               </Field>
               <Field textAlign="left" w="full" required label="Postal Code">
                 <Input
                   type="number"
-                  value={postal_code}
-                  onChange={(e) => setPostal_code(e.target.value)}
+                  name="postal_code"
+                  value={formData.postal_code}
+                  onChange={handleInputChange}
                 />
               </Field>
               <Field textAlign="left" w="full" required label="Detail Address">
                 <Textarea
                   h="150px"
-                  value={detail_address}
-                  onChange={(e) => setDetail_address(e.target.value)}
+                  name="detail_address"
+                  value={formData.detail_address}
+                  onChange={handleTextChange}
                 />
               </Field>
             </Box>
@@ -388,7 +422,9 @@ export default function CheckoutProduct() {
               <Button
                 bgColor="#2400FE"
                 color="white"
-                onClick={() => onSubmit(productName, price, quantity)}
+                onClick={() =>
+                  onSubmit(productName, price, quantity, shipping, serviceFee)
+                }
               >
                 Checkout Now
               </Button>
