@@ -277,7 +277,7 @@ export function Home() {
           </Box>
         </VStack>
 
-        <VStack my="5" h="full" w="full" p="3" bg="gray.100" borderRadius="5px">
+        <VStack my="5" h="full" w="full" p="3" bg="#F3F4F6" borderRadius="5px">
           <Text fontWeight="600" fontSize="20px" w="full">
             Recommendations
           </Text>

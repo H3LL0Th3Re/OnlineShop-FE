@@ -77,7 +77,7 @@ function Registration() {
   };
   return (
     <Box
-      bgColor="#E5E5E5"
+      bgColor="#F3F4F6"
       height="100vh"
       w="100vw"
       display="flex"
@@ -94,7 +94,7 @@ function Registration() {
           display="flex"
           alignItems="center"
           justifyContent="center"
-          rounded="12px"
+          rounded="5px"
         >
           <VStack>
             <HStack gap="50px" marginLeft="40px" marginRight="40px">
@@ -110,11 +110,11 @@ function Registration() {
                 <Stack
                   align="center"
                   width="500px"
-                  borderColor="#5F2EEA"
-                  borderWidth="2px"
+                  // borderColor="#5F2EEA"
+                  // borderWidth="2px"
                   p="3"
                   justifyContent="center"
-                  borderRadius="15px"
+                  // borderRadius="15px"
                   as="form"
                   onSubmit={handleSubmit(onSubmit)}
                 >
