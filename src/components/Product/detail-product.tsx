@@ -1,9 +1,9 @@
-// import {
-//   AccordionItem,
-//   AccordionItemContent,
-//   AccordionItemTrigger,
-//   AccordionRoot,
-// } from '@/components/ui/accordion';
+import {
+  AccordionItem,
+  AccordionItemContent,
+  AccordionItemTrigger,
+  AccordionRoot,
+} from '@/components/ui/accordion';
 
 import {
   Box,
@@ -192,6 +192,63 @@ export default function DetailProduct() {
                 +
               </Button>
             </HStack>
+            <AccordionRoot collapsible defaultValue={['specification']}>
+              <AccordionItem value="specification">
+                <AccordionItemTrigger>
+                  Product Specification
+                </AccordionItemTrigger>
+                <AccordionItemContent p="3">
+                  <HStack gapX="10">
+                    <VStack>
+                      <Text color="grey" w="full">
+                        Category
+                      </Text>
+                      <Text color="grey" w="full">
+                        Stock
+                      </Text>
+                      <Text color="grey" w="full">
+                        Weight
+                      </Text>
+                      <Text color="grey" w="full">
+                        Length
+                      </Text>
+                      <Text color="grey" w="full">
+                        Width
+                      </Text>
+                      <Text color="grey" w="full">
+                        Height
+                      </Text>
+                      <Text color="grey" w="full">
+                        SKU
+                      </Text>
+                    </VStack>
+
+                    <VStack>
+                      <Text w="full">Category</Text>
+                      <Text w="full">{product.stock}</Text>
+                      <Text w="full">{product.weight} </Text>
+                      <Text w="full">{product.length}</Text>
+                      <Text w="full">{product.width}</Text>
+                      <Text w="full">{product.height}</Text>
+                      <Text w="full">{product.sku}</Text>
+                    </VStack>
+                  </HStack>
+                </AccordionItemContent>
+              </AccordionItem>
+            </AccordionRoot>
+
+            <AccordionRoot collapsible defaultValue={['specification']}>
+              <AccordionItem value="specification">
+                <AccordionItemTrigger>
+                  Product Specification
+                </AccordionItemTrigger>
+                <AccordionItemContent p="3">
+                  <Text>
+                    {product.description || 'No description available'}
+                  </Text>
+                </AccordionItemContent>
+              </AccordionItem>
+            </AccordionRoot>
             <HStack w="full" mt="15px">
               <Button
                 w="50%"

@@ -22,6 +22,7 @@ export interface Product {
 export interface Checkout_Product {
   price: number;
   quantity: number;
+  weight: number;
   selectedOptions: string;
   name: string;
   attachments: string;

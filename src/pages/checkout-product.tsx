@@ -22,7 +22,7 @@ import axios from 'axios';
 // import { useState } from 'react';
 import { RiShoppingBag4Line } from 'react-icons/ri';
 import Cookies from 'js-cookie';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import 'midtrans-snap';
 import { formatPrice } from '@/utils/format-price';
 import { Checkout_Product } from '@/types/product-type';
@@ -48,27 +48,19 @@ export default function CheckoutProduct() {
   }, []);
 
   const image = product?.attachments;
-  const productName = product?.name || ''; // Default to empty string if no product
+  const productName = product?.name || '';
   const price = product?.price || 0;
   const quantity = product?.quantity || 1;
+  const weight = product?.weight || 0;
   const variants = product?.selectedOptions;
   const totalPrice = price * quantity;
   const shipping = 15000;
   const serviceFee = (1 / 100) * totalPrice;
   const subTotalPrice = totalPrice + shipping + serviceFee;
 
-  useEffect(() => {
-    // Optionally update product details from localStorage if needed
-    // This ensures that if localStorage changes, the state is updated accordingly
-  }, [product]);
+  useEffect(() => {}, [product]);
 
   const [paymentLink, setPaymentLink] = useState('');
-  // useEffect(() => {
-  //   const script = document.createElement('script');
-  //   script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-  //   script.setAttribute('data-client-key', 'SB-Mid-client-4omBGFxKlAqOqhRu'); // Replace with actual client key
-  //   document.body.appendChild(script);
-  // }, []);
 
   const token = Cookies.get('token');
 
@@ -101,7 +93,7 @@ export default function CheckoutProduct() {
             quantity: quantity,
             height: 200,
             length: 200,
-            weight: 200,
+            weight: weight,
             width: 200,
           },
         ],
