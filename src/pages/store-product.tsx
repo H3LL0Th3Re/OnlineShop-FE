@@ -110,7 +110,7 @@ export default function StoreProduct() {
                   borderWidth="1px"
                   borderColor="gray.200"
                 >
-                  <Link to={'/detail-product'}>
+                  <Link to={`/${store?.username}/${product.url}`}>
                     <VStack display="flex" alignItems="center" h="full">
                       <Image
                         src={
