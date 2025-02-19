@@ -26,6 +26,8 @@ import { useEffect, useState } from 'react';
 import 'midtrans-snap';
 import { formatPrice } from '@/utils/format-price';
 import { Checkout_Product } from '@/types/product-type';
+import { DialogDataBuyer } from '@/components/dialog-data-buyer';
+import { currentStore } from '@/features/get-store';
 // import { NumberDomain } from 'recharts/types/util/types';
 
 export default function CheckoutProduct() {
@@ -41,6 +43,7 @@ export default function CheckoutProduct() {
     detail_address: '',
   });
 
+  const [responseOrder, setResponseOrder] = useState<any>("");
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -75,7 +78,33 @@ export default function CheckoutProduct() {
   const [paymentLink, setPaymentLink] = useState('');
 
   const token = Cookies.get('token');
+  const store_response = currentStore(token || "");
+  console.log("my response store",store_response);
+  async function location_fetch(){
+    const location_response = await axios.get(apiURL + '/locations',{
 
+      headers:{
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }
+    })
+    
+
+    // console.log(location_response.data.location[0].address)
+    return location_response.data.location[0]
+  }
+  const response_location = location_fetch();
+
+  async function user_fetch(){
+    const user_response = await axios.get(apiURL + '/user', {
+      headers:{
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      }      
+    })
+    return user_response.data.user[0];
+  }
+  const response_user = user_fetch();
   async function onSubmit(
     productName: string,
     price: number,
@@ -84,17 +113,10 @@ export default function CheckoutProduct() {
     serviceFee: number
   ) {
     try {
-      const order_response = await axios.post(apiURL + '/order/add-order', {
-        origin_contact_name: 'jack',
-        origin_contact_phone: '029319321',
-        origin_contact_email: 'jack@mail.com',
-        origin_address: 'pajeet street',
-        origin_postal_code: '12240',
-        destination_contact_name: formData.name,
-        destination_contact_phone: formData.phone_number,
-        destination_contact_email: formData.email,
-        destination_address: `${formData.detail_address}, ${formData.province}, ${formData.district}, ${formData.sub_district}, ${formData.city}`,
-        destination_postal_code: formData.postal_code,
+      // console.log("draft order id", localStorage.getItem("order_id_response"))
+      
+      const order_response = await axios.put(apiURL + '/order/update-order', {
+        orderid: localStorage.getItem("order_id_response"),
         courier_company: 'jne',
         courier_type: 'reg',
         delivery_type: 'now',
@@ -118,45 +140,6 @@ export default function CheckoutProduct() {
       //     .then(response => console.log("Data sent successfully:", response.data))
       //     .catch(error => console.error("Error sending data:", error));
       // }
-
-      // const service_charge = (price * quantity * 1) / 100;
-
-      // const invoice_response = await axios.post(
-      //   apiURL + '/invoice/create-invoice',
-      //   {
-      //     status: 'pending',
-      //     prices: price * quantity,
-      //     service_charge: service_charge,
-      //     receiver_city: city,
-      //     receiver_province: province,
-      //     receiver_subDistrict: sub_district,
-      //     receiver_district: district,
-      //     receiver_phone: phone_number,
-      //     receiver_name: name,
-      //     receiver_postalCode: postal_code,
-      //     receiver_detailAddress: detail_address,
-      //     receiver_email: email,
-      //     // cartsId: 'cdqdwir39232',
-      //     userId: 'cm71m960c0007tarc0pnj62eb',
-      //     order_id: order_response.data.orderId,
-      //     // paymentsId: 'joewjfiewjfiwf',
-      //     // courierId: 'wqeijeiqejei',
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `bearer ${token}`,
-      //       'Content-Type': 'application/json',
-      //     },
-      //   }
-      // );
-
-      // const invoice_history_response = await axios.post(
-      //   apiURL + '/invoice-history/create-invoice-history',
-      //   {
-      //     invoice_id: invoice_response.data.invoice_created.id,
-      //   }
-      // );
-      // console.log('invoice_history created: ', invoice_history_response.data);
 
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',
@@ -187,32 +170,7 @@ export default function CheckoutProduct() {
       } else {
         alert('Failed to generate payment link.');
       }
-      // if (window.snap) {
-      //   window.snap.pay(snapToken, {
-      //     onSuccess: async function (result) {
-      //       try {
-      //         console.log('Payment Success:', result);
-      //         alert('Payment successful!');
-      //       } catch (error) {
-      //         console.error('Error processing payment:', error);
-      //         // Handle error appropriately
-      //       }
-      //     },
-      //     onPending: function (result) {
-      //       console.log('Payment Pending:', result);
-      //       alert('Payment pending. Complete the payment to continue.');
-      //     },
-      //     onError: function (result) {
-      //       console.log('Payment Error:', result);
-      //       alert('Payment failed. Try again.');
-      //     },
-      //     onClose: function () {
-      //       alert('Payment window closed.');
-      //     },
-      //   });
-      // } else {
-      //   alert('Midtrans SDK not loaded.');
-      // }
+      
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return {
@@ -223,101 +181,93 @@ export default function CheckoutProduct() {
       }
     }
   }
+  useEffect(() => {
+    const IwillHaveOrder = async () => {
+      const orderId = localStorage.getItem("order_id_response");
+    
+    if (!orderId) {
+      console.error("Order ID is missing in localStorage.");
+      return;
+    }
+  
+    try {
+      const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
+      setResponseOrder(getOrderResponse.data.order);
+      return getOrderResponse.data.order;
+    } catch (error) {
+      console.error("Error retrieving the order:", error);
+    }
+    };
+
+    IwillHaveOrder();
+  }, []);
+  console.log(responseOrder)
+  // async function IwillHaveOrder() {
+  //   const orderId = localStorage.getItem("order_id_response");
+    
+  //   if (!orderId) {
+  //     console.error("Order ID is missing in localStorage.");
+  //     return;
+  //   }
+  
+  //   try {
+  //     const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
+  //     setResponseOrder(getOrderResponse.data.order);
+  //     return getOrderResponse.data.order;
+  //   } catch (error) {
+  //     console.error("Error retrieving the order:", error);
+  //   }
+  // }
+  // const response_order = IwillHaveOrder();
+  
   return (
+    
     <Box p="0" m="0">
       <Box p="2" m="5px" bg="white">
         <Text fontSize="20px" fontWeight="600">
           Checkout Product
         </Text>
         <HStack mt="3" gap="10">
-          <Box
-            w="60%"
-            h="full"
-            borderWidth="1px"
-            borderColor="grey"
-            borderRadius="10px"
-          >
-            <Box p="3">
-              <Text>Shipping Information</Text>
-              <HStack w="full">
-                <VStack w="50%">
-                  <Field textAlign="left" w="full" required label="Nama">
-                    <Input
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                    />
-                  </Field>
-                </VStack>
-                <VStack w="50%">
-                  <Field textAlign="left" w="full" required label="Email">
-                    <Input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                    />
-                  </Field>
-                </VStack>
-              </HStack>
-              <VStack w="full">
-                <Field textAlign="left" w="full" required label="Phone Number">
-                  <Input
-                    type="number"
-                    name="phone_number"
-                    value={formData.phone_number}
-                    onChange={handleInputChange}
+          
+            <Box w="60%" h="full" spaceY={5}>
+              <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+                <HStack w={'full'} display={'flex'} justifyContent={'space-between'}>
+                  <Text fontSize={'20px'} fontWeight="600">
+                    Buyer Informations
+                  </Text>
+                  <DialogDataBuyer />
+                </HStack>
+                <HStack>
+                  <Text fontWeight={'500'}>{responseOrder.destination?.contact_name}</Text> |<Text>{responseOrder.destination?.contact_phone}</Text>
+                </HStack>
+                <Text>{responseOrder.destination?.contact_email}</Text>
+                <Text>{responseOrder.destination?.address}</Text>
+                <Text>{responseOrder.destination?.postal_code}</Text>
+                
+              </Box>
+              <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+                <Text fontSize={'20px'} fontWeight="600">
+                  Detail Shipment
+                </Text>
+                <HStack>
+                  <Image
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg"
+                    boxSize="50px"
+                  />
+                  <Text>J&T Ekspress</Text>
+                  <Text>Rp 27.000</Text>
+                </HStack>
+              </Box>
+              <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+                <Field label="Notes">
+                  <Textarea
+                    placeholder="Enter your request to product"
+                    h="80px"
                   />
                 </Field>
-              </VStack>
-              <Field textAlign="left" w="full" required label="Province">
-                <Input
-                  name="province"
-                  value={formData.province}
-                  onChange={handleInputChange}
-                />
-              </Field>
-
-              <Field textAlign="left" w="full" required label="City">
-                <Input
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                />
-              </Field>
-
-              <Field textAlign="left" w="full" required label="District">
-                <Input
-                  name="district"
-                  value={formData.district}
-                  onChange={handleInputChange}
-                />
-              </Field>
-              <Field textAlign="left" w="full" required label="Subdistrict">
-                <Input
-                  name="sub_district"
-                  value={formData.sub_district}
-                  onChange={handleInputChange}
-                />
-              </Field>
-              <Field textAlign="left" w="full" required label="Postal Code">
-                <Input
-                  type="number"
-                  name="postal_code"
-                  value={formData.postal_code}
-                  onChange={handleInputChange}
-                />
-              </Field>
-              <Field textAlign="left" w="full" required label="Detail Address">
-                <Textarea
-                  h="150px"
-                  name="detail_address"
-                  value={formData.detail_address}
-                  onChange={handleTextChange}
-                />
-              </Field>
-            </Box>
+              </Box>
           </Box>
+          
 
           <Box
             w="40%"
