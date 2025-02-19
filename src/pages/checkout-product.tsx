@@ -28,6 +28,7 @@ import { formatPrice } from '@/utils/format-price';
 import { Checkout_Product } from '@/types/product-type';
 import { DialogDataBuyer } from '@/components/dialog-data-buyer';
 import { currentStore } from '@/features/get-store';
+import { use } from 'chai';
 // import { NumberDomain } from 'recharts/types/util/types';
 
 export default function CheckoutProduct() {
@@ -44,6 +45,7 @@ export default function CheckoutProduct() {
   });
 
   const [responseOrder, setResponseOrder] = useState<any>("");
+  const [email_user, setEmail_user] = useState<any>("");
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -201,6 +203,37 @@ export default function CheckoutProduct() {
 
     IwillHaveOrder();
   }, []);
+
+
+  useEffect(() => {
+    const getEmail = async () => {
+      const orderId = localStorage.getItem("order_id_response");
+      try{
+        const response_email = await axios.post(apiURL + `/order/get-email`, 
+          {
+            "id_order": orderId
+          },
+          {
+          headers: {
+            Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+        // console.log(response_email);
+        setEmail_user(response_email.data);
+        return response_email.data;
+      }catch(error){
+        console.log("error getting email.", error)
+      }
+    }
+  
+    getEmail();
+  }, []);
+
+  console.log("my email",email_user);
+  
+  
+  
   console.log(responseOrder)
   // async function IwillHaveOrder() {
   //   const orderId = localStorage.getItem("order_id_response");
@@ -219,7 +252,7 @@ export default function CheckoutProduct() {
   //   }
   // }
   // const response_order = IwillHaveOrder();
-  
+  console.log("mee: ",responseOrder.destination?.contact_name)
   return (
     
     <Box p="0" m="0">
@@ -240,7 +273,7 @@ export default function CheckoutProduct() {
                 <HStack>
                   <Text fontWeight={'500'}>{responseOrder.destination?.contact_name}</Text> |<Text>{responseOrder.destination?.contact_phone}</Text>
                 </HStack>
-                <Text>{responseOrder.destination?.contact_email}</Text>
+                <Text>{email_user.data_response?.destination_email}</Text>
                 <Text>{responseOrder.destination?.address}</Text>
                 <Text>{responseOrder.destination?.postal_code}</Text>
                 

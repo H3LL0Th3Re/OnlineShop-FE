@@ -271,12 +271,15 @@ export const DialogDataBuyer = () => {
         origin_contact_phone: (await response_user).phone_number,
         origin_contact_email: (await response_user).email,
         origin_address: `${(await response_location).city_district}, ${(await response_location).address}`,
+        
         origin_postal_code: (await response_location).postal_code,
-        destination_contact_email: formData.email,
         destination_contact_name: formData.name,
         destination_contact_phone: formData.phone_number,
+        destination_contact_email: formData.email,
         destination_address: `${formData.detail_address}, ${getLabelByValue(provinces,formData.province)}, ${getLabelByValue(districts,formData.district)}, ${getLabelByValue(villages,formData.sub_district)}, ${getLabelByValue(cities,formData.city)}`,
         destination_postal_code: formData.postal_code,
+        
+
         delivery_type: "now",
         items: [
           {
