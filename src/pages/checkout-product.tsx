@@ -1,4 +1,6 @@
-import DialogShipmentCheckout from '@/components/dialog-shipment-checkout';
+import DialogShipmentCheckout, {
+  Courier,
+} from '@/components/dialog-shipment-checkout';
 import {
   AccordionItem,
   AccordionItemContent,
@@ -31,7 +33,9 @@ import { RiShoppingBag4Line } from 'react-icons/ri';
 
 export default function CheckoutProduct() {
   const [responseOrder, setResponseOrder] = useState<any>('');
-
+  const [selectedShipment, setSelectedShipment] = useState<Courier | null>(
+    null
+  );
   const [product, setProduct] = useState<Checkout_Product | null>(null);
 
   useEffect(() => {
@@ -48,7 +52,7 @@ export default function CheckoutProduct() {
   const weight = product?.weight || 0;
   const variants = product?.selectedOptions;
   const totalPrice = price * quantity;
-  const shipping = 15000;
+  const shipping = selectedShipment?.price || 0;
   const serviceFee = (1 / 100) * totalPrice;
   const subTotalPrice = totalPrice + shipping + serviceFee;
 
@@ -59,6 +63,10 @@ export default function CheckoutProduct() {
   const token = Cookies.get('token');
   const store_response = currentStore(token || '');
   console.log('my response store', store_response);
+
+  const handleShipmentSelection = (shipmentData: Courier | null) => {
+    setSelectedShipment(shipmentData);
+  };
 
   async function onSubmit(
     productName: string,
@@ -82,10 +90,10 @@ export default function CheckoutProduct() {
             description: 'cow is sacred saar',
             value: price,
             quantity: quantity,
-            height: 200,
-            length: 200,
+            height: 0,
+            length: 0,
             weight: weight,
-            width: 200,
+            width: 0,
           },
         ],
       });
@@ -155,24 +163,16 @@ export default function CheckoutProduct() {
 
     IwillHaveOrder();
   }, []);
-  console.log(responseOrder);
-  // async function IwillHaveOrder() {
-  //   const orderId = localStorage.getItem("order_id_response");
+  console.log('response order:', responseOrder);
 
-  //   if (!orderId) {
-  //     console.error("Order ID is missing in localStorage.");
-  //     return;
-  //   }
-
-  //   try {
-  //     const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
-  //     setResponseOrder(getOrderResponse.data.order);
-  //     return getOrderResponse.data.order;
-  //   } catch (error) {
-  //     console.error("Error retrieving the order:", error);
-  //   }
-  // }
-  // const response_order = IwillHaveOrder();
+  const courierImages: { [key: string]: string } = {
+    gojek:
+      'https://cdn.antaranews.com/cache/1200x800/2020/10/03/Gojek-simbol.jpg',
+    grab: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/74/e0/4a/74e04a86-94bd-fc99-d853-836fcbfa00bf/GrabIcon-0-0-1x_U007emarketing-0-5-0-0-85-220.png/1200x630wa.png',
+    jne: 'https://asset.kompas.com/crops/b69bSXp1n7COYJrBlDdB5nFZDZ0=/87x58:785x523/1200x800/data/photo/2019/06/01/431914915.jpg',
+    jnt: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg',
+    tiki: 'https://www.julo.co.id/sites/default/files/2024-10/franchise%20TIKI.webp',
+  };
 
   return (
     <Box p="0" m="0">
@@ -180,7 +180,7 @@ export default function CheckoutProduct() {
         <Text fontSize="20px" fontWeight="600">
           Checkout Product
         </Text>
-        <HStack mt="3" gap="10">
+        <HStack mt="3" gap="10" display={'flex'} alignItems={'flex-start'}>
           <Box w="60%" h="full" spaceY={5}>
             <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
               <HStack
@@ -208,12 +208,35 @@ export default function CheckoutProduct() {
                 Detail Shipment
               </Text>
               <HStack>
-                <Image
-                  src="https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg"
-                  boxSize="50px"
-                />
-                <Text>J&T Ekspress</Text>
-                <Text>Rp 27.000</Text>
+                {selectedShipment && (
+                  <Image
+                    src={courierImages[selectedShipment.courier_code]}
+                    boxSize="50px"
+                    alt={`${selectedShipment.courier_service_name} logo`}
+                  />
+                )}
+                {selectedShipment && (
+                  <HStack
+                    mt="4"
+                    display={'flex'}
+                    w={'full'}
+                    justifyContent={'space-between'}
+                  >
+                    <Box>
+                      <Text fontSize={'xl'}>
+                        {selectedShipment.courier_service_name}
+                      </Text>
+                      <Text>
+                        {selectedShipment.courier_code} (
+                        {selectedShipment.shipment_duration_range}{' '}
+                        {selectedShipment.shipment_duration_unit})
+                      </Text>
+                    </Box>
+                    <Text fontWeight={'500'} fontSize={'3xl'}>
+                      Rp {formatPrice(selectedShipment.price)}
+                    </Text>
+                  </HStack>
+                )}
               </HStack>
             </Box>
             <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
@@ -266,7 +289,10 @@ export default function CheckoutProduct() {
                     Rp {formatPrice(price)}
                   </Text>
                   <Text>Quantity: {quantity}</Text>
-                  <DialogShipmentCheckout />
+                  <DialogShipmentCheckout
+                    selectedShipment={selectedShipment}
+                    onSelectShipment={handleShipmentSelection}
+                  />
                   {/* <Button>Select Shipment</Button> */}
                 </VStack>
               </HStack>
