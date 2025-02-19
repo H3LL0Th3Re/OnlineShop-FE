@@ -3,7 +3,7 @@ import Fallback from './pages/fallback';
 import Product from './pages/product';
 import Login from './pages/login';
 import Registration from './pages/registration';
-import { Order } from './pages/order';
+// import { Order } from './pages/orderDummy';
 import { DetailOrder } from './components/Order/detail-order';
 import Settings from './pages/settings';
 import { Home } from './pages/home';
@@ -14,6 +14,8 @@ import { LandingPage } from './pages/landing-page';
 import CheckoutProduct from './pages/checkout-product';
 import AddProduct from './components/Product/add-product';
 import StoreProduct from './pages/store-product';
+import { OrderDummy } from './pages/orderDummy';
+import { Order } from './pages/order';
 // import UpdatedProduct from './components/Product/updated-product';
 function App() {
   const router = createBrowserRouter([
@@ -83,6 +85,11 @@ function App() {
           HydrateFallback: Fallback,
         },
         {
+          path: '/order-dummy',
+          Component: OrderDummy,
+          HydrateFallback: Fallback,
+        },
+        {
           path: '/dashboard',
           Component: Dashboard,
           HydrateFallback: Fallback,
@@ -92,7 +99,6 @@ function App() {
           Component: DetailOrder,
           HydrateFallback: Fallback,
         },
-
         {
           path: '/pengaturan',
           Component: Settings,
