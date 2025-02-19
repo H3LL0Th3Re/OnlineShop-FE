@@ -12,6 +12,13 @@ import {
 } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/hooks/authstore';
+
+import {
+  useMutation,
+  UseMutationResult,
+  useQueryClient,
+} from '@tanstack/react-query';
+import axios from 'axios';
 import {
   MapContainer,
   Marker,
@@ -19,26 +26,22 @@ import {
   TileLayer,
   useMapEvents,
 } from 'react-leaflet';
-import {
-  useMutation,
-  UseMutationResult,
-  useQueryClient,
-} from '@tanstack/react-query';
-import axios from 'axios';
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// interface DialogAddLocationProps {
-//   onAddLocation: (newLocation: any) => void; // Tambahkan callback
-// }
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 interface DropdownOption {
   label: string;
   value: string;
   postCode?: string;
 }
-
-// export default function DialogAddLocation({
-//   onAddLocation,
-// }: DialogAddLocationProps) {
 
 export default function DialogAddLocation() {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
@@ -507,12 +510,7 @@ export default function DialogAddLocation() {
                 Pinpoint Lokasi*
               </Text>
 
-              <Box
-                borderRadius="7px"
-                h="400px"
-                w="full"
-                bg="blue"
-              >
+              <Box borderRadius="7px" h="400px" w="full" bg="blue">
                 <MapContainer
                   center={{ lat: -6.2, lng: 106.8 }}
                   zoom={15}
@@ -525,6 +523,18 @@ export default function DialogAddLocation() {
                   <LocationMarker />
                 </MapContainer>
               </Box>
+
+              {/* <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[51.505, -0.09]}>
+              <Popup>
+                A pretty CSS3 popup. <br /> Easily customizable.
+              </Popup>
+            </Marker>
+          </MapContainer> */}
 
               <Text fontWeight="400" fontSize="13px" mb="7px">
                 Tandai lokasi untuk mempermudah pemintaan pickup kurir{' '}
