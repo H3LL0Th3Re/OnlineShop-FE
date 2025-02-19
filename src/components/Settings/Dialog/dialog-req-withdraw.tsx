@@ -1,4 +1,5 @@
-import { Box, Button, Input, Text } from '@chakra-ui/react';
+import { Box, Button, Input, Text, NativeSelect } from '@chakra-ui/react';
+
 import {
   DialogActionTrigger,
   DialogBody,
@@ -11,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 // import { useAuthStore } from '@/hooks/authstore';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 // import { messageTemplates } from '@/features/message';
 // import { z } from 'zod';
 // import { useForm } from 'react-hook-form';
@@ -21,6 +22,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiURL } from '@/utils/api-url';
 import Cookies from 'js-cookie';
+import { useFetchBank } from '@/components/tanstack/useBank';
+import { useFetchBalance } from '@/components/tanstack/useTransactionList';
 import Swal from 'sweetalert2';
 // const schema = z.object({
 //   name: z.string(),
@@ -31,42 +34,45 @@ import Swal from 'sweetalert2';
 // type MessageData = z.infer<typeof schema>;
 const token = Cookies.get('token');
 
-export default function DialogAddBank() {
-  const [acc_name, setAccName] = useState<string>('');
-  const [bank, setBank] = useState<string>('');
-  const [acc_number, setAccNumber] = useState<string>('');
-  const [errors, setErrors] = useState<{
-    acc_name?: string;
-    bank?: string;
-    acc_number?: string;
-  }>({});
-
-  const validateForm = () => {
-    const newErrors: { acc_name?: string; bank?: string; acc_number?: string } =
-      {};
-    if (!acc_name.trim()) newErrors.acc_name = 'Nama harus diisi';
-    if (!bank.trim()) newErrors.bank = 'Bank harus diisi';
-    if (!acc_number.trim())
-      newErrors.acc_number = 'Nomor Rekening tidak boleh kosong';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+export default function DialogRequestWithdraw() {
+  const [amount, setAmount] = useState<number>(0);
+  const [bankId, setBankId] = useState<string>('');
+  const [errors, setErrors] = useState<{ amount?: string; bankId?: string }>(
+    {}
+  );
+  const { data: total } = useFetchBalance(token || '');
+  const { data: banks } = useFetchBank(token || '');
+  console.log(banks);
+  const validateAmount = (value: number) => {
+    let error: string | undefined;
+    if (isNaN(value) || value <= 0) {
+      error = 'Jumlah harus lebih besar dari 0 dan berupa angka';
+    } else if (value > (total || 0)) {
+      error = 'Jumlah tidak boleh lebih dari total saldo';
+    }
+    setErrors((prevErrors) => ({ ...prevErrors, amount: error }));
   };
-  const isFormValid = acc_name.trim() && bank.trim() && acc_number.trim();
+  const validateForm = () => {
+    const newErrors: { amount?: string; bankId?: string } = {};
+
+    if (!bankId.trim()) newErrors.bankId = 'Bank harus dipilih';
+    setErrors((prevErrors) => ({ ...prevErrors, ...newErrors }));
+
+    return Object.keys(newErrors).length === 0 && !errors.amount;
+  };
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async ({
-      acc_name,
-      bank,
-      acc_number,
+      amount,
+      bankId,
     }: {
-      acc_name: string;
-      bank: string;
-      acc_number: string;
+      amount: number;
+      bankId: string;
     }) => {
       const response = await axios.post(
-        `${apiURL}/bank/create-bank`,
-        { acc_name, bank, acc_number },
+        `${apiURL}/transaction-list/request`,
+        { amount, bankId },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -77,14 +83,14 @@ export default function DialogAddBank() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['Bank'] });
+      queryClient.invalidateQueries({ queryKey: ['Transaction'] });
     },
   });
-
+  const contentRef = useRef<HTMLDivElement>(null);
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
-    mutation.mutate({ acc_name, bank, acc_number });
+    mutation.mutate({ amount, bankId });
     Swal.fire({
       title: 'Data Bank Added!',
       confirmButtonText: 'Ok',
@@ -102,33 +108,49 @@ export default function DialogAddBank() {
             borderColor="black"
             fontWeight="700"
           >
-            Add Bank Account
+            Request Withdraw
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent ref={contentRef}>
           <DialogHeader>
             <DialogTitle>Add Bank Account</DialogTitle>
           </DialogHeader>
           <DialogBody>
             <form onSubmit={onSubmit}>
               <Text fontWeight="600" fontSize="15px" mb="7px">
-                Nama Pengguna*
+                Jumlah Withdraw*
               </Text>
               <Input
                 mb="7px"
-                value={acc_name}
-                onChange={(e) => setAccName(e.target.value)}
+                value={amount}
+                type="number"
+                onChange={(e) => {
+                  const value = e.target.value ? Number(e.target.value) : 0;
+                  setAmount(value);
+                  validateAmount(value); // Real-time validation on change
+                }}
               />
-              {errors.acc_name && (
+              {errors.amount && (
                 <Text color="red.500" fontSize="sm" mt={1}>
-                  {errors.acc_name}
+                  {errors.amount}
                 </Text>
               )}
-              <Text fontWeight="600" fontSize="15px" mb="7px">
-                Bank*
-              </Text>
 
-              <Input value={bank} onChange={(e) => setBank(e.target.value)} />
+              <NativeSelect.Root size="sm" width="240px">
+                <NativeSelect.Field
+                  placeholder="Select option"
+                  value={bankId}
+                  onChange={(e) => setBankId(e.currentTarget.value)}
+                >
+                  {banks?.map((x) => (
+                    <option value={x.id}>
+                      {x.acc_name} : {x.bank} - {x.acc_number}
+                    </option>
+                  ))}
+                </NativeSelect.Field>
+                <NativeSelect.Indicator />
+              </NativeSelect.Root>
+              {/* <Input value={bank} onChange={(e) => setBank(e.target.value)} />
               {errors.bank && (
                 <Text color="red.500" fontSize="sm" mt={1}>
                   {errors.bank}
@@ -146,14 +168,15 @@ export default function DialogAddBank() {
                 <Text color="red.500" fontSize="sm" mt={1}>
                   {errors.acc_number}
                 </Text>
-              )}
+              )} */}
+
               <DialogFooter>
                 <DialogActionTrigger asChild>
                   <Button
                     type="submit"
                     bgColor="#2400FE"
                     color="white"
-                    disabled={!isFormValid}
+                    disabled={amount === 0 || errors.amount !== undefined}
                   >
                     Save
                   </Button>
