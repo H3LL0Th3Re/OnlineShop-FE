@@ -1,29 +1,12 @@
-import {
-  SelectContent,
-  SelectItem,
-  SelectRoot,
-  SelectTrigger,
-  SelectValueText,
-} from '@/components/ui/select';
-import {
-  Box,
-  createListCollection,
-  Flex,
-  Image,
-  Input,
-  Stack,
-  Tabs,
-  Text,
-} from '@chakra-ui/react';
-import { useState } from 'react';
+import { Box, Flex, Image, Stack, Tabs, Text } from '@chakra-ui/react';
 
 import { LuUser } from 'react-icons/lu';
 import { useNavigate } from 'react-router';
 // import dialogTemplateMessage from '../components/Order/Dialog/dialog-template-message'
-import DialogTemplateMessage from '../components/Order/Dialog/dialog-template-message';
-import axios from 'axios';
 import { useAuthStore } from '@/hooks/authstore';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import DialogTemplateMessage from '../components/Order/Dialog/dialog-template-message';
 
 interface Order {
   id: string;
@@ -55,32 +38,36 @@ export const getStatusColor = (status: string | undefined) => {
 };
 
 export function Order() {
-    const token = useAuthStore((state) => state.token);
-    const navigate = useNavigate();
-  
-    // Fungsi untuk mengambil data Order
-    const fetchOrders = async () => {
-      const response = await axios.get('http://localhost:3000/api/order', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data.orders;
-    };
-  
-    // Menggunakan useQuery dengan refetchInterval
-    const { data: orders = [], isLoading, isError } = useQuery<Order[]>({
-      queryKey: ['orders'],
-      queryFn: fetchOrders,
-      refetchInterval: 2000, // Refetch data setiap 2 detik
-    });
-  
-    if (isLoading) return <Text>Loading...</Text>;
-    if (isError) return <Text>Error fetching orders</Text>;
+  const token = useAuthStore((state) => state.token);
+  const navigate = useNavigate();
 
-    const handleClickOrder = (orderId: string) => {
-      navigate(`/detail-order/${orderId}`);
-    };
+  // Fungsi untuk mengambil data Order
+  const fetchOrders = async () => {
+    const response = await axios.get('http://localhost:3000/api/order', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data.orders;
+  };
+
+  // Menggunakan useQuery dengan refetchInterval
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+  } = useQuery<Order[]>({
+    queryKey: ['orders'],
+    queryFn: fetchOrders,
+    refetchInterval: 2000, // Refetch data setiap 2 detik
+  });
+
+  if (isLoading) return <Text>Loading...</Text>;
+  if (isError) return <Text>Error fetching orders</Text>;
+
+  const handleClickOrder = (orderId: string) => {
+    navigate(`/detail-order/${orderId}`);
+  };
   return (
     <Box>
       <Tabs.Root defaultValue="semua" bg={'white'} p={3} pt={4}>

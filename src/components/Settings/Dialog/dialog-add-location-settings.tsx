@@ -43,6 +43,11 @@ interface DropdownOption {
   postCode?: string;
 }
 
+interface DataProps {
+  name: string;
+  code: string;
+}
+
 export default function DialogAddLocation() {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
     null
@@ -51,7 +56,7 @@ export default function DialogAddLocation() {
   const [cities, setCities] = useState<DropdownOption[]>([]);
   const [districts, setDistricts] = useState<DropdownOption[]>([]);
   const [villages, setVillages] = useState<DropdownOption[]>([]);
-  const [postalCodes, setPostalCodes] = useState<DropdownOption[]>([]);
+  const [, setPostalCodes] = useState<DropdownOption[]>([]);
   const [locationName, setLocationName] = useState<string>('');
   const [locationAddress, setLocationAddress] = useState<string>('');
   const queryClient = useQueryClient();
@@ -65,10 +70,10 @@ export default function DialogAddLocation() {
   );
   const { token } = useAuthStore();
 
-  const getProvinceLabel = (value: string | null) => {
-    const province = provinces.find((prov) => prov.value === value);
-    return province ? province.label : null;
-  };
+  // const getProvinceLabel = (value: string | null) => {
+  //   const province = provinces.find((prov) => prov.value === value);
+  //   return province ? province.label : null;
+  // };
 
   const getLabelByValue = (options: DropdownOption[], value: string | null) => {
     const option = options.find((opt) => opt.value === value);
@@ -93,7 +98,7 @@ export default function DialogAddLocation() {
           }
           const data = await response.json();
           setProvinces(
-            data.data.map((prov: any) => ({
+            data.data.map((prov: DataProps) => ({
               label: prov.name,
               value: prov.code,
             }))
@@ -125,7 +130,7 @@ export default function DialogAddLocation() {
           // Memastikan data dikirim sesuai dengan format yang diinginkan
           if (data?.data) {
             setCities(
-              data.data.map((city: any) => ({
+              data.data.map((city: DataProps) => ({
                 label: city.name, // Menampilkan nama kota
                 value: city.code, // Menyimpan kode kota
               }))
@@ -163,7 +168,7 @@ export default function DialogAddLocation() {
           if (data?.data) {
             setDistricts(
               // Mengubah setCities menjadi setDistricts
-              data.data.map((district: any) => ({
+              data.data.map((district: DataProps) => ({
                 label: district.name, // Menampilkan nama kecamatan
                 value: district.code, // Menyimpan kode kecamatan
               }))

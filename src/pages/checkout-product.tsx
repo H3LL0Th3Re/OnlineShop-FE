@@ -13,45 +13,24 @@ import {
   Flex,
   HStack,
   Image,
-  Input,
   Text,
   Textarea,
   VStack,
 } from '@chakra-ui/react';
 import axios from 'axios';
 // import { useState } from 'react';
-import { RiShoppingBag4Line } from 'react-icons/ri';
-import Cookies from 'js-cookie';
-import { useEffect, useState } from 'react';
-import 'midtrans-snap';
-import { formatPrice } from '@/utils/format-price';
-import { Checkout_Product } from '@/types/product-type';
 import { DialogDataBuyer } from '@/components/dialog-data-buyer';
 import { currentStore } from '@/features/get-store';
+import { Checkout_Product } from '@/types/product-type';
+import { formatPrice } from '@/utils/format-price';
+import Cookies from 'js-cookie';
+import 'midtrans-snap';
+import { useEffect, useState } from 'react';
+import { RiShoppingBag4Line } from 'react-icons/ri';
 // import { NumberDomain } from 'recharts/types/util/types';
 
 export default function CheckoutProduct() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone_number: '',
-    province: '',
-    city: '',
-    district: '',
-    sub_district: '',
-    postal_code: '',
-    detail_address: '',
-  });
-
-  const [responseOrder, setResponseOrder] = useState<any>("");
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const [responseOrder, setResponseOrder] = useState<any>('');
 
   const [product, setProduct] = useState<Checkout_Product | null>(null);
 
@@ -78,33 +57,9 @@ export default function CheckoutProduct() {
   const [paymentLink, setPaymentLink] = useState('');
 
   const token = Cookies.get('token');
-  const store_response = currentStore(token || "");
-  console.log("my response store",store_response);
-  async function location_fetch(){
-    const location_response = await axios.get(apiURL + '/locations',{
+  const store_response = currentStore(token || '');
+  console.log('my response store', store_response);
 
-      headers:{
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
-    })
-    
-
-    // console.log(location_response.data.location[0].address)
-    return location_response.data.location[0]
-  }
-  const response_location = location_fetch();
-
-  async function user_fetch(){
-    const user_response = await axios.get(apiURL + '/user', {
-      headers:{
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }      
-    })
-    return user_response.data.user[0];
-  }
-  const response_user = user_fetch();
   async function onSubmit(
     productName: string,
     price: number,
@@ -114,9 +69,9 @@ export default function CheckoutProduct() {
   ) {
     try {
       // console.log("draft order id", localStorage.getItem("order_id_response"))
-      
+
       const order_response = await axios.put(apiURL + '/order/update-order', {
-        orderid: localStorage.getItem("order_id_response"),
+        orderid: localStorage.getItem('order_id_response'),
         courier_company: 'jne',
         courier_type: 'reg',
         delivery_type: 'now',
@@ -170,7 +125,6 @@ export default function CheckoutProduct() {
       } else {
         alert('Failed to generate payment link.');
       }
-      
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return {
@@ -183,33 +137,33 @@ export default function CheckoutProduct() {
   }
   useEffect(() => {
     const IwillHaveOrder = async () => {
-      const orderId = localStorage.getItem("order_id_response");
-    
-    if (!orderId) {
-      console.error("Order ID is missing in localStorage.");
-      return;
-    }
-  
-    try {
-      const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
-      setResponseOrder(getOrderResponse.data.order);
-      return getOrderResponse.data.order;
-    } catch (error) {
-      console.error("Error retrieving the order:", error);
-    }
+      const orderId = localStorage.getItem('order_id_response');
+
+      if (!orderId) {
+        console.error('Order ID is missing in localStorage.');
+        return;
+      }
+
+      try {
+        const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
+        setResponseOrder(getOrderResponse.data.order);
+        return getOrderResponse.data.order;
+      } catch (error) {
+        console.error('Error retrieving the order:', error);
+      }
     };
 
     IwillHaveOrder();
   }, []);
-  console.log(responseOrder)
+  console.log(responseOrder);
   // async function IwillHaveOrder() {
   //   const orderId = localStorage.getItem("order_id_response");
-    
+
   //   if (!orderId) {
   //     console.error("Order ID is missing in localStorage.");
   //     return;
   //   }
-  
+
   //   try {
   //     const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
   //     setResponseOrder(getOrderResponse.data.order);
@@ -219,55 +173,58 @@ export default function CheckoutProduct() {
   //   }
   // }
   // const response_order = IwillHaveOrder();
-  
+
   return (
-    
     <Box p="0" m="0">
       <Box p="2" m="5px" bg="white">
         <Text fontSize="20px" fontWeight="600">
           Checkout Product
         </Text>
         <HStack mt="3" gap="10">
-          
-            <Box w="60%" h="full" spaceY={5}>
-              <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
-                <HStack w={'full'} display={'flex'} justifyContent={'space-between'}>
-                  <Text fontSize={'20px'} fontWeight="600">
-                    Buyer Informations
-                  </Text>
-                  <DialogDataBuyer />
-                </HStack>
-                <HStack>
-                  <Text fontWeight={'500'}>{responseOrder.destination?.contact_name}</Text> |<Text>{responseOrder.destination?.contact_phone}</Text>
-                </HStack>
-                <Text>{responseOrder.destination?.contact_email}</Text>
-                <Text>{responseOrder.destination?.address}</Text>
-                <Text>{responseOrder.destination?.postal_code}</Text>
-                
-              </Box>
-              <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+          <Box w="60%" h="full" spaceY={5}>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <HStack
+                w={'full'}
+                display={'flex'}
+                justifyContent={'space-between'}
+              >
                 <Text fontSize={'20px'} fontWeight="600">
-                  Detail Shipment
+                  Buyer Informations
                 </Text>
-                <HStack>
-                  <Image
-                    src="https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg"
-                    boxSize="50px"
-                  />
-                  <Text>J&T Ekspress</Text>
-                  <Text>Rp 27.000</Text>
-                </HStack>
-              </Box>
-              <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
-                <Field label="Notes">
-                  <Textarea
-                    placeholder="Enter your request to product"
-                    h="80px"
-                  />
-                </Field>
-              </Box>
+                <DialogDataBuyer />
+              </HStack>
+              <HStack>
+                <Text fontWeight={'500'}>
+                  {responseOrder.destination?.contact_name}
+                </Text>{' '}
+                |<Text>{responseOrder.destination?.contact_phone}</Text>
+              </HStack>
+              <Text>{responseOrder.destination?.contact_email}</Text>
+              <Text>{responseOrder.destination?.address}</Text>
+              <Text>{responseOrder.destination?.postal_code}</Text>
+            </Box>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <Text fontSize={'20px'} fontWeight="600">
+                Detail Shipment
+              </Text>
+              <HStack>
+                <Image
+                  src="https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg"
+                  boxSize="50px"
+                />
+                <Text>J&T Ekspress</Text>
+                <Text>Rp 27.000</Text>
+              </HStack>
+            </Box>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <Field label="Notes">
+                <Textarea
+                  placeholder="Enter your request to product"
+                  h="80px"
+                />
+              </Field>
+            </Box>
           </Box>
-          
 
           <Box
             w="40%"

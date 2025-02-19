@@ -1,20 +1,20 @@
-import { Box, HStack, Text, VStack } from '@chakra-ui/react';
-import { LuNavigation2, LuNavigation2Off } from 'react-icons/lu';
-import DialogAddLocation from './Dialog/dialog-add-location-settings';
-import DialogEditLocation from './Dialog/dialog-edit-location-settings';
 import { useAuthStore } from '@/hooks/authstore';
+import type { Location } from '@/types/location';
+import { Box, HStack, Text, VStack } from '@chakra-ui/react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import type { Location } from '@/types/location';
-import Swal from 'sweetalert2';
+import { useState } from 'react';
+import { LuNavigation2 } from 'react-icons/lu';
 import { MdOutlineDelete } from 'react-icons/md';
 import { Link } from 'react-router';
-import { useState } from 'react';
+import Swal from 'sweetalert2';
+import DialogAddLocation from './Dialog/dialog-add-location-settings';
+import DialogEditLocation from './Dialog/dialog-edit-location-settings';
 
 export default function LocationSetting() {
   const { token } = useAuthStore();
   const queryClient = useQueryClient();
-  const [editingLocationId, setEditingLocationId] = useState<string | null>(null);
+  const [, setEditingLocationId] = useState<string | null>(null);
 
   const handleEdit = (id: string) => {
     setEditingLocationId(id); // Simpan ID lokasi yang sedang diedit
@@ -235,7 +235,7 @@ export default function LocationSetting() {
                 p="5px"
                 onClick={() => handleEdit(location.id)}
               >
-                <DialogEditLocation locationId={location.id}/>
+                <DialogEditLocation locationId={location.id} />
               </Box>
             </HStack>
           </Box>

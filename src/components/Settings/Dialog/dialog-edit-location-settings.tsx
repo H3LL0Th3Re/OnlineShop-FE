@@ -47,7 +47,7 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
   const [cities, setCities] = useState<DropdownOption[]>([]);
   const [districts, setDistricts] = useState<DropdownOption[]>([]);
   const [villages, setVillages] = useState<DropdownOption[]>([]);
-  const [postalCodes, setPostalCodes] = useState<DropdownOption[]>([]);
+  const [, setPostalCodes] = useState<DropdownOption[]>([]);
   const [locationName, setLocationName] = useState<string>('');
   const [locationAddress, setLocationAddress] = useState<string>('');
   const queryClient = useQueryClient();
@@ -61,10 +61,10 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
   );
   const { token } = useAuthStore();
 
-  const getProvinceLabel = (value: string | null) => {
-    const province = provinces.find((prov) => prov.value === value);
-    return province ? province.label : null;
-  };
+  // const getProvinceLabel = (value: string | null) => {
+  //   const province = provinces.find((prov) => prov.value === value);
+  //   return province ? province.label : null;
+  // };
 
   const getLabelByValue = (options: DropdownOption[], value: string | null) => {
     const option = options.find((opt) => opt.value === value);
