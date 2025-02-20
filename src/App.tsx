@@ -17,6 +17,8 @@ import StoreProduct from './pages/store-product';
 import { OrderDummy } from './pages/orderDummy';
 import { Order } from './pages/order';
 import previewStoreProduct from './pages/preview-store-product';
+import DashboardAdmin from './pages/dashboard-admin';
+
 // import UpdatedProduct from './components/Product/updated-product';
 function App() {
   const router = createBrowserRouter([
@@ -98,6 +100,11 @@ function App() {
         {
           path: '/dashboard',
           Component: Dashboard,
+          HydrateFallback: Fallback,
+        },
+        {
+          path: '/dashboard-admin',
+          Component: DashboardAdmin,
           HydrateFallback: Fallback,
         },
         {

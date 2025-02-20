@@ -16,7 +16,7 @@ import { Link } from 'react-router';
 import { LuUser } from 'react-icons/lu';
 import { MdModeEditOutline, MdOutlineDelete } from 'react-icons/md';
 import { Checkbox } from '../ui/checkbox';
-import { DialogUpdatePrice } from './Dialog/dialog-update-price';
+import { DialogUpdatePrice } from './Dialog/dialog-update-price-stock';
 import {
   SelectContent,
   SelectItem,
@@ -343,7 +343,7 @@ const ListProduct = () => {
                             h={7}
                           >
                             <Text>
-                              <DialogUpdatePrice />
+                              <DialogUpdatePrice productId={product.id || ''} />
                             </Text>
                           </Button>
                           <Button
@@ -569,7 +569,9 @@ const ListProduct = () => {
                               h={7}
                             >
                               <Text>
-                                <DialogUpdatePrice />
+                                <DialogUpdatePrice
+                                  productId={product.id || ''}
+                                />
                               </Text>
                             </Button>
                             <Button
@@ -795,7 +797,9 @@ const ListProduct = () => {
                               h={7}
                             >
                               <Text>
-                                <DialogUpdatePrice />
+                                <DialogUpdatePrice
+                                  productId={product.id || ''}
+                                />
                               </Text>
                             </Button>
                             <Button

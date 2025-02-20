@@ -21,7 +21,7 @@ import { useState, useRef } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import { apiURL } from '@/utils/api-url';
-import Cookies from 'js-cookie';
+import { useAuthStore } from '@/hooks/authstore';
 import { useFetchBank } from '@/components/tanstack/useBank';
 import { useFetchBalance } from '@/components/tanstack/useTransactionList';
 import Swal from 'sweetalert2';
@@ -32,7 +32,6 @@ import Swal from 'sweetalert2';
 
 // // TypeScript type inferred from Zod schema
 // type MessageData = z.infer<typeof schema>;
-const token = Cookies.get('token');
 
 export default function DialogRequestWithdraw() {
   const [amount, setAmount] = useState<number>(0);
@@ -40,6 +39,7 @@ export default function DialogRequestWithdraw() {
   const [errors, setErrors] = useState<{ amount?: string; bankId?: string }>(
     {}
   );
+  const { token } = useAuthStore();
   const { data: total } = useFetchBalance(token || '');
   const { data: banks } = useFetchBank(token || '');
   console.log(banks);
@@ -83,7 +83,7 @@ export default function DialogRequestWithdraw() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['Transaction'] });
+      queryClient.invalidateQueries({ queryKey: ['TransactionList'] });
     },
   });
   const contentRef = useRef<HTMLDivElement>(null);

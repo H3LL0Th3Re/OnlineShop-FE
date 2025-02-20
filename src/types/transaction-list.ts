@@ -12,4 +12,5 @@ export interface TransactionList {
   bank: Bank;
   storeId: string;
   store: Store;
+  createdAt: string;
 }
