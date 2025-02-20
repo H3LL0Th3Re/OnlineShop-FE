@@ -25,7 +25,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import axios from 'axios';
-
+import { apiURL } from '@/utils/api-url';
 // interface DialogAddLocationProps {
 //   onAddLocation: (newLocation: any) => void; // Tambahkan callback
 // }
@@ -77,7 +77,7 @@ export default function DialogAddLocation() {
       if (token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/provinces`,
+            `${apiUrl}/locations/api/provinces`,
             {
               method: 'GET',
               headers: {
@@ -109,7 +109,7 @@ export default function DialogAddLocation() {
       if (provinceCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/cities/${provinceCode}`,
+            `${apiUrl}/locations/api/cities/${provinceCode}`,
             {
               method: 'GET',
               headers: {
@@ -146,7 +146,7 @@ export default function DialogAddLocation() {
       if (cityCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/districts/${cityCode}`,
+            `${apiUrl}/locations/api/districts/${cityCode}`,
             {
               method: 'GET',
               headers: {
@@ -184,7 +184,7 @@ export default function DialogAddLocation() {
       if (districtCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/villages/${districtCode}`,
+            `${apiUrl}/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
               headers: {
@@ -254,7 +254,7 @@ export default function DialogAddLocation() {
 
   const addLocation = async (data: LocationData) => {
     const response = await axios.post(
-      'http://localhost:3000/api/locations/create',
+      '${apiUrl}/locations/create',
       data,
       {
         headers: {
