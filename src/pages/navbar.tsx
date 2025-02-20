@@ -16,18 +16,18 @@ export default function Navbar() {
   const { data: store } = useQuery<Store, Error>({
     queryKey: ['store'],
     queryFn: () => currentStore(token || ''),
-    enabled: !!token, 
+    enabled: !!token,
   });
 
-  console.log("data store:",store)
+  console.log('data store:', store);
   // console.log("data tanstack:",));
   const handleLogout = () => {
     setToken(null); // Hapus token dari cookies dan state
     window.location.href = 'http://localhost:5173/landing-page'; // Arahkan ke halaman landing page
   };
   const handleProfile = () => {
-    setToken(null); // Hapus token dari cookies dan state
-    window.location.href = 'http://localhost:5173/private-store'; // Arahkan ke halaman landing page
+    // Hapus token dari cookies dan state
+    window.location.href = `/preview/store/${store?.username}`; // Arahkan ke halaman landing page
   };
 
   return (
@@ -72,7 +72,9 @@ export default function Navbar() {
               />
             </MenuTrigger>
             <MenuContent>
-              <MenuItem value="rename" onClick={handleProfile}>Profile</MenuItem>
+              <MenuItem value="rename" onClick={handleProfile}>
+                Preview Store
+              </MenuItem>
               <MenuItem
                 value="delete"
                 color="fg.error"
