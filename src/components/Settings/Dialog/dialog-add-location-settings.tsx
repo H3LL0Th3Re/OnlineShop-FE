@@ -19,17 +19,11 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import axios from 'axios';
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMapEvents,
-} from 'react-leaflet';
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { FaLocationDot } from 'react-icons/fa6';
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -226,27 +220,46 @@ export default function DialogAddLocation() {
     }
   }, [selectedDistrict, token]);
 
-  function LocationMarker() {
-    const map = useMapEvents({
-      click() {
-        map.locate();
-      },
-      locationfound(e) {
-        setPosition(e.latlng); // Simpan posisi
-        console.log('Latitude:', e.latlng.lat, 'Longitude:', e.latlng.lng); // Log koordinat
-        map.flyTo(e.latlng, map.getZoom());
-      },
-    });
+  const handleGetLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setPosition({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          console.log('Latitude:', position.coords.latitude);
+          console.log('Longitude:', position.coords.longitude);
+        },
+        (error) => {
+          console.error('Error getting location:', error.message);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+  // function LocationMarker() {
+  //   const map = useMapEvents({
+  //     click() {
+  //       map.locate();
+  //     },
+  //     locationfound(e) {
+  //       setPosition(e.latlng); // Simpan posisi
+  //       console.log('Latitude:', e.latlng.lat, 'Longitude:', e.latlng.lng); // Log koordinat
+  //       map.flyTo(e.latlng, map.getZoom());
+  //     },
+  //   });
 
-    return position === null ? null : (
-      <Marker position={position}>
-        <Popup>
-          Latitude: {position.lat} <br />
-          Longitude: {position.lng}
-        </Popup>
-      </Marker>
-    );
-  }
+  //   return position === null ? null : (
+  //     <Marker position={position}>
+  //       <Popup>
+  //         Latitude: {position.lat} <br />
+  //         Longitude: {position.lng}
+  //       </Popup>
+  //     </Marker>
+  //   );
+  // }
 
   interface LocationData {
     name: string;
@@ -514,8 +527,11 @@ export default function DialogAddLocation() {
               <Text fontWeight="600" fontSize="15px" mb="7px">
                 Pinpoint Lokasi*
               </Text>
+              <Button colorScheme="blue" onClick={handleGetLocation}>
+                <FaLocationDot size="15px" /> Get My Location
+              </Button>
 
-              <Box borderRadius="7px" h="400px" w="full" bg="blue">
+              {/* <Box borderRadius="7px" h="400px" w="full" bg="blue">
                 <MapContainer
                   center={{ lat: -6.2, lng: 106.8 }}
                   zoom={15}
@@ -524,10 +540,10 @@ export default function DialogAddLocation() {
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright"></a> '
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
+                  /> 
                   <LocationMarker />
                 </MapContainer>
-              </Box>
+              </Box> */}
 
               {/* <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
             <TileLayer
