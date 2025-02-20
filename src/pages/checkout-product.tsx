@@ -13,7 +13,6 @@ import {
   Flex,
   HStack,
   Image,
-  Input,
   Text,
   Textarea,
   VStack,
@@ -27,33 +26,14 @@ import 'midtrans-snap';
 import { formatPrice } from '@/utils/format-price';
 import { Checkout_Product } from '@/types/product-type';
 import { DialogDataBuyer } from '@/components/dialog-data-buyer';
-import { currentStore } from '@/features/get-store';
-import { use } from 'chai';
+
 // import { NumberDomain } from 'recharts/types/util/types';
 
 export default function CheckoutProduct() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone_number: '',
-    province: '',
-    city: '',
-    district: '',
-    sub_district: '',
-    postal_code: '',
-    detail_address: '',
-  });
+  
 
   const [responseOrder, setResponseOrder] = useState<any>("");
   const [email_user, setEmail_user] = useState<any>("");
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
 
   const [product, setProduct] = useState<Checkout_Product | null>(null);
 
@@ -78,35 +58,26 @@ export default function CheckoutProduct() {
   useEffect(() => {}, [product]);
 
   const [paymentLink, setPaymentLink] = useState('');
-
+  
   const token = Cookies.get('token');
-  const store_response = currentStore(token || "");
-  console.log("my response store",store_response);
-  async function location_fetch(){
-    const location_response = await axios.get(apiURL + '/locations',{
-
-      headers:{
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }
+  // const store_response = currentStore(token || "");
+  // console.log("my response store",store_response);
+  
+  async function fetch_store_location(){
+    if(!product){
+      return; 
+    }
+    const response = await axios.post(apiURL + '/stores/by-product',{
+      product_id: product.id
     })
-    
 
-    // console.log(location_response.data.location[0].address)
-    return location_response.data.location[0]
+    console.log(response);
+    return response.data;
   }
-  const response_location = location_fetch();
+  const stores = fetch_store_location();
 
-  async function user_fetch(){
-    const user_response = await axios.get(apiURL + '/user', {
-      headers:{
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      }      
-    })
-    return user_response.data.user[0];
-  }
-  const response_user = user_fetch();
+  console.log("local",localStorage.getItem("order_id_response"))
+
   async function onSubmit(
     productName: string,
     price: number,
@@ -115,8 +86,10 @@ export default function CheckoutProduct() {
     serviceFee: number
   ) {
     try {
-      // console.log("draft order id", localStorage.getItem("order_id_response"))
       
+    
+      
+      // console.log("draft order id", localStorage.getItem("order_id_response")
       const order_response = await axios.put(apiURL + '/order/update-order', {
         orderid: localStorage.getItem("order_id_response"),
         courier_company: 'jne',
@@ -126,23 +99,67 @@ export default function CheckoutProduct() {
         items: [
           {
             name: productName,
-            description: 'cow is sacred saar',
+            description: product?.description,
             value: price,
             quantity: quantity,
-            height: 200,
-            length: 200,
+            height: product?.height,
+            length: product?.length,
             weight: weight,
-            width: 200,
+            width: product?.width,
           },
         ],
       });
 
-      // if (formData) {
-      //   axios.post("http://localhost:3000/api/save-data", JSON.stringify(formData))
-      //     .then(response => console.log("Data sent successfully:", response.data))
-      //     .catch(error => console.error("Error sending data:", error));
-      // }
+      // console.log("ini response order: ",order_response.data.data.destination)
 
+      async function fetch_user_email(){
+        const response = await axios.post(apiURL + '/order/get-email',{
+          id_order: order_response.data.orderId
+        })
+    
+        console.log(response);
+        return response.data;
+      }
+      const email_fetch = fetch_user_email();
+
+      console.log("Store ID:", (await stores).store_id?.id);
+
+      const invoice_response = await axios.post(
+        apiURL + '/invoice/create-invoice',
+        {
+          status: 'pending',
+          prices: Math.floor((price* quantity) + shipping + serviceFee),
+          receiver_city: order_response.data.data.destination.city_name,
+          receiver_province: order_response.data.data.destination.province_name,
+          receiver_district: order_response.data.data.destination.district_name,
+          receiver_phone: order_response.data.data.destination.contact_phone,
+          receiver_name: order_response.data.data.destination.contact_name,
+          receiver_postalCode:(order_response.data.data.destination.postal_code).toString(),
+          receiver_detailAddress: order_response.data.data.destination.address,
+          receiver_email: (await email_fetch).data_response.destination_email,
+          storesId: (await stores).store_id.id,
+          order_id: order_response.data.data.id,
+        },
+        {
+          headers: {
+            // Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      console.log("invoice response: ",invoice_response);
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: invoice_response.data.invoice_created.id,
+        },
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
+
+
+     
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',
         {
@@ -160,6 +177,8 @@ export default function CheckoutProduct() {
           },
         }
       );
+
+      // console.log("midtrans response: ", response);
 
       const snapToken = response.data.token.token; // Expect snapToken from backend
       const redirect_pay = response.data.token.redirect_url;
@@ -230,29 +249,13 @@ export default function CheckoutProduct() {
     getEmail();
   }, []);
 
-  console.log("my email",email_user);
+  // console.log("my email",email_user);
   
   
   
-  console.log(responseOrder)
-  // async function IwillHaveOrder() {
-  //   const orderId = localStorage.getItem("order_id_response");
-    
-  //   if (!orderId) {
-  //     console.error("Order ID is missing in localStorage.");
-  //     return;
-  //   }
+  // console.log(responseOrder)
   
-  //   try {
-  //     const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
-  //     setResponseOrder(getOrderResponse.data.order);
-  //     return getOrderResponse.data.order;
-  //   } catch (error) {
-  //     console.error("Error retrieving the order:", error);
-  //   }
-  // }
-  // const response_order = IwillHaveOrder();
-  console.log("mee: ",responseOrder.destination?.contact_name)
+  // console.log("mee: ",responseOrder.destination?.contact_name)
   return (
     
     <Box p="0" m="0">
