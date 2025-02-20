@@ -81,6 +81,7 @@ export default function DialogShipmentCheckout({
 
     const fetchCouriers = async () => {
       try {
+        console.log('this is my response order', responseOrder);
         const originAreaId = responseOrder.origin?.area_id;
         const destinationAreaId = responseOrder.destination?.area_id;
 
