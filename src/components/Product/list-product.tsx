@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  createListCollection,
   Flex,
   HStack,
   Icon,
@@ -18,13 +17,6 @@ import { LuUser } from 'react-icons/lu';
 import { MdOutlineDelete } from 'react-icons/md';
 import { Checkbox } from '../ui/checkbox';
 import { DialogUpdatePrice } from './Dialog/dialog-update-price-stock';
-import {
-  SelectContent,
-  SelectItem,
-  SelectRoot,
-  SelectTrigger,
-  SelectValueText,
-} from '../ui/select';
 import { IoIosLink } from 'react-icons/io';
 import { useAuthStore } from '@/hooks/authstore';
 import { useFetchStore } from '../tanstack/useStore';
@@ -34,16 +26,6 @@ import { useDeleteProduct } from '../tanstack/useProduct';
 import { useState, useEffect } from 'react';
 import { DialogVariants } from './Dialog/dialog-variants';
 import { getAllCategory } from '@/features/dashboard/services/category-services';
-
-const sortbyOptions = createListCollection({
-  items: [
-    { label: 'Terakhir Diubah', value: 'terakhir-diubah' },
-    { label: 'Harga Tertinggi', value: 'harga-tertinggi' },
-    { label: 'Harga Terendah', value: 'harga-terendah' },
-    { label: 'Stock Terbanyak', value: 'stock-terbanyak' },
-    { label: 'Stock Sedikit', value: 'stock-sedikit' },
-  ],
-});
 
 // Define the type for a category
 interface Category {
@@ -63,7 +45,7 @@ const ListProduct = () => {
   const { mutate: deleteProducts } = useDeleteProduct(token || '');
   const [checkedProducts, setCheckedProducts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -151,14 +133,6 @@ const ListProduct = () => {
         .includes(searchQuery.toLowerCase())
   );
 
-  // Assuming categories is an array of Category objects
-  const categoryListCollection = createListCollection({
-    items: categories.map((category) => ({
-      label: category.name,
-      value: category.id,
-    })),
-  });
-
   return (
     <Box>
       {/* ListProduct Content */}
@@ -196,42 +170,13 @@ const ListProduct = () => {
               Nonaktif
             </Tabs.Trigger>
           </Tabs.List>
-          <Flex mb="4" gap="4" pt={3} justifyContent={'space-between'}>
+          <Flex mb="4" gap="4" pt={3} w={'full'} justifyContent={'center'}>
             <Input
               placeholder="Cari Pesanan"
               w={'50%'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <SelectRoot
-              multiple
-              collection={categoryListCollection}
-              size="sm"
-              width="320px"
-            >
-              <SelectTrigger>
-                <SelectValueText placeholder="All Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categoryListCollection.items.map((category) => (
-                  <SelectItem item={category} key={category.value}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </SelectRoot>
-            <SelectRoot collection={sortbyOptions} size="sm" width="320px">
-              <SelectTrigger>
-                <SelectValueText placeholder="Sort By" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortbyOptions.items.map((sort) => (
-                  <SelectItem item={sort} key={sort.value}>
-                    {sort.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </SelectRoot>
           </Flex>
           <Tabs.Content value="semua">
             <Box border="1px" borderColor="gray.200" rounded="md">
