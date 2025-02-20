@@ -75,7 +75,7 @@ export default function DialogAddLocation() {
     const option = options.find((opt) => opt.value === value);
     return option ? option.label : null;
   };
-
+  console.log(apiURL);
   useEffect(() => {
     const fetchProvinces = async () => {
       if (token) {
