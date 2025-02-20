@@ -2,10 +2,9 @@ import { Box, Text, VStack, Spinner } from '@chakra-ui/react';
 import { useState } from 'react';
 import { useCategories } from '../tanstack/useCategory';
 import { useAuthStore } from '@/hooks/authstore';
-import { CategoryDisplay } from '@/types/categories';
 
 interface DropdownCategoryProps {
-  onSelectCategory: (categoryId: string, subcategoryId: string) => void;
+  onSelectCategory: (categoryId: string) => void;
 }
 
 export default function DropdownCategory({
@@ -15,8 +14,6 @@ export default function DropdownCategory({
   const { data: categories, isLoading, error } = useCategories(token || '');
 
   const [isOpen, setIsOpen] = useState(false);
-  const [hoveredCategory, setHoveredCategory] =
-    useState<CategoryDisplay | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('');
 
   if (isLoading) {
@@ -56,43 +53,16 @@ export default function DropdownCategory({
           {categories.map((category) => (
             <Box
               key={category.id}
-              position="relative"
               p={3}
               _hover={{ bg: 'gray.50' }}
-              onMouseEnter={() => setHoveredCategory(category)}
-              onMouseLeave={() => setHoveredCategory(null)}
+              cursor="pointer"
+              onClick={() => {
+                onSelectCategory(category.id); // Only pass categoryId
+                setSelectedCategory(category.name); // Set selected category name
+                setIsOpen(false); // Close the dropdown after selection
+              }}
             >
               {category.name}
-
-              {hoveredCategory?.id === category.id &&
-                category.subCategories.length > 0 && (
-                  <Box
-                    position="absolute"
-                    left="calc(100% + 8px)"
-                    top="0"
-                    bg="white"
-                    boxShadow="lg"
-                    borderRadius="md"
-                    minW="200px"
-                    zIndex={20}
-                  >
-                    {category.subCategories.map((sub) => (
-                      <Box
-                        key={sub.id}
-                        p={3}
-                        _hover={{ bg: 'gray.50' }}
-                        cursor="pointer"
-                        onClick={() => {
-                          onSelectCategory(category.id, sub.id);
-                          setSelectedCategory(`${category.name} - ${sub.name}`);
-                          setIsOpen(false);
-                        }}
-                      >
-                        {sub.name}
-                      </Box>
-                    ))}
-                  </Box>
-                )}
             </Box>
           ))}
         </Box>
