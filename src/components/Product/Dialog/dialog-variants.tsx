@@ -13,7 +13,6 @@ import {
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchVariants } from '@/features/dashboard/services/product';
-import { Switch } from '@/components/ui/switch';
 import { Option, Variant_option_values } from '@/types/product-type';
 
 export const DialogVariants = ({ productId }: { productId: string }) => {
@@ -62,7 +61,7 @@ export const DialogVariants = ({ productId }: { productId: string }) => {
                   borderRadius="md"
                   width="100%"
                 >
-                  <HStack display={'flex'} justify={'space-between'} w={'full'}>
+                  <HStack display={'flex'} w={'full'} gap={24}>
                     <VStack
                       display={'flex'}
                       justifyContent={'flex-start'}
@@ -81,7 +80,6 @@ export const DialogVariants = ({ productId }: { productId: string }) => {
                       <Text fontWeight={'500'}>Stock: {variant.stock} pcs</Text>
                       <Text fontWeight={'500'}>Weight: {variant.weight} g</Text>
                     </VStack>
-                    <Switch colorScheme="blue" />
                   </HStack>
                   <Text fontWeight="semibold">Options:</Text>
                   {variant.options && variant.options.length > 0 ? (

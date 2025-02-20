@@ -284,17 +284,7 @@ export default function DetailProduct() {
                   </AccordionItemContent>
                 </AccordionItem>
               </AccordionRoot>
-              <HStack w="full" mt="15px">
-                <Button
-                  w="50%"
-                  p="7"
-                  borderWidth="2px"
-                  borderColor="black"
-                  bg="white"
-                  color="black"
-                >
-                  Add to Cart
-                </Button>
+              <HStack w="full" mt="15px" justify={'center'}>
                 <Button w="50%" p="7" bgColor="#5F2EEA" onClick={handleBuyNow}>
                   Buy it Now
                 </Button>

@@ -31,7 +31,7 @@ interface DialogInputVariantCombinationsProps {
   onSave: (variantCombination: DialogInputVariant) => void;
 }
 
-export const DialogInputVariantCombinations = ({
+const DialogInputVariantCombinations = ({
   onSave,
 }: DialogInputVariantCombinationsProps) => {
   const [open, setOpen] = useState(false);
@@ -141,3 +141,5 @@ export const DialogInputVariantCombinations = ({
     </DialogRoot>
   );
 };
+
+export default DialogInputVariantCombinations;
