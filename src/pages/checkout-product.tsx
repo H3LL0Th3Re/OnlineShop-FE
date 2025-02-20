@@ -1,4 +1,6 @@
-import DialogShipmentCheckout from '@/components/dialog-shipment-checkout';
+import DialogShipmentCheckout, {
+  Courier,
+} from '@/components/dialog-shipment-checkout';
 import {
   AccordionItem,
   AccordionItemContent,
@@ -19,13 +21,8 @@ import {
 } from '@chakra-ui/react';
 import axios from 'axios';
 // import { useState } from 'react';
-import { RiShoppingBag4Line } from 'react-icons/ri';
-import Cookies from 'js-cookie';
-import { useEffect, useState } from 'react';
-import 'midtrans-snap';
-import { formatPrice } from '@/utils/format-price';
-import { Checkout_Product } from '@/types/product-type';
 import { DialogDataBuyer } from '@/components/dialog-data-buyer';
+
 
 // import { NumberDomain } from 'recharts/types/util/types';
 
@@ -34,6 +31,22 @@ export default function CheckoutProduct() {
 
   const [responseOrder, setResponseOrder] = useState<any>("");
   const [email_user, setEmail_user] = useState<any>("");
+
+
+import { currentStore } from '@/features/get-store';
+import { Checkout_Product } from '@/types/product-type';
+import { formatPrice } from '@/utils/format-price';
+import Cookies from 'js-cookie';
+import 'midtrans-snap';
+import { useEffect, useState } from 'react';
+import { RiShoppingBag4Line } from 'react-icons/ri';
+// import { NumberDomain } from 'recharts/types/util/types';
+
+export default function CheckoutProduct() {
+  const [responseOrder, setResponseOrder] = useState<any>('');
+  const [selectedShipment, setSelectedShipment] = useState<Courier | null>(
+    null
+  );
 
   const [product, setProduct] = useState<Checkout_Product | null>(null);
 
@@ -51,7 +64,7 @@ export default function CheckoutProduct() {
   const weight = product?.weight || 0;
   const variants = product?.selectedOptions;
   const totalPrice = price * quantity;
-  const shipping = 15000;
+  const shipping = selectedShipment?.price || 0;
   const serviceFee = (1 / 100) * totalPrice;
   const subTotalPrice = totalPrice + shipping + serviceFee;
 
@@ -60,6 +73,7 @@ export default function CheckoutProduct() {
   const [paymentLink, setPaymentLink] = useState('');
   
   const token = Cookies.get('token');
+
   // const store_response = currentStore(token || "");
   // console.log("my response store",store_response);
   
@@ -78,6 +92,11 @@ export default function CheckoutProduct() {
 
   console.log("local",localStorage.getItem("order_id_response"))
 
+  const handleShipmentSelection = (shipmentData: Courier | null) => {
+    setSelectedShipment(shipmentData);
+  };
+
+
   async function onSubmit(
     productName: string,
     price: number,
@@ -86,14 +105,11 @@ export default function CheckoutProduct() {
     serviceFee: number
   ) {
     try {
-      
-    
-      
-      // console.log("draft order id", localStorage.getItem("order_id_response")
+
       const order_response = await axios.put(apiURL + '/order/update-order', {
-        orderid: localStorage.getItem("order_id_response"),
-        courier_company: 'jne',
-        courier_type: 'reg',
+        orderid: localStorage.getItem('order_id_response'),
+        courier_company: selectedShipment?.courier_code,
+        courier_type: selectedShipment?.courier_service_name,
         delivery_type: 'now',
         order_note: 'please be Careful',
         items: [
@@ -102,6 +118,7 @@ export default function CheckoutProduct() {
             description: product?.description,
             value: price,
             quantity: quantity,
+
             height: product?.height,
             length: product?.length,
             weight: weight,
@@ -148,6 +165,7 @@ export default function CheckoutProduct() {
         },
       );
 
+
       console.log("invoice response: ",invoice_response);
 
       const invoice_history_response = await axios.post(
@@ -191,7 +209,6 @@ export default function CheckoutProduct() {
       } else {
         alert('Failed to generate payment link.');
       }
-      
     } catch (error) {
       if (axios.isAxiosError(error)) {
         return {
@@ -204,24 +221,25 @@ export default function CheckoutProduct() {
   }
   useEffect(() => {
     const IwillHaveOrder = async () => {
-      const orderId = localStorage.getItem("order_id_response");
-    
-    if (!orderId) {
-      console.error("Order ID is missing in localStorage.");
-      return;
-    }
-  
-    try {
-      const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
-      setResponseOrder(getOrderResponse.data.order);
-      return getOrderResponse.data.order;
-    } catch (error) {
-      console.error("Error retrieving the order:", error);
-    }
+      const orderId = localStorage.getItem('order_id_response');
+
+      if (!orderId) {
+        console.error('Order ID is missing in localStorage.');
+        return;
+      }
+
+      try {
+        const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
+        setResponseOrder(getOrderResponse.data.order);
+        return getOrderResponse.data.order;
+      } catch (error) {
+        console.error('Error retrieving the order:', error);
+      }
     };
 
     IwillHaveOrder();
   }, []);
+
 
 
   useEffect(() => {
@@ -256,13 +274,26 @@ export default function CheckoutProduct() {
   // console.log(responseOrder)
   
   // console.log("mee: ",responseOrder.destination?.contact_name)
+
+  console.log('response order:', responseOrder);
+
+  const courierImages: { [key: string]: string } = {
+    gojek:
+      'https://cdn.antaranews.com/cache/1200x800/2020/10/03/Gojek-simbol.jpg',
+    grab: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/74/e0/4a/74e04a86-94bd-fc99-d853-836fcbfa00bf/GrabIcon-0-0-1x_U007emarketing-0-5-0-0-85-220.png/1200x630wa.png',
+    jne: 'https://asset.kompas.com/crops/b69bSXp1n7COYJrBlDdB5nFZDZ0=/87x58:785x523/1200x800/data/photo/2019/06/01/431914915.jpg',
+    jnt: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg',
+    tiki: 'https://www.julo.co.id/sites/default/files/2024-10/franchise%20TIKI.webp',
+  };
+
+
   return (
-    
     <Box p="0" m="0">
       <Box p="2" m="5px" bg="white">
         <Text fontSize="20px" fontWeight="600">
           Checkout Product
         </Text>
+
         <HStack mt="3" gap="10">
           
             <Box w="60%" h="full" spaceY={5}>
@@ -282,28 +313,76 @@ export default function CheckoutProduct() {
                 
               </Box>
               <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+
+<!--         <HStack mt="3" gap="10" display={'flex'} alignItems={'flex-start'}>
+          <Box w="60%" h="full" spaceY={5}>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <HStack
+                w={'full'}
+                display={'flex'}
+                justifyContent={'space-between'}
+              > -->
+
                 <Text fontSize={'20px'} fontWeight="600">
-                  Detail Shipment
+                  Buyer Informations
                 </Text>
-                <HStack>
+                <DialogDataBuyer />
+              </HStack>
+              <HStack>
+                <Text fontWeight={'500'}>
+                  {responseOrder.destination?.contact_name}
+                </Text>{' '}
+                |<Text>{responseOrder.destination?.contact_phone}</Text>
+              </HStack>
+              <Text>{responseOrder.destination?.contact_email}</Text>
+              <Text>{responseOrder.destination?.address}</Text>
+              <Text>{responseOrder.destination?.postal_code}</Text>
+            </Box>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <Text fontSize={'20px'} fontWeight="600">
+                Detail Shipment
+              </Text>
+              <HStack>
+                {selectedShipment && (
                   <Image
-                    src="https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg"
+                    src={courierImages[selectedShipment.courier_code]}
                     boxSize="50px"
+                    alt={`${selectedShipment.courier_service_name} logo`}
                   />
-                  <Text>J&T Ekspress</Text>
-                  <Text>Rp 27.000</Text>
-                </HStack>
-              </Box>
-              <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
-                <Field label="Notes">
-                  <Textarea
-                    placeholder="Enter your request to product"
-                    h="80px"
-                  />
-                </Field>
-              </Box>
+                )}
+                {selectedShipment && (
+                  <HStack
+                    mt="4"
+                    display={'flex'}
+                    w={'full'}
+                    justifyContent={'space-between'}
+                  >
+                    <Box>
+                      <Text fontSize={'xl'}>
+                        {selectedShipment.courier_service_name}
+                      </Text>
+                      <Text>
+                        {selectedShipment.courier_code} (
+                        {selectedShipment.shipment_duration_range}{' '}
+                        {selectedShipment.shipment_duration_unit})
+                      </Text>
+                    </Box>
+                    <Text fontWeight={'500'} fontSize={'3xl'}>
+                      Rp {formatPrice(selectedShipment.price)}
+                    </Text>
+                  </HStack>
+                )}
+              </HStack>
+            </Box>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <Field label="Notes">
+                <Textarea
+                  placeholder="Enter your request to product"
+                  h="80px"
+                />
+              </Field>
+            </Box>
           </Box>
-          
 
           <Box
             w="40%"
@@ -345,7 +424,10 @@ export default function CheckoutProduct() {
                     Rp {formatPrice(price)}
                   </Text>
                   <Text>Quantity: {quantity}</Text>
-                  <DialogShipmentCheckout />
+                  <DialogShipmentCheckout
+                    selectedShipment={selectedShipment}
+                    onSelectShipment={handleShipmentSelection}
+                  />
                   {/* <Button>Select Shipment</Button> */}
                 </VStack>
               </HStack>

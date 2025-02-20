@@ -12,19 +12,43 @@ import {
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { apiURL } from '@/utils/api-url';
+import { formatPrice } from '@/utils/format-price';
+import { Checkout_Product } from '@/types/product-type';
 
-interface Courier {
+export interface Courier {
   courier_code: string;
   courier_service_name: string;
   courier_service_code: string;
-  shipping_type?: string; // optional field if shipping type exists
+  shipment_duration_range: string;
+  shipment_duration_unit: string;
+  price: number;
 }
 
-export default function DialogShipmentCheckout() {
-  const [selectedShipment, setSelectedShipment] = useState<string | null>(null);
-  const [couriers, setCouriers] = useState<Courier[]>([]);
+interface DialogShipmentCheckoutProps {
+  selectedShipment: Courier | null;
+  onSelectShipment: (shipmentData: Courier | null) => void; // Pastikan menerima Courier | null
+}
 
-  // Image URLs for couriers
+export default function DialogShipmentCheckout({
+  selectedShipment,
+  onSelectShipment,
+}: DialogShipmentCheckoutProps) {
+  const [couriers, setCouriers] = useState<Courier[]>([]);
+  const [responseOrder, setResponseOrder] = useState<any>('');
+  const [product, setProduct] = useState<Checkout_Product | null>(null);
+
+  useEffect(() => {
+    const productData = localStorage.getItem('selectedProduct');
+    if (productData) {
+      setProduct(JSON.parse(productData));
+    }
+  }, []);
+
+  const productName = product?.name || '';
+  const price = product?.price || 0;
+  const quantity = product?.quantity || 1;
+  const weight = product?.weight || 0;
+
   const courierImages: { [key: string]: string } = {
     gojek:
       'https://cdn.antaranews.com/cache/1200x800/2020/10/03/Gojek-simbol.jpg',
@@ -35,14 +59,56 @@ export default function DialogShipmentCheckout() {
   };
 
   useEffect(() => {
+    const IwillHaveOrder = async () => {
+      const orderId = localStorage.getItem('order_id_response');
+      if (!orderId) {
+        console.error('Order ID is missing in localStorage.');
+        return;
+      }
+      try {
+        const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
+        setResponseOrder(getOrderResponse.data.order);
+      } catch (error) {
+        console.error('Error retrieving the order:', error);
+      }
+    };
+
+    IwillHaveOrder();
+  }, []);
+
+  useEffect(() => {
+    if (!responseOrder) return;
+
     const fetchCouriers = async () => {
       try {
-        const response = await axios.get(apiURL + '/courier/seeder');
+        const originAreaId = responseOrder.origin?.area_id;
+        const destinationAreaId = responseOrder.destination?.area_id;
 
-        if (Array.isArray(response.data.data)) {
-          setCouriers(response.data.data);
+        const response = await axios.post(apiURL + '/courier/rates', {
+          origin_area_id: originAreaId,
+          destination_area_id: destinationAreaId,
+          couriers: 'gojek,grab,jne,jnt,tiki',
+          items: [
+            {
+              name: productName,
+              description: 'Product Description',
+              value: price,
+              length: 0,
+              width: 0,
+              height: 0,
+              weight: weight,
+              quantity: quantity,
+            },
+          ],
+        });
+
+        if (Array.isArray(response.data.biteShip.pricing)) {
+          setCouriers(response.data.biteShip.pricing);
         } else {
-          console.error('Received data is not an array:', response.data.data);
+          console.error(
+            'Received data is not an array:',
+            response.data.biteShip.pricing
+          );
           setCouriers([]);
         }
       } catch (error) {
@@ -52,7 +118,24 @@ export default function DialogShipmentCheckout() {
     };
 
     fetchCouriers();
-  }, []);
+  }, [responseOrder]);
+
+  const createCourierUniqueKey = (courier: Courier) => {
+    return `${courier.courier_code}-${courier.courier_service_name}`;
+  };
+
+  const handleSelectShipment = (courier: Courier | null) => {
+    // Jika sudah ada yang dipilih, set ke null (untuk membatalkan pemilihan pengiriman)
+    if (
+      selectedShipment &&
+      createCourierUniqueKey(selectedShipment) ===
+        createCourierUniqueKey(courier!)
+    ) {
+      onSelectShipment(null);
+    } else {
+      onSelectShipment(courier); // Jika belum dipilih, pilih courier
+    }
+  };
 
   return (
     <DialogRoot>
@@ -68,37 +151,29 @@ export default function DialogShipmentCheckout() {
 
         <DialogBody>
           {couriers.length === 0 ? (
-            <Text>No couriers available.</Text> // Display a message if no couriers are loaded
+            <Text>No couriers available.</Text>
           ) : (
             couriers.map((courier: Courier) => {
-              // Get the logo URL from the courierImages object
               const logoUrl = courierImages[courier.courier_code];
+              const isSelected =
+                selectedShipment &&
+                createCourierUniqueKey(selectedShipment) ===
+                  createCourierUniqueKey(courier);
 
               return (
                 <Box
-                  key={courier.courier_code} // Using courier_code as a unique key
+                  key={courier.courier_code}
                   gap="1"
                   mb="8px"
                   p="1"
-                  onClick={() =>
-                    setSelectedShipment(courier.courier_service_name)
-                  }
+                  onClick={() => handleSelectShipment(courier)} // Memilih pengiriman atau membatalkan pilihan
                   cursor="pointer"
-                  bg={
-                    selectedShipment === courier.courier_service_name
-                      ? 'blue.100'
-                      : 'white'
-                  }
+                  bg={isSelected ? 'blue.100' : 'white'}
                   borderWidth="1px"
-                  borderColor={
-                    selectedShipment === courier.courier_service_name
-                      ? 'blue.500'
-                      : 'gray.200'
-                  }
+                  borderColor={isSelected ? 'blue.500' : 'gray.200'}
                   borderRadius="8px"
                 >
                   <HStack w="full">
-                    {/* Image component with the URL from courierImages */}
                     <Image
                       src={logoUrl}
                       boxSize={'50px'}
@@ -108,8 +183,10 @@ export default function DialogShipmentCheckout() {
                       <Text w="full" fontSize="20px" fontWeight={'500'}>
                         {courier.courier_service_name}
                       </Text>
-                      <Text w="full" color="grey">
-                        {courier.courier_code}
+                      <Text w="full" color="grey" fontSize="15px">
+                        {courier.courier_code} (
+                        {courier.shipment_duration_range}{' '}
+                        {courier.shipment_duration_unit})
                       </Text>
                     </VStack>
                     <Text
@@ -118,9 +195,7 @@ export default function DialogShipmentCheckout() {
                       fontSize="17px"
                       fontWeight="600"
                     >
-                      {courier.shipping_type
-                        ? `Shipping Type: ${courier.shipping_type}`
-                        : 'No price available'}
+                      Rp {formatPrice(courier.price)}
                     </Text>
                   </HStack>
                 </Box>

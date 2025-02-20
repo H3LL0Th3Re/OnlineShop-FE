@@ -132,15 +132,15 @@ export default function StoreProduct() {
                       </Text>
                       <Text fontWeight="400" textAlign="center" fontSize="15px">
                         Rp.{' '}
-                        {product.price
-                          ? formatPrice(product.price)
-                          : product.variants?.[0].Variant_options[0]
-                                .Variant_option_values?.[0].price
-                            ? formatPrice(
-                                product.variants?.[0].Variant_options[0]
-                                  .Variant_option_values?.[0].price
-                              )
-                            : '-'}
+                        {(product.variants ?? []).length > 0
+                          ? formatPrice(
+                              (
+                                product.variants?.[0]
+                                  ?.Variant_options?.[0] as any
+                              )?.variant_values?.[0]?.variant_option_value
+                                ?.price || 0
+                            )
+                          : formatPrice(product.price || 0)}
                       </Text>
                     </VStack>
                   </Link>

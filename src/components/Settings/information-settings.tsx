@@ -19,6 +19,7 @@ import { useAuthStore } from '@/hooks/authstore';
 import { useState, useEffect } from 'react';
 import { updateStore } from '@/features/update-store';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { BiImageAdd } from 'react-icons/bi';
 
 export default function Information() {
   const { token } = useAuthStore();
@@ -146,6 +147,73 @@ export default function Information() {
   return (
     <Box>
       <Box>
+        <Box mb="10px">
+          <Text fontWeight="700" fontSize="17px" color="black" mb="10px">
+            Store Banner
+          </Text>
+
+          <VStack w="100%" display="flex" alignItems="flex-start">
+            <Box
+              width={'full'}
+              height={'270px'}
+              borderRadius={'100%'}
+              position="relative"
+              cursor="pointer" // Makes it clear the area is clickable
+              onClick={() =>
+                document.getElementById('banner_attachment')?.click()
+              } // Triggers file input click
+              _hover={{
+                opacity: 0.8, // Slightly dim the image on hover for effect
+                backgroundColor: 'rgba(0, 0, 0, 0.3)', // Optional background color on hover
+              }}
+            >
+              <Image
+                src={
+                  bannerPreview ||
+                  store?.banner_attachment ||
+                  'https://wallpapers.com/images/featured/blank-h9v8oske8iey8nkq.jpg'
+                } // Fallback if no image
+                alt="Profile"
+                width="100%"
+                height="100%"
+                borderRadius="5px"
+                objectFit="cover" // Keeps the image properly cropped inside the circle
+              />
+              <Input
+                type="file"
+                id="banner_attachment"
+                onChange={handleBannerChange}
+                display="none" // Hides the default file input
+              />
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                transform="translate(-50%, -50%)"
+                color="white"
+                fontWeight="bold"
+                fontSize="14px"
+                opacity="0"
+                _hover={{
+                  opacity: 1, // Make text visible on hover
+                }}
+                transition="opacity 0.3s ease"
+              >
+                <BiImageAdd size="50px" />
+              </Box>
+            </Box>
+
+            {error && (
+              <Box mt="10px" color="red.500">
+                <Text>{error}</Text>
+              </Box>
+            )}
+            <Text textAlign="left" fontSize="13px" w="full">
+              Ukuran optimal 1920 x 540 piksel dengan Besar file: Maksimum 10
+              Megabytes. Ekstensi file yang diperbolehkan: JPG, JPEG, PNG
+            </Text>
+          </VStack>
+        </Box>
         <Text fontWeight="700" fontSize="17px" color="black">
           Store Information
         </Text>
@@ -201,23 +269,21 @@ export default function Information() {
         </Button>
       </Box>
 
-      <HStack>
-        <Box mt="10px">
+      <HStack
+        display="flex"
+        justifyContent="flex-start"
+        alignItems="flex-start"
+        gap="3"
+      >
+        <Box mt="10px" w="20%">
           <Text fontWeight="700" fontSize="17px" color="black" mb="10px">
             Store Logo
           </Text>
 
           <VStack w="100%" display="flex" alignItems="flex-start">
-            {/* <FileUploadRoot maxW="xs" alignItems="stretch" maxFiles={1}>
-            <FileUploadDropzone
-              label="Upload Store Logo"
-              onSelect={handleImageChange}
-            />
-            <FileUploadList />
-          </FileUploadRoot> */}
             <Box
-              width={'100px'}
-              height={'100px'}
+              w="full"
+              h="full"
               borderRadius={'100%'}
               position="relative"
               cursor="pointer" // Makes it clear the area is clickable
@@ -261,7 +327,7 @@ export default function Information() {
                 }}
                 transition="opacity 0.3s ease"
               >
-                Upload Photo
+                <BiImageAdd size="50px" />
               </Box>
             </Box>
 
@@ -270,80 +336,7 @@ export default function Information() {
                 <Text>{error}</Text>
               </Box>
             )}
-            <Text textAlign="left" w="50%" fontSize="13px">
-              Ukuran optimal 300 x 300 piksel dengan Besar file: Maksimum 10
-              Megabytes. Ekstensi file yang diperbolehkan: JPG, JPEG, PNG
-            </Text>
-          </VStack>
-        </Box>
-        <Box mt="10px">
-          <Text fontWeight="700" fontSize="17px" color="black" mb="10px">
-            Store Banner
-          </Text>
-
-          <VStack w="100%" display="flex" alignItems="flex-start">
-            {/* <FileUploadRoot maxW="xs" alignItems="stretch" maxFiles={1}>
-            <FileUploadDropzone
-              label="Upload Store Logo"
-              onSelect={handleImageChange}
-            />
-            <FileUploadList />
-          </FileUploadRoot> */}
-            <Box
-              width={'400px'}
-              height={'350px'}
-              borderRadius={'100%'}
-              position="relative"
-              cursor="pointer" // Makes it clear the area is clickable
-              onClick={() =>
-                document.getElementById('banner_attachment')?.click()
-              } // Triggers file input click
-              _hover={{
-                opacity: 0.8, // Slightly dim the image on hover for effect
-                backgroundColor: 'rgba(0, 0, 0, 0.3)', // Optional background color on hover
-              }}
-            >
-              <Image
-                src={
-                  bannerPreview ||
-                  store?.banner_attachment ||
-                  'https://wallpapers.com/images/featured/blank-h9v8oske8iey8nkq.jpg'
-                } // Fallback if no image
-                alt="Profile"
-                width="100%"
-                height="100%"
-                objectFit="cover" // Keeps the image properly cropped inside the circle
-              />
-              <Input
-                type="file"
-                id="banner_attachment"
-                onChange={handleBannerChange}
-                display="none" // Hides the default file input
-              />
-              <Box
-                position="absolute"
-                top="50%"
-                left="50%"
-                transform="translate(-50%, -50%)"
-                color="white"
-                fontWeight="bold"
-                fontSize="14px"
-                opacity="0"
-                _hover={{
-                  opacity: 1, // Make text visible on hover
-                }}
-                transition="opacity 0.3s ease"
-              >
-                Upload Photo
-              </Box>
-            </Box>
-
-            {error && (
-              <Box mt="10px" color="red.500">
-                <Text>{error}</Text>
-              </Box>
-            )}
-            <Text textAlign="left" w="50%" fontSize="13px">
+            <Text fontSize="13px" w="full" textAlign="justify">
               Ukuran optimal 300 x 300 piksel dengan Besar file: Maksimum 10
               Megabytes. Ekstensi file yang diperbolehkan: JPG, JPEG, PNG
             </Text>

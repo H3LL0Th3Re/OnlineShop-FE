@@ -71,3 +71,12 @@ export interface VariantOption {
   variantId: string;
   values: string[]; // Adjust based on your actual structure
 }
+
+// Contoh definisi ProductType
+export interface ProductType {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  variant_combinations?: Variant_option_values[];
+}

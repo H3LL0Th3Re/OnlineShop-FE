@@ -11,16 +11,6 @@ import {
   Table,
   Icon,
 } from '@chakra-ui/react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 
 import {
   Users,
@@ -33,6 +23,12 @@ import {
 import type { LucideProps } from 'lucide-react';
 import { FaRegBell } from 'react-icons/fa6';
 import { Link } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/hooks/authstore';
+import axios from 'axios';
+import { useFetchTransactionStore } from '@/components/tanstack/useTransactionList';
+import { formatDateString } from '@/utils/date-format';
+const apiURL = 'http://localhost:3000/api';
 
 interface StatWidgetProps {
   icon: React.ComponentType<LucideProps>;
@@ -40,111 +36,13 @@ interface StatWidgetProps {
   value: string;
 }
 
-// Mock data for the charts and tables
-const items = [
-  { id: 1, date: '2023-10-04', amount: 100, status: 'Selesai' },
-  { id: 2, date: '2023-10-03', amount: 200, status: 'Pending' },
-  { id: 3, date: '2023-10-02', amount: 150, status: 'Selesai' },
-  { id: 4, date: '2023-10-01', amount: 300, status: 'Pending' },
-];
-
-const product = [
-  {
-    id: 1,
-    nama_produk: 'Blouse Wanita',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Wanita',
-    jumlah_dibeli: 120,
-  },
-  {
-    id: 2,
-    nama_produk: 'Kemeja Pria',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Pria',
-    jumlah_dibeli: 90,
-  },
-  {
-    id: 3,
-    nama_produk: 'Baju Anak',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Anak',
-    jumlah_dibeli: 70,
-  },
-  {
-    id: 4,
-    nama_produk: 'Blender Listrik',
-    kategori: 'Elektronik',
-    sub_kategori: 'Kitchen Electronics',
-    jumlah_dibeli: 50,
-  },
-  {
-    id: 5,
-    nama_produk: 'Toaster',
-    kategori: 'Elektronik',
-    sub_kategori: 'Kitchen Electronics',
-    jumlah_dibeli: 30,
-  },
-  {
-    id: 6,
-    nama_produk: 'Smartphone X',
-    kategori: 'Elektronik',
-    sub_kategori: 'Smartphones and Accessories',
-    jumlah_dibeli: 200,
-  },
-  {
-    id: 7,
-    nama_produk: 'Earbuds Wireless',
-    kategori: 'Elektronik',
-    sub_kategori: 'Smartphones and Accessories',
-    jumlah_dibeli: 150,
-  },
-  {
-    id: 8,
-    nama_produk: 'Rok Wanita',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Wanita',
-    jumlah_dibeli: 80,
-  },
-  {
-    id: 9,
-    nama_produk: 'Celana Jeans Pria',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Pria',
-    jumlah_dibeli: 110,
-  },
-  {
-    id: 10,
-    nama_produk: 'Setelan Anak',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Anak',
-    jumlah_dibeli: 60,
-  },
-  {
-    id: 11,
-    nama_produk: 'Microwave',
-    kategori: 'Elektronik',
-    sub_kategori: 'Kitchen Electronics',
-    jumlah_dibeli: 40,
-  },
-  {
-    id: 12,
-    nama_produk: 'Charger Portable',
-    kategori: 'Elektronik',
-    sub_kategori: 'Smartphones and Accessories',
-    jumlah_dibeli: 180,
-  },
-];
-
-const top6Data = product.slice(0, 6);
-
-const generateSalesData = () => {
-  return Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    sales: Math.floor(Math.random() * 1000) + 500,
-  }));
+type DashboardData = {
+  totalSales: number; // Ubah dari string ke number
+  totalProduk: number;
+  totalOrders: number;
+  dataProduk: any[];
 };
-
-const salesData = generateSalesData();
+// Mock data for the charts and tables
 
 function StatWidget({ icon: Icon, title, value }: StatWidgetProps) {
   return (
@@ -166,6 +64,21 @@ function StatWidget({ icon: Icon, title, value }: StatWidgetProps) {
   );
 }
 
+const getDashboard = async (token: string) => {
+  try {
+    const response = await axios.get(apiURL + '/dashboard/data', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to fetch Store');
+  }
+};
+
 export function Dashboard() {
   const currentDate = new Date().toLocaleDateString('id-ID', {
     year: 'numeric',
@@ -173,6 +86,17 @@ export function Dashboard() {
     day: 'numeric',
   });
 
+  const { token } = useAuthStore();
+  const { data, isLoading, isError, error } = useQuery<DashboardData>({
+    queryKey: ['dashboard', token],
+    queryFn: () => getDashboard(token || ''),
+    enabled: !!token, // Only fetch if token exists
+  });
+  const { data: items } = useFetchTransactionStore(token || '');
+  if (isLoading) return <Text>Loading...</Text>;
+  if (isError) return <Text>Error: {error.message}</Text>;
+
+  console.log('Data Dashboard:', data);
   return (
     <Box minH="100vh">
       {/* Header */}
@@ -189,13 +113,25 @@ export function Dashboard() {
         gap={6}
         mb={6}
       >
-        <StatWidget icon={Users} title="Total Sales" value="Rp.168.570.000" />
-        <StatWidget icon={Package} title="Total Product" value="567" />
-        <StatWidget icon={CreditCard} title="Today's Transactions" value="89" />
+        <StatWidget
+          icon={Users}
+          title="Total Sales"
+          value={`Rp ${data?.totalSales ?? 0}`}
+        />
+        <StatWidget
+          icon={Package}
+          title="Total Product"
+          value={data?.totalProduk.toString() ?? '0'}
+        />
+        <StatWidget
+          icon={CreditCard}
+          title="Today's Transactions"
+          value={data?.totalOrders.toString() ?? '0'}
+        />
       </Grid>
 
       {/* Charts */}
-      <Grid
+      {/* <Grid
         templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
         gap={6}
         mb={6}
@@ -206,7 +142,7 @@ export function Dashboard() {
           </Text>
           <Box pr={5}>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={salesData}>
+              <LineChart>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
                 <YAxis />
@@ -232,28 +168,28 @@ export function Dashboard() {
                 <Table.Row>
                   <Table.ColumnHeader>Product</Table.ColumnHeader>
                   <Table.ColumnHeader>Category</Table.ColumnHeader>
-                  <Table.ColumnHeader>Sub-Category</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign={'end'}>
-                    Value
+                    Stock
                   </Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {top6Data.map((item) => (
+                {data?.dataProduk?.map((item: any) => (
                   <Table.Row key={item.id}>
-                    <Table.Cell>{item.nama_produk}</Table.Cell>
-                    <Table.Cell>{item.kategori}</Table.Cell>
-                    <Table.Cell>{item.sub_kategori}</Table.Cell>
-                    <Table.Cell textAlign="end">
-                      {item.jumlah_dibeli}
+                    <Table.Cell>{item.name}</Table.Cell>
+                    <Table.Cell>
+                      {item.Categories?.map(
+                        (category: any) => category.name
+                      ).join(', ')}
                     </Table.Cell>
+                    <Table.Cell textAlign="end">{item.stock}</Table.Cell>
                   </Table.Row>
                 ))}
               </Table.Body>
-            </Table.Root>
+            </Table.Root> 
           </Box>
         </Box>
-      </Grid>
+      </Grid> */}
 
       {/* Transactions Table */}
       <Box
@@ -261,34 +197,64 @@ export function Dashboard() {
         borderRadius="lg"
         boxShadow="md"
         mb={6}
+        p="6"
         overflow="hidden"
       >
-        <Box p={6}>
-          <Text mb={3} fontWeight={'medium'}>
-            Recent Transactions
-          </Text>
-          <Box overflowX="auto">
-            <Table.Root size="sm" striped>
+        <Box mt={3}>
+          <Text fontWeight={'bolder'}>Transactions List</Text>
+
+          <Table.ScrollArea
+            mt={3}
+            borderWidth="1px"
+            rounded="md"
+            height="300px"
+          >
+            <Table.Root size="sm" stickyHeader>
               <Table.Header>
-                <Table.Row>
+                <Table.Row bg="bg.subtle">
                   <Table.ColumnHeader>Date</Table.ColumnHeader>
-                  <Table.ColumnHeader>Amount</Table.ColumnHeader>
+                  <Table.ColumnHeader>Name</Table.ColumnHeader>
+                  <Table.ColumnHeader>Type</Table.ColumnHeader>
+                  <Table.ColumnHeader>Status</Table.ColumnHeader>
+                  <Table.ColumnHeader>order_id</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="end">
-                    Status
+                    Amount
                   </Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
+
               <Table.Body>
-                {items.map((item) => (
-                  <Table.Row key={item.id}>
-                    <Table.Cell>{item.date}</Table.Cell>
-                    <Table.Cell>{item.amount}</Table.Cell>
-                    <Table.Cell textAlign="end">{item.status}</Table.Cell>
-                  </Table.Row>
-                ))}
+                {items?.length === 0 ? (
+                  <Text
+                    mt="100px"
+                    ml="200px"
+                    h="full"
+                    w="full"
+                    textAlign="center"
+                    fontSize="20px"
+                    fontWeight="600"
+                  >
+                    {' '}
+                    No transaction
+                  </Text>
+                ) : (
+                  items?.map((item) => (
+                    <Table.Row key={item.id}>
+                      <Table.Cell>
+                        {' '}
+                        {formatDateString(item.createdAt)}
+                      </Table.Cell>
+                      <Table.Cell>{item.name}</Table.Cell>
+                      <Table.Cell>{item.type}</Table.Cell>
+                      <Table.Cell>{item.status}</Table.Cell>
+                      <Table.Cell>{item.orderId}</Table.Cell>
+                      <Table.Cell textAlign="end">{item.amount}</Table.Cell>
+                    </Table.Row>
+                  ))
+                )}
               </Table.Body>
             </Table.Root>
-          </Box>
+          </Table.ScrollArea>
         </Box>
       </Box>
 
@@ -320,17 +286,19 @@ export function Dashboard() {
               <Button>
                 <Link to={'/add-product'}>
                   <Icon>
-                    <PlusCircle size={20} />
+                    <PlusCircle size={20} style={{ marginRight: '6px' }} />
                   </Icon>
                   Tambah Produk
                 </Link>
               </Button>
-              <Button>
-                <Icon>
-                  <FileText size={20} />
-                </Icon>
-                <Text>Laporan</Text>
-              </Button>
+              <Link to={'/pengaturan'}>
+                <Button>
+                  <Icon>
+                    <FileText size={20} />
+                  </Icon>
+                  <Text>Withdrawal</Text>
+                </Button>
+              </Link>
             </Flex>
           </VStack>
         </Box>

@@ -25,16 +25,28 @@ const Sidebar = () => {
         <Text color="#5F2EEA" fontWeight="900" fontSize="25px" mb="0">
           LAKOE APP
         </Text>
-        <Link to="/dashboard">
-          <HStack _hover={{ color: '#5F2EEA' }}>
-            <TbSmartHome />
-            <Text p={1} borderRadius={5} fontWeight="600">
-              Dashboard
-            </Text>
-          </HStack>
-        </Link>
+        {users?.role_id.id === findAdmin?.id && (
+          <>
+            <Link to="/dashboard-admin">
+              <HStack _hover={{ color: '#5F2EEA' }}>
+                <TbSmartHome />
+                <Text p={1} borderRadius={5} fontWeight="600">
+                  Dashboard
+                </Text>
+              </HStack>
+            </Link>
+          </>
+        )}
         {users?.role_id.id !== findAdmin?.id && (
           <>
+            <Link to="/dashboard">
+              <HStack _hover={{ color: '#5F2EEA' }}>
+                <TbSmartHome />
+                <Text p={1} borderRadius={5} fontWeight="600">
+                  Dashboard
+                </Text>
+              </HStack>
+            </Link>
             <Link to="/product">
               <HStack _hover={{ color: '#5F2EEA' }} align="center">
                 <RiDashboardHorizontalLine />
@@ -51,18 +63,17 @@ const Sidebar = () => {
                 </Text>
               </HStack>
             </Link>
+            <Spacer />
+            <Link to="/pengaturan">
+              <HStack _hover={{ color: '#5F2EEA' }}>
+                <TbSettings />
+                <Text p={1} borderRadius={5} fontWeight="600">
+                  Settings
+                </Text>
+              </HStack>
+            </Link>
           </>
         )}
-
-        <Spacer />
-        <Link to="/pengaturan">
-          <HStack _hover={{ color: '#5F2EEA' }}>
-            <TbSettings />
-            <Text p={1} borderRadius={5} fontWeight="600">
-              Settings
-            </Text>
-          </HStack>
-        </Link>
       </Flex>
     </Flex>
   );
