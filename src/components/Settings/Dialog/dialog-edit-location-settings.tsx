@@ -13,19 +13,13 @@ import {
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/hooks/authstore';
 import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMapEvents,
-} from 'react-leaflet';
-import {
   useMutation,
   UseMutationResult,
   useQueryClient,
 } from '@tanstack/react-query';
 import axios from 'axios';
 import { MdEditLocationAlt } from 'react-icons/md';
+import { FaLocationDot } from 'react-icons/fa6';
 
 interface DropdownOption {
   label: string;
@@ -217,27 +211,46 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
     }
   }, [selectedDistrict, token]);
 
-  function LocationMarker() {
-    const map = useMapEvents({
-      click() {
-        map.locate();
-      },
-      locationfound(e) {
-        setPosition(e.latlng); // Simpan posisi
-        console.log('Latitude:', e.latlng.lat, 'Longitude:', e.latlng.lng); // Log koordinat
-        map.flyTo(e.latlng, map.getZoom());
-      },
-    });
+  const handleGetLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setPosition({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          console.log('Latitude:', position.coords.latitude);
+          console.log('Longitude:', position.coords.longitude);
+        },
+        (error) => {
+          console.error('Error getting location:', error.message);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+  // function LocationMarker() {
+  //   const map = useMapEvents({
+  //     click() {
+  //       map.locate();
+  //     },
+  //     locationfound(e) {
+  //       setPosition(e.latlng); // Simpan posisi
+  //       console.log('Latitude:', e.latlng.lat, 'Longitude:', e.latlng.lng); // Log koordinat
+  //       map.flyTo(e.latlng, map.getZoom());
+  //     },
+  //   });
 
-    return position === null ? null : (
-      <Marker position={position}>
-        <Popup>
-          Latitude: {position.lat} <br />
-          Longitude: {position.lng}
-        </Popup>
-      </Marker>
-    );
-  }
+  //   return position === null ? null : (
+  //     <Marker position={position}>
+  //       <Popup>
+  //         Latitude: {position.lat} <br />
+  //         Longitude: {position.lng}
+  //       </Popup>
+  //     </Marker>
+  //   );
+  // }
 
   interface LocationData {
     name: string;
@@ -497,19 +510,9 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
                 Pinpoint Lokasi*
               </Text>
 
-              <Box borderRadius="7px" h="400px" w="full" bg="blue">
-                <MapContainer
-                  center={{ lat: -6.2, lng: 106.8 }}
-                  zoom={15}
-                  scrollWheelZoom={false}
-                >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright"></a> '
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <LocationMarker />
-                </MapContainer>
-              </Box>
+              <Button colorScheme="blue" onClick={handleGetLocation}>
+                <FaLocationDot size="15px" /> Get My Location
+              </Button>
 
               <Text fontWeight="400" fontSize="13px" mb="7px">
                 Tandai lokasi untuk mempermudah pemintaan pickup kurir{' '}
