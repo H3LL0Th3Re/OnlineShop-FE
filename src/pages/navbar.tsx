@@ -44,7 +44,7 @@ export default function Navbar() {
       <Flex w="full" justify="space-between" alignItems="center">
         <Box>
           <Text color="black" fontWeight="600" fontSize="17px">
-            Welcome, {store?.name || 'User'}
+            Welcome, {store?.name || 'admin'}
           </Text>
         </Box>
         <Box>
