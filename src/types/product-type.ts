@@ -20,9 +20,14 @@ export interface Product {
 }
 
 export interface Checkout_Product {
+  id: string
   price: number;
   quantity: number;
+  description: string;
   weight: number;
+  width: number;
+  length: number;
+  height: number;
   selectedOptions: string;
   name: string;
   attachments: string;

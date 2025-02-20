@@ -47,6 +47,7 @@ export default function DetailProduct() {
     fetchProduct();
   }, [username, url, selectedOptions]);
 
+  
   useEffect(() => {
     if (product && selectedOptions.length === product.variants?.length) {
       localStorage.setItem(
@@ -57,8 +58,13 @@ export default function DetailProduct() {
           quantity,
         })
       );
+      
     }
   }, [product, selectedOptions, quantity]);
+
+
+  
+
 
   const imageUrls =
     product?.attachments?.map((attachment) =>

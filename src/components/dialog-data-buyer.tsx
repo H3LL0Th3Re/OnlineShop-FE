@@ -22,11 +22,12 @@ import {
 } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
 import { Field } from '@/components/ui/field';
-import { currentStore } from '@/features/get-store';
+
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { apiURL } from '@/utils/api-url';
 import { Checkout_Product } from '@/types/product-type';
+
 
 export const DialogDataBuyer = () => {
   const token = Cookies.get('token');
@@ -54,10 +55,12 @@ export const DialogDataBuyer = () => {
   const [villages, setVillages] = useState<DropdownOption[]>([]);
   const [, setPostalCodes] = useState<DropdownOption[]>([]);
 
+
   const getLabelByValue = (options: DropdownOption[], value: string | null) => {
     const option = options.find((opt) => opt.value === value);
     return option ? option.label : null;
   };
+
 
   useEffect(() => {
     const fetchProvinces = async () => {
@@ -200,6 +203,118 @@ export const DialogDataBuyer = () => {
       }
     };
 
+
+    useEffect(() => {
+        const productData = localStorage.getItem('selectedProduct');
+        if (productData) {
+          setProduct(JSON.parse(productData)); // Set the product from localStorage
+        }
+      }, []);
+
+
+      
+      const product_id = product?.id || '';
+      const product_height = product?.height;
+      const product_width = product?.width;
+      const product_length = product?.length;
+      const product_weight = product?.weight;
+      const productName = product?.name || ''; // Default to empty string if no product
+      const price = product?.price || 0;
+      const quantity = product?.quantity || 1;
+
+      console.log("id produk",product_id);
+    
+    // const store_response = currentStore(token, product_id);
+    // console.log("my response store", currentStore);
+    async function fetch_store_location(){
+      if(!product){
+        return
+      }
+      const response = await axios.post(apiURL + '/stores/by-product',{
+        product_id: product_id
+      })
+
+      console.log(response);
+      return response.data;
+    }
+    const stores = fetch_store_location();
+
+
+    // async function location_fetch(){
+    //   const location_response = await axios.get(apiURL + '/locations',{
+  
+    //     headers:{
+    //       "Authorization": `Bearer ${token}`,
+    //       "Content-Type": "application/json"
+    //     }
+    //   })
+      
+  
+    //   // console.log("lokasi store",location_response.data.location[0])
+    //   return location_response.data.location[0]
+    // }
+    // const response_location = location_fetch();
+  
+    async function user_store_fetch(){
+      const response = await axios.post(apiURL + '/user', {
+        storeId: ((await stores).store_id.id)
+      })
+      console.log("user res",response)
+      return response.data.user;
+    }
+    const storeUser_fetch = user_store_fetch();
+
+    // async function user_fetch(){
+    //   const user_response = await axios.get(apiURL + '/user', {
+    //     headers:{
+    //       "Authorization": `Bearer ${token}`,
+    //       "Content-Type": "application/json"
+    //     }      
+    //   })
+    //   return user_response.data.user[0];
+    // }
+    // const response_user = user_fetch();
+    
+    async function onSubmit(
+      productName: string,
+      price: number,
+      quantity: number
+    ){
+      console.log("Form Data Before Sending:", formData);
+      // console.log("Destination name:", (await response_user));
+
+      const order_response = await axios.post(apiURL + '/order/add-order', {
+        origin_contact_name: (await storeUser_fetch).fullname,
+        origin_contact_phone: (await storeUser_fetch).phone_number,
+        origin_contact_email: (await storeUser_fetch).email,
+        origin_address: `${(await stores).location_store[0].city_district}, ${(await stores).location_store[0].address}`,
+        
+        origin_postal_code: (await stores).location_store[0].postal_code,
+        destination_contact_name: formData.name,
+        destination_contact_phone: formData.phone_number,
+        destination_contact_email: formData.email,
+        destination_address: `${formData.detail_address}, ${getLabelByValue(provinces,formData.province)}, ${getLabelByValue(districts,formData.district)}, ${getLabelByValue(villages,formData.sub_district)}, ${getLabelByValue(cities,formData.city)}`,
+        destination_postal_code: formData.postal_code,
+        
+
+        delivery_type: "now",
+        items: [
+          {
+            name: productName,
+            description: 'cow is sacred saar',
+            value: price,
+            quantity: quantity,
+            height: product_height,
+            length: product_length,
+            weight: product_weight,
+            width: product_width,
+          },
+        ],
+      });
+
+      localStorage.setItem("order_id_response",order_response.data.orderId);
+      console.log("response dari order bro",order_response.data);
+
     if (formData.district) {
       fetchVillages(formData.district);
     }
@@ -214,6 +329,7 @@ export const DialogDataBuyer = () => {
     const productData = localStorage.getItem('selectedProduct');
     if (productData) {
       setProduct(JSON.parse(productData)); // Set the product from localStorage
+
     }
   }, []);
 
