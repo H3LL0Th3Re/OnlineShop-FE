@@ -33,6 +33,10 @@ import {
 import type { LucideProps } from 'lucide-react';
 import { FaRegBell } from 'react-icons/fa6';
 import { Link } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { useAuthStore } from '@/hooks/authstore';
+import axios from 'axios';
+const apiURL = 'http://localhost:3000/api';
 
 interface StatWidgetProps {
   icon: React.ComponentType<LucideProps>;
@@ -40,6 +44,12 @@ interface StatWidgetProps {
   value: string;
 }
 
+type DashboardData = {
+  totalSales: number; // Ubah dari string ke number
+  totalProduk: number;
+  totalOrders: number;
+  dataProduk: any[];
+};
 // Mock data for the charts and tables
 const items = [
   { id: 1, date: '2023-10-04', amount: 100, status: 'Selesai' },
@@ -47,104 +57,6 @@ const items = [
   { id: 3, date: '2023-10-02', amount: 150, status: 'Selesai' },
   { id: 4, date: '2023-10-01', amount: 300, status: 'Pending' },
 ];
-
-const product = [
-  {
-    id: 1,
-    nama_produk: 'Blouse Wanita',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Wanita',
-    jumlah_dibeli: 120,
-  },
-  {
-    id: 2,
-    nama_produk: 'Kemeja Pria',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Pria',
-    jumlah_dibeli: 90,
-  },
-  {
-    id: 3,
-    nama_produk: 'Baju Anak',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Anak',
-    jumlah_dibeli: 70,
-  },
-  {
-    id: 4,
-    nama_produk: 'Blender Listrik',
-    kategori: 'Elektronik',
-    sub_kategori: 'Kitchen Electronics',
-    jumlah_dibeli: 50,
-  },
-  {
-    id: 5,
-    nama_produk: 'Toaster',
-    kategori: 'Elektronik',
-    sub_kategori: 'Kitchen Electronics',
-    jumlah_dibeli: 30,
-  },
-  {
-    id: 6,
-    nama_produk: 'Smartphone X',
-    kategori: 'Elektronik',
-    sub_kategori: 'Smartphones and Accessories',
-    jumlah_dibeli: 200,
-  },
-  {
-    id: 7,
-    nama_produk: 'Earbuds Wireless',
-    kategori: 'Elektronik',
-    sub_kategori: 'Smartphones and Accessories',
-    jumlah_dibeli: 150,
-  },
-  {
-    id: 8,
-    nama_produk: 'Rok Wanita',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Wanita',
-    jumlah_dibeli: 80,
-  },
-  {
-    id: 9,
-    nama_produk: 'Celana Jeans Pria',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Pria',
-    jumlah_dibeli: 110,
-  },
-  {
-    id: 10,
-    nama_produk: 'Setelan Anak',
-    kategori: 'Pakaian',
-    sub_kategori: 'Pakaian Anak',
-    jumlah_dibeli: 60,
-  },
-  {
-    id: 11,
-    nama_produk: 'Microwave',
-    kategori: 'Elektronik',
-    sub_kategori: 'Kitchen Electronics',
-    jumlah_dibeli: 40,
-  },
-  {
-    id: 12,
-    nama_produk: 'Charger Portable',
-    kategori: 'Elektronik',
-    sub_kategori: 'Smartphones and Accessories',
-    jumlah_dibeli: 180,
-  },
-];
-
-const top6Data = product.slice(0, 6);
-
-const generateSalesData = () => {
-  return Array.from({ length: 30 }, (_, i) => ({
-    day: i + 1,
-    sales: Math.floor(Math.random() * 1000) + 500,
-  }));
-};
-
-const salesData = generateSalesData();
 
 function StatWidget({ icon: Icon, title, value }: StatWidgetProps) {
   return (
@@ -166,6 +78,21 @@ function StatWidget({ icon: Icon, title, value }: StatWidgetProps) {
   );
 }
 
+const getDashboard = async (token: string) => {
+  try {
+    const response = await axios.get(apiURL + '/dashboard/data', {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error('Failed to fetch Store');
+  }
+};
+
 export function Dashboard() {
   const currentDate = new Date().toLocaleDateString('id-ID', {
     year: 'numeric',
@@ -173,6 +100,16 @@ export function Dashboard() {
     day: 'numeric',
   });
 
+  const { token } = useAuthStore();
+  const { data, isLoading, isError, error } = useQuery<DashboardData>({
+    queryKey: ['dashboard', token],
+    queryFn: () => getDashboard(token || ''),
+    enabled: !!token, // Only fetch if token exists
+  });
+  if (isLoading) return <Text>Loading...</Text>;
+  if (isError) return <Text>Error: {error.message}</Text>;
+
+  console.log('Data Dashboard:', data);
   return (
     <Box minH="100vh">
       {/* Header */}
@@ -189,9 +126,21 @@ export function Dashboard() {
         gap={6}
         mb={6}
       >
-        <StatWidget icon={Users} title="Total Sales" value="Rp.168.570.000" />
-        <StatWidget icon={Package} title="Total Product" value="567" />
-        <StatWidget icon={CreditCard} title="Today's Transactions" value="89" />
+        <StatWidget
+          icon={Users}
+          title="Total Sales"
+          value={`Rp ${data?.totalSales ?? 0}`}
+        />
+        <StatWidget
+          icon={Package}
+          title="Total Product"
+          value={data?.totalProduk.toString() ?? '0'}
+        />
+        <StatWidget
+          icon={CreditCard}
+          title="Today's Transactions"
+          value={data?.totalOrders.toString() ?? '0'}
+        />
       </Grid>
 
       {/* Charts */}
@@ -206,7 +155,7 @@ export function Dashboard() {
           </Text>
           <Box pr={5}>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={salesData}>
+              <LineChart>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="day" />
                 <YAxis />
@@ -232,18 +181,16 @@ export function Dashboard() {
                 <Table.Row>
                   <Table.ColumnHeader>Product</Table.ColumnHeader>
                   <Table.ColumnHeader>Category</Table.ColumnHeader>
-                  <Table.ColumnHeader>Sub-Category</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign={'end'}>
-                    Value
+                    Stock
                   </Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {top6Data.map((item) => (
+                {data?.dataProduk?.slice(0, 6).map((item: any) => (
                   <Table.Row key={item.id}>
                     <Table.Cell>{item.nama_produk}</Table.Cell>
                     <Table.Cell>{item.kategori}</Table.Cell>
-                    <Table.Cell>{item.sub_kategori}</Table.Cell>
                     <Table.Cell textAlign="end">
                       {item.jumlah_dibeli}
                     </Table.Cell>
