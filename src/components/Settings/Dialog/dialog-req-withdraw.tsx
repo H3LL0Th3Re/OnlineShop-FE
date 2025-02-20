@@ -83,7 +83,7 @@ export default function DialogRequestWithdraw() {
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['Transaction'] });
+      queryClient.invalidateQueries({ queryKey: ['TransactionList'] });
     },
   });
   const contentRef = useRef<HTMLDivElement>(null);

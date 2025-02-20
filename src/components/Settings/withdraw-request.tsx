@@ -5,20 +5,26 @@ import DialogEditBank from './Dialog/dialog-edit-bank-settings';
 import DialogRequestWithdraw from './Dialog/dialog-req-withdraw';
 import { useAuthStore } from '@/hooks/authstore';
 import DialogBankDelete from './Dialog/dialog-delete-bank-settings';
-import { useFetchBalance } from '../tanstack/useTransactionList';
+import {
+  useFetchBalance,
+  useFetchTransactionStore,
+} from '../tanstack/useTransactionList';
 import { formatPrice } from '@/utils/format-price';
-const items = [
-  { id: 1, name: 'Laptop', category: 'Electronics', price: 999.99 },
-  { id: 2, name: 'Coffee Maker', category: 'Home Appliances', price: 49.99 },
-  { id: 3, name: 'Desk Chair', category: 'Furniture', price: 150.0 },
-  { id: 4, name: 'Smartphone', category: 'Electronics', price: 799.99 },
-  { id: 5, name: 'Headphones', category: 'Accessories', price: 199.99 },
-];
+import { formatDateString } from '@/utils/date-format';
+// const items = [
+//   { id: 1, name: 'Laptop', category: 'Electronics', price: 999.99 },
+//   { id: 2, name: 'Coffee Maker', category: 'Home Appliances', price: 49.99 },
+//   { id: 3, name: 'Desk Chair', category: 'Furniture', price: 150.0 },
+//   { id: 4, name: 'Smartphone', category: 'Electronics', price: 799.99 },
+//   { id: 5, name: 'Headphones', category: 'Accessories', price: 199.99 },
+// ];
 export default function Withdrawal() {
   const { token } = useAuthStore();
   const { data: bank, isLoading, isError, error } = useFetchBank(token || '');
   const { data: balance } = useFetchBalance(token || '');
+  const { data: items } = useFetchTransactionStore(token || '');
   console.log(bank);
+  console.log(items);
   if (isLoading) {
     return <Text>Loading...</Text>;
   }
@@ -81,24 +87,35 @@ export default function Withdrawal() {
       </Box>
       <Box mt={3}>
         <Text fontWeight={'bolder'}>Transactions List</Text>
+
         <Table.ScrollArea mt={3} borderWidth="1px" rounded="md" height="300px">
           <Table.Root size="sm" stickyHeader>
             <Table.Header>
               <Table.Row bg="bg.subtle">
-                <Table.ColumnHeader>Product</Table.ColumnHeader>
-                <Table.ColumnHeader>Category</Table.ColumnHeader>
-                <Table.ColumnHeader textAlign="end">Price</Table.ColumnHeader>
+                <Table.ColumnHeader>Date</Table.ColumnHeader>
+                <Table.ColumnHeader>Name</Table.ColumnHeader>
+                <Table.ColumnHeader>Type</Table.ColumnHeader>
+                <Table.ColumnHeader>Status</Table.ColumnHeader>
+                <Table.ColumnHeader>order_id</Table.ColumnHeader>
+                <Table.ColumnHeader textAlign="end">Amount</Table.ColumnHeader>
               </Table.Row>
             </Table.Header>
 
             <Table.Body>
-              {items.map((item) => (
-                <Table.Row key={item.id}>
-                  <Table.Cell>{item.name}</Table.Cell>
-                  <Table.Cell>{item.category}</Table.Cell>
-                  <Table.Cell textAlign="end">{item.price}</Table.Cell>
-                </Table.Row>
-              ))}
+              {items?.length === 0 ? (
+                <Text> No transaction</Text>
+              ) : (
+                items?.map((item) => (
+                  <Table.Row key={item.id}>
+                    <Table.Cell> {formatDateString(item.createdAt)}</Table.Cell>
+                    <Table.Cell>{item.name}</Table.Cell>
+                    <Table.Cell>{item.type}</Table.Cell>
+                    <Table.Cell>{item.status}</Table.Cell>
+                    <Table.Cell>{item.orderId}</Table.Cell>
+                    <Table.Cell textAlign="end">{item.amount}</Table.Cell>
+                  </Table.Row>
+                ))
+              )}
             </Table.Body>
           </Table.Root>
         </Table.ScrollArea>
