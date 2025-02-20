@@ -24,6 +24,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { FaLocationDot } from 'react-icons/fa6';
+import { apiURL } from '@/utils/api-url';
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
@@ -78,15 +79,12 @@ export default function DialogAddLocation() {
     const fetchProvinces = async () => {
       if (token) {
         try {
-          const response = await fetch(
-            `http://localhost:3000/api/locations/api/provinces`,
-            {
-              method: 'GET',
-              headers: {
-                Authorization: `Bearer ${token}`, // Menambahkan token ke header
-              },
-            }
-          );
+          const response = await fetch(`${apiURL}/locations/api/provinces`, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`, // Menambahkan token ke header
+            },
+          });
           if (!response.ok) {
             throw new Error('Failed to fetch provinces');
           }
@@ -111,7 +109,7 @@ export default function DialogAddLocation() {
       if (provinceCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/cities/${provinceCode}`,
+            `${apiURL}/locations/api/cities/${provinceCode}`,
             {
               method: 'GET',
               headers: {
@@ -148,7 +146,7 @@ export default function DialogAddLocation() {
       if (cityCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/districts/${cityCode}`,
+            `${apiURL}/locations/api/districts/${cityCode}`,
             {
               method: 'GET',
               headers: {
@@ -186,7 +184,7 @@ export default function DialogAddLocation() {
       if (districtCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/villages/${districtCode}`,
+            `${apiURL}/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
               headers: {
@@ -274,16 +272,12 @@ export default function DialogAddLocation() {
   }
 
   const addLocation = async (data: LocationData) => {
-    const response = await axios.post(
-      'http://localhost:3000/api/locations/create',
-      data,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.post(`${apiURL}/locations/create`, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.data) {
       throw new Error('Failed to add location');
