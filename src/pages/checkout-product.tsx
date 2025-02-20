@@ -80,8 +80,8 @@ export default function CheckoutProduct() {
 
       const order_response = await axios.put(apiURL + '/order/update-order', {
         orderid: localStorage.getItem('order_id_response'),
-        courier_company: 'jne',
-        courier_type: 'reg',
+        courier_company: selectedShipment?.courier_code,
+        courier_type: selectedShipment?.courier_service_name,
         delivery_type: 'now',
         order_note: 'please be Careful',
         items: [
@@ -97,6 +97,8 @@ export default function CheckoutProduct() {
           },
         ],
       });
+
+      console.log('order:', order_response);
 
       // if (formData) {
       //   axios.post("http://localhost:3000/api/save-data", JSON.stringify(formData))
