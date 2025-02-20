@@ -32,10 +32,16 @@ export function DialogUpdatePrice({ productId }: { productId: string }) {
   const [loading, setLoading] = useState(false);
   const [productData, setProductData] = useState<ProductType | null>(null);
   const [updatedData, setUpdatedData] = useState<{
+    name: string;
+    description: string;
+    minimum_order: number;
     price: number | null;
     stock: number | null;
     variants: Variant_option_values[];
   }>({
+    name: '',
+    description: '',
+    minimum_order: 0,
     price: null,
     stock: null,
     variants: [],
@@ -53,7 +59,11 @@ export function DialogUpdatePrice({ productId }: { productId: string }) {
         // If there are variants, initialize updated data
         if (data.variant_combinations) {
           setUpdatedData({
-            ...updatedData,
+            name: data.name,
+            description: data.description,
+            minimum_order: data.minimum_order,
+            price: data.price,
+            stock: data.stock,
             variants: data.variant_combinations.map(
               (variant: Variant_option_values) => ({
                 id: variant.id,
@@ -64,9 +74,12 @@ export function DialogUpdatePrice({ productId }: { productId: string }) {
           });
         } else {
           setUpdatedData({
-            ...updatedData,
+            name: data.name,
+            description: data.description,
+            minimum_order: data.minimum_order,
             price: data.price,
             stock: data.stock,
+            variants: [],
           });
         }
       } catch (error) {
@@ -78,8 +91,8 @@ export function DialogUpdatePrice({ productId }: { productId: string }) {
   }, [productId]);
 
   const handleSave = async () => {
-    console.log('Updated data:', updatedData); // Logs the data you want to send
-    setLoading(true); // Set loading menjadi true
+    console.log('Updated data:', updatedData);
+    setLoading(true);
 
     try {
       const response = await axios.put(
@@ -88,7 +101,6 @@ export function DialogUpdatePrice({ productId }: { productId: string }) {
       );
       console.log('Update success:', response.data);
       Swal.fire({
-        // Ganti dengan SweetAlert
         title: 'Update Berhasil!',
         text: 'Data produk telah diperbarui.',
         icon: 'success',
@@ -96,18 +108,17 @@ export function DialogUpdatePrice({ productId }: { productId: string }) {
         showConfirmButton: false,
         timer: 3000,
       }).then(() => {
-        setOpen(false); // Tutup dialog setelah notifikasi
+        setOpen(false);
       });
     } catch (error) {
       console.error('Error updating product:', error);
       Swal.fire({
-        // Notifikasi error
         title: 'Update Gagal!',
         text: 'Terjadi kesalahan saat memperbarui data produk.',
         icon: 'error',
       });
     } finally {
-      setLoading(false); // Set loading menjadi false setelah proses selesai
+      setLoading(false);
     }
   };
 
@@ -132,6 +143,46 @@ export function DialogUpdatePrice({ productId }: { productId: string }) {
         </DialogHeader>
 
         <DialogBody spaceY={5}>
+          <Box spaceY={2}>
+            <Field>
+              <Text>Product Name</Text>
+              <Input
+                value={updatedData.name}
+                onChange={(e) =>
+                  setUpdatedData({ ...updatedData, name: e.target.value })
+                }
+                placeholder="Nama produk"
+              />
+            </Field>
+            <Field>
+              <Text>Description</Text>
+              <Input
+                value={updatedData.description}
+                onChange={(e) =>
+                  setUpdatedData({
+                    ...updatedData,
+                    description: e.target.value,
+                  })
+                }
+                placeholder="Deskripsi produk"
+              />
+            </Field>
+            <Field>
+              <Text>Minimum Order</Text>
+              <Input
+                type="number"
+                value={updatedData.minimum_order}
+                onChange={(e) =>
+                  setUpdatedData({
+                    ...updatedData,
+                    minimum_order: parseInt(e.target.value),
+                  })
+                }
+                placeholder="Jumlah minimum"
+              />
+            </Field>
+          </Box>
+
           {productData.variant_combinations ? (
             <VStack align="start" spaceY={4}>
               {productData.variant_combinations.map(
