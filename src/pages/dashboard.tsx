@@ -11,16 +11,6 @@ import {
   Table,
   Icon,
 } from '@chakra-ui/react';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
 
 import {
   Users,
@@ -36,6 +26,8 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/hooks/authstore';
 import axios from 'axios';
+import { useFetchTransactionStore } from '@/components/tanstack/useTransactionList';
+import { formatDateString } from '@/utils/date-format';
 const apiURL = 'http://localhost:3000/api';
 
 interface StatWidgetProps {
@@ -51,12 +43,6 @@ type DashboardData = {
   dataProduk: any[];
 };
 // Mock data for the charts and tables
-const items = [
-  { id: 1, date: '2023-10-04', amount: 100, status: 'Selesai' },
-  { id: 2, date: '2023-10-03', amount: 200, status: 'Pending' },
-  { id: 3, date: '2023-10-02', amount: 150, status: 'Selesai' },
-  { id: 4, date: '2023-10-01', amount: 300, status: 'Pending' },
-];
 
 function StatWidget({ icon: Icon, title, value }: StatWidgetProps) {
   return (
@@ -106,6 +92,7 @@ export function Dashboard() {
     queryFn: () => getDashboard(token || ''),
     enabled: !!token, // Only fetch if token exists
   });
+  const { data: items } = useFetchTransactionStore(token || '');
   if (isLoading) return <Text>Loading...</Text>;
   if (isError) return <Text>Error: {error.message}</Text>;
 
@@ -144,7 +131,7 @@ export function Dashboard() {
       </Grid>
 
       {/* Charts */}
-      <Grid
+      {/* <Grid
         templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }}
         gap={6}
         mb={6}
@@ -187,20 +174,22 @@ export function Dashboard() {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {data?.dataProduk?.slice(0, 6).map((item: any) => (
+                {data?.dataProduk?.map((item: any) => (
                   <Table.Row key={item.id}>
-                    <Table.Cell>{item.nama_produk}</Table.Cell>
-                    <Table.Cell>{item.kategori}</Table.Cell>
-                    <Table.Cell textAlign="end">
-                      {item.jumlah_dibeli}
+                    <Table.Cell>{item.name}</Table.Cell>
+                    <Table.Cell>
+                      {item.Categories?.map(
+                        (category: any) => category.name
+                      ).join(', ')}
                     </Table.Cell>
+                    <Table.Cell textAlign="end">{item.stock}</Table.Cell>
                   </Table.Row>
                 ))}
               </Table.Body>
-            </Table.Root>
+            </Table.Root> 
           </Box>
         </Box>
-      </Grid>
+      </Grid> */}
 
       {/* Transactions Table */}
       <Box
@@ -208,34 +197,64 @@ export function Dashboard() {
         borderRadius="lg"
         boxShadow="md"
         mb={6}
+        p="6"
         overflow="hidden"
       >
-        <Box p={6}>
-          <Text mb={3} fontWeight={'medium'}>
-            Recent Transactions
-          </Text>
-          <Box overflowX="auto">
-            <Table.Root size="sm" striped>
+        <Box mt={3}>
+          <Text fontWeight={'bolder'}>Transactions List</Text>
+
+          <Table.ScrollArea
+            mt={3}
+            borderWidth="1px"
+            rounded="md"
+            height="300px"
+          >
+            <Table.Root size="sm" stickyHeader>
               <Table.Header>
-                <Table.Row>
+                <Table.Row bg="bg.subtle">
                   <Table.ColumnHeader>Date</Table.ColumnHeader>
-                  <Table.ColumnHeader>Amount</Table.ColumnHeader>
+                  <Table.ColumnHeader>Name</Table.ColumnHeader>
+                  <Table.ColumnHeader>Type</Table.ColumnHeader>
+                  <Table.ColumnHeader>Status</Table.ColumnHeader>
+                  <Table.ColumnHeader>order_id</Table.ColumnHeader>
                   <Table.ColumnHeader textAlign="end">
-                    Status
+                    Amount
                   </Table.ColumnHeader>
                 </Table.Row>
               </Table.Header>
+
               <Table.Body>
-                {items.map((item) => (
-                  <Table.Row key={item.id}>
-                    <Table.Cell>{item.date}</Table.Cell>
-                    <Table.Cell>{item.amount}</Table.Cell>
-                    <Table.Cell textAlign="end">{item.status}</Table.Cell>
-                  </Table.Row>
-                ))}
+                {items?.length === 0 ? (
+                  <Text
+                    mt="100px"
+                    ml="200px"
+                    h="full"
+                    w="full"
+                    textAlign="center"
+                    fontSize="20px"
+                    fontWeight="600"
+                  >
+                    {' '}
+                    No transaction
+                  </Text>
+                ) : (
+                  items?.map((item) => (
+                    <Table.Row key={item.id}>
+                      <Table.Cell>
+                        {' '}
+                        {formatDateString(item.createdAt)}
+                      </Table.Cell>
+                      <Table.Cell>{item.name}</Table.Cell>
+                      <Table.Cell>{item.type}</Table.Cell>
+                      <Table.Cell>{item.status}</Table.Cell>
+                      <Table.Cell>{item.orderId}</Table.Cell>
+                      <Table.Cell textAlign="end">{item.amount}</Table.Cell>
+                    </Table.Row>
+                  ))
+                )}
               </Table.Body>
             </Table.Root>
-          </Box>
+          </Table.ScrollArea>
         </Box>
       </Box>
 
@@ -267,17 +286,19 @@ export function Dashboard() {
               <Button>
                 <Link to={'/add-product'}>
                   <Icon>
-                    <PlusCircle size={20} />
+                    <PlusCircle size={20} style={{ marginRight: '6px' }} />
                   </Icon>
                   Tambah Produk
                 </Link>
               </Button>
-              <Button>
-                <Icon>
-                  <FileText size={20} />
-                </Icon>
-                <Text>Laporan</Text>
-              </Button>
+              <Link to={'/pengaturan'}>
+                <Button>
+                  <Icon>
+                    <FileText size={20} />
+                  </Icon>
+                  <Text>Withdrawal</Text>
+                </Button>
+              </Link>
             </Flex>
           </VStack>
         </Box>

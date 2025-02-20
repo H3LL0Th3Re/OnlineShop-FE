@@ -8,7 +8,6 @@ import { useFetchStoreName } from '@/components/tanstack/useStore';
 import { Button } from '@/components/ui/button';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/format-price';
-import NavbarBuyer from './navbarBuyer';
 
 export default function previewStoreProduct() {
   const { username } = useParams();
