@@ -19,6 +19,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import axios from 'axios';
+
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -30,6 +31,12 @@ L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
   shadowUrl: markerShadow,
 });
+
+import { apiURL } from '@/utils/api-url';
+// interface DialogAddLocationProps {
+//   onAddLocation: (newLocation: any) => void; // Tambahkan callback
+// }
+
 
 interface DropdownOption {
   label: string;
@@ -79,7 +86,7 @@ export default function DialogAddLocation() {
       if (token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/provinces`,
+            `${apiUrl}/locations/api/provinces`,
             {
               method: 'GET',
               headers: {
@@ -111,7 +118,7 @@ export default function DialogAddLocation() {
       if (provinceCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/cities/${provinceCode}`,
+            `${apiUrl}/locations/api/cities/${provinceCode}`,
             {
               method: 'GET',
               headers: {
@@ -148,7 +155,7 @@ export default function DialogAddLocation() {
       if (cityCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/districts/${cityCode}`,
+            `${apiUrl}/locations/api/districts/${cityCode}`,
             {
               method: 'GET',
               headers: {
@@ -186,7 +193,7 @@ export default function DialogAddLocation() {
       if (districtCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/villages/${districtCode}`,
+            `${apiUrl}/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
               headers: {
@@ -275,7 +282,7 @@ export default function DialogAddLocation() {
 
   const addLocation = async (data: LocationData) => {
     const response = await axios.post(
-      'http://localhost:3000/api/locations/create',
+      '${apiUrl}/locations/create',
       data,
       {
         headers: {
