@@ -23,15 +23,19 @@ import {
 } from '@chakra-ui/react';
 import { Field } from '../../ui/field';
 import { apiURL } from '@/utils/api-url';
-import { Variant_option_values } from '@/types/product-type';
+import { ProductType, Variant_option_values } from '@/types/product-type';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
 export function DialogUpdatePrice({ productId }: { productId: string }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [productData, setProductData] = useState<any>(null);
-  const [updatedData, setUpdatedData] = useState<any>({
+  const [productData, setProductData] = useState<ProductType | null>(null);
+  const [updatedData, setUpdatedData] = useState<{
+    price: number | null;
+    stock: number | null;
+    variants: Variant_option_values[];
+  }>({
     price: null,
     stock: null,
     variants: [],

@@ -41,7 +41,7 @@ function DialogAddVariant({ onAddVariant }: DialogAddVariantProps) {
             type="button"
             width="200px"
             rounded="50px"
-            bgColor="#085DCF"
+            bgColor="#5F2EEA"
             color="white"
           >
             Add Variant
