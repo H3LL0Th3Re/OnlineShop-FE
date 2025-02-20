@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/timeline';
 import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
 import { useParams } from 'react-router';
-import { getStatusColor } from '../../pages/order';
+// import { getStatusColor } from '../../pages/order';
 
 interface Order {
   id: number;
@@ -118,7 +118,7 @@ export function DetailOrder() {
               <RiFileList2Line />
             </Icon>
             <Box
-              bg={getStatusColor(order?.status)}
+              // bg={getStatusColor(order?.status)}
               borderRadius={'full'}
               width={'36'}
             >

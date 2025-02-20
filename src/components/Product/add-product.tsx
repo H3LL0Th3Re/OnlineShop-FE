@@ -23,12 +23,11 @@ import { useCreateVariantOptions } from '../tanstack/useVariantOptions';
 import { useCreateVariantOptionValue } from '../tanstack/useVariantOptionValues';
 import { Variant, Variant_option_values } from '@/types/product-type';
 import cuid from 'cuid';
+import { IoClose } from 'react-icons/io5';
 
-// Define the type for variant options
 interface VariantOption {
-  id: string; // or the appropriate type for your ID
+  id: string;
   name: string;
-  // Add other properties if needed
 }
 
 function AddProduct() {
@@ -85,18 +84,28 @@ function AddProduct() {
     }
   }, [variantCombinations]);
 
-  const handleCategorySelect = (categoryId: string, subcategoryId: string) => {
+  const handleCategorySelect = (categoryId: string) => {
     setFormData({
       ...formData,
       categoryIds: [categoryId],
-      subcategoryIds: [subcategoryId],
     });
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // Jika field yang diubah adalah nama produk, update URL secara otomatis
+    if (name === 'name') {
+      const formattedUrl = value
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Ganti spasi dengan dash
+        .replace(/[^a-z0-9-]/g, ''); // Hapus karakter yang tidak valid
+      setFormData({ ...formData, [name]: value, url: formattedUrl });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleFileSelect = (files: File[]) => {
@@ -324,7 +333,7 @@ function AddProduct() {
           updatedOptions[variantIndex] = [];
         }
 
-        const variantId = variants[variantIndex]?.id || ''; // ✅ Ambil ID varian yang benar
+        const variantId = variants[variantIndex]?.id || '';
 
         if (
           !updatedOptions[variantIndex].some(
@@ -332,9 +341,9 @@ function AddProduct() {
           )
         ) {
           updatedOptions[variantIndex].push({
-            id: cuid(), // ✅ Buat ID unik
+            id: cuid(),
             name: optionName,
-            variantId: variantId, // ✅ Gunakan ID varian yang benar
+            variantId: variantId,
           });
         }
         return updatedOptions;
@@ -354,13 +363,29 @@ function AddProduct() {
     variantId: string
   ) => {
     setVariantOptions((prev) => {
-      const updatedOptions = { ...prev };
+      const updatedOptions = [...prev];
       updatedOptions[variantIndex] = updatedOptions[variantIndex].filter(
         (option) => option.variantId !== variantId
       );
       return updatedOptions;
     });
+
+    // Hapus kombinasi varian yang terkait dengan opsi yang dihapus
+    setVariantCombinations((prev) => {
+      const updatedCombinations = prev.filter((combination) => {
+        return !combination.some((option) => option.id === variantId);
+      });
+      return updatedCombinations;
+    });
   };
+
+  useEffect(() => {
+    if (variantOptions.length > 0) {
+      generateVariantCombinations();
+    } else {
+      setVariantCombinations([]); // Reset kombinasi jika tidak ada opsi
+    }
+  }, [variantOptions]);
 
   const handleRemoveVariant = (index: number) => {
     setVariants((prev) => prev.filter((_, i) => i !== index));
@@ -398,6 +423,8 @@ function AddProduct() {
   useEffect(() => {
     if (variantOptions.length > 0) {
       generateVariantCombinations();
+    } else {
+      setVariantCombinations([]); // Reset kombinasi jika tidak ada opsi
     }
   }, [variantOptions]);
 
@@ -414,7 +441,7 @@ function AddProduct() {
               align="flex-start"
               borderRadius="10px"
             >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
+              <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                 Product Information
               </Text>
               <VStack gap="5px" w={'full'} align="flex-start">
@@ -455,7 +482,7 @@ function AddProduct() {
               align="flex-start"
               borderRadius="10px"
             >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
+              <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                 Product Detail
               </Text>
               <VStack gap="5px" w="full" align="flex-start">
@@ -504,12 +531,19 @@ function AddProduct() {
               align="flex-start"
               borderRadius="10px"
             >
-              <Text fontWeight="700" fontSize="17px" color="#2400FE">
+              <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                 Product Variant
               </Text>
-              <HStack gap="5px" w="full" align="flex-start">
+              <HStack
+                gap="5px"
+                w="full"
+                align="flex-start"
+                display={'flex'}
+                justifyContent={'space-between'}
+              >
                 <Text fontWeight="600" fontSize="15px">
-                  Add variants so buyers can choose the right product, come on!{' '}
+                  Add variants so buyers can choose the right product, come
+                  on!{' '}
                 </Text>
                 <DialogAddVariant
                   onAddVariant={(newVariant) =>
@@ -531,7 +565,7 @@ function AddProduct() {
                     </Text>
                     <Button
                       onClick={() => handleRemoveVariant(variantIndex)}
-                      colorScheme="red"
+                      bgColor="#5F2EEA"
                       size="xs"
                     >
                       Remove
@@ -550,26 +584,32 @@ function AddProduct() {
                     />
                     <Button
                       onClick={() => handleAddVariantOption(variantIndex)}
-                      colorScheme="blue"
+                      bgColor="#5F2EEA"
                     >
                       Add Option
                     </Button>
                   </HStack>
-                  <HStack align="flex-start">
+                  <HStack
+                    align="flex-start"
+                    display={'flex'}
+                    justifyContent={'center'}
+                    alignItems={'center'}
+                  >
                     {variantOptions[variantIndex]?.map((option) => (
-                      <HStack key={option.variantId} spaceY={2}>
+                      <HStack key={option.variantId}>
                         <Text fontSize="14px">{option.name}</Text>
                         <Button
+                          bg={'red'}
+                          borderRadius={'full'}
+                          size={'2xs'}
                           onClick={() =>
                             handleRemoveVariantOption(
                               variantIndex,
                               option.variantId
                             )
                           }
-                          colorScheme="red"
-                          size="xs"
                         >
-                          X
+                          <IoClose />
                         </Button>
                       </HStack>
                     ))}
@@ -578,7 +618,7 @@ function AddProduct() {
               ))}
 
               <VStack spaceY={2} align="flex-start" mt={4}>
-                <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                   All Variant Options
                 </Text>
                 <Flex
@@ -606,21 +646,21 @@ function AddProduct() {
               <VStack spaceY={2} align="flex-start" mt={4} w={'100%'}>
                 {variants.length > 0 && (
                   <>
-                    <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                    <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                       Variant Option Values
                     </Text>
                     {variantCombinations.length > 0 &&
                       variantCombinations.map((combination, index) => (
                         <Box
                           key={index}
-                          bg={'green.100'}
                           borderWidth="1px"
                           borderRadius="md"
+                          width={'full'}
                           p={4}
                         >
                           <VStack align="flex-start">
                             <Text fontWeight={'bold'}>
-                              Combination {index + 1}:{' '}
+                              Variant:{' '}
                               {combination
                                 .map((opt: VariantOption) => opt.name)
                                 .join(', ')}
@@ -733,7 +773,7 @@ function AddProduct() {
                   align="flex-start"
                   borderRadius="10px"
                 >
-                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                  <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                     Product Price
                   </Text>
                   <VStack gap="5px" w="full" align="flex-start">
@@ -781,7 +821,7 @@ function AddProduct() {
                   align="flex-start"
                   borderRadius="10px"
                 >
-                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                  <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                     Product Management
                   </Text>
                   <HStack gap="10" width="full">
@@ -824,7 +864,7 @@ function AddProduct() {
                   align="flex-start"
                   borderRadius="10px"
                 >
-                  <Text fontWeight="700" fontSize="17px" color="#2400FE">
+                  <Text fontWeight="700" fontSize="17px" color="#5F2EEA">
                     Weight & Dimension
                   </Text>
                   <VStack w="full" align="flex-start">
@@ -847,7 +887,7 @@ function AddProduct() {
                   </VStack>
                   <VStack w="full" align="flex-start">
                     <Text fontWeight="600" fontSize="15px">
-                      Product Stock
+                      Product Dimensions
                     </Text>
                     <HStack gap="10" width="full">
                       <VStack w="full" align="flex-start">
@@ -924,7 +964,7 @@ function AddProduct() {
             >
               <HStack>
                 <Button variant="outline">Cancel</Button>
-                <Button bgColor="#2400FE" color="white" type="submit">
+                <Button bgColor="#5F2EEA" color="white" type="submit">
                   Save Product
                 </Button>
               </HStack>

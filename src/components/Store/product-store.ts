@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import {
   getAllProducts,
-  createProduct,
+  createProducts,
 } from '@/features/dashboard/services/product';
 import { Product } from '@/types/product-type';
 
@@ -10,7 +10,7 @@ interface ProductState {
   loading: boolean;
   error: string | null;
   fetchProducts: (token: string) => Promise<void>;
-  addProduct: (token: string, productData: FormData) => Promise<Product>;
+  addProduct: (token: string, productData: Product) => Promise<Product>;
 }
 
 export const useProductStore = create<ProductState>((set) => ({
@@ -39,10 +39,10 @@ export const useProductStore = create<ProductState>((set) => ({
     }
   },
 
-  addProduct: async (token: string, productData: FormData) => {
+  addProduct: async (token: string, productData: Product) => {
     set({ loading: true, error: null });
     try {
-      const newProduct = await createProduct(token, productData);
+      const newProduct = await createProducts(productData, token);
       set((state) => ({
         products: [...state.products, newProduct],
         loading: false,

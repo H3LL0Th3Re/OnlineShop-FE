@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  createListCollection,
   Flex,
   HStack,
   Icon,
@@ -10,64 +9,74 @@ import {
   Stack,
   Tabs,
   Text,
+  Spinner,
 } from '@chakra-ui/react';
 import { Switch } from '../ui/switch';
 import { Link } from 'react-router';
 import { LuUser } from 'react-icons/lu';
-import { MdModeEditOutline, MdOutlineDelete } from 'react-icons/md';
+import { MdOutlineDelete } from 'react-icons/md';
 import { Checkbox } from '../ui/checkbox';
-import { DialogUpdatePrice } from './Dialog/dialog-update-price';
-import {
-  SelectContent,
-  SelectItem,
-  SelectRoot,
-  SelectTrigger,
-  SelectValueText,
-} from '../ui/select';
+import { DialogUpdatePrice } from './Dialog/dialog-update-price-stock';
 import { IoIosLink } from 'react-icons/io';
-import { HiDotsHorizontal } from 'react-icons/hi';
-import { MenuContent, MenuItem, MenuRoot, MenuTrigger } from '../ui/menu';
-
 import { useAuthStore } from '@/hooks/authstore';
+import { useFetchStore } from '../tanstack/useStore';
 import { useFetchProductStore } from '../tanstack/useProduct';
-import { DialogDeleteProduct } from './Dialog/dialog-delete-product';
 import { useToggleActiveProduct } from '../tanstack/useToggleActiveProduct';
 import { useDeleteProduct } from '../tanstack/useProduct';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DialogVariants } from './Dialog/dialog-variants';
-const categories = createListCollection({
-  items: [
-    { label: 'All', value: 'all' },
-    { label: 'Men', value: 'Men' },
-    { label: 'Accessories', value: 'Accessories' },
-    { label: 'Shoes', value: 'Shoes' },
-  ],
-});
+import { getAllCategory } from '@/features/dashboard/services/category-services';
 
-const sortbyOptions = createListCollection({
-  items: [
-    { label: 'Terakhir Diubah', value: 'terakhir-diubah' },
-    { label: 'Harga Tertinggi', value: 'harga-tertinggi' },
-    { label: 'Harga Terendah', value: 'harga-terendah' },
-    { label: 'Stock Terbanyak', value: 'stock-terbanyak' },
-    { label: 'Stock Sedikit', value: 'stock-sedikit' },
-  ],
-});
+// Define the type for a category
+interface Category {
+  id: string;
+  name: string;
+}
 
 const ListProduct = () => {
   const token = useAuthStore((state) => state.token);
   const {
     data: products,
     isLoading,
-    error,
+    error: productError,
   } = useFetchProductStore(token || '');
+  const { data: store } = useFetchStore(token || '');
   const { mutate: toggleActive } = useToggleActiveProduct();
   const { mutate: deleteProducts } = useDeleteProduct(token || '');
   const [checkedProducts, setCheckedProducts] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategory.getAllCategories(token || '');
+        const data: Category[] = response.categories;
+        setCategories(data);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to fetch categories'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, [token]);
+
+  if (loading) {
+    return <Spinner size="sm" />;
+  }
+
+  if (error) {
+    return <Text color="red.500">{error}</Text>;
+  }
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
+  if (productError) return <div>Error: {productError.message}</div>;
 
   console.log('Product Data:', products);
 
@@ -161,42 +170,13 @@ const ListProduct = () => {
               Nonaktif
             </Tabs.Trigger>
           </Tabs.List>
-          <Flex mb="4" gap="4" pt={3} justifyContent={'space-between'}>
+          <Flex mb="4" gap="4" pt={3} w={'full'} justifyContent={'center'}>
             <Input
               placeholder="Cari Pesanan"
               w={'50%'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <SelectRoot
-              multiple
-              collection={categories}
-              size="sm"
-              width="320px"
-            >
-              <SelectTrigger>
-                <SelectValueText placeholder="All Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.items.map((category) => (
-                  <SelectItem item={category} key={category.value}>
-                    {category.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </SelectRoot>
-            <SelectRoot collection={sortbyOptions} size="sm" width="320px">
-              <SelectTrigger>
-                <SelectValueText placeholder="Sort By" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortbyOptions.items.map((sort) => (
-                  <SelectItem item={sort} key={sort.value}>
-                    {sort.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </SelectRoot>
           </Flex>
           <Tabs.Content value="semua">
             <Box border="1px" borderColor="gray.200" rounded="md">
@@ -341,7 +321,7 @@ const ListProduct = () => {
                             h={7}
                           >
                             <Text>
-                              <DialogUpdatePrice />
+                              <DialogUpdatePrice productId={product.id || ''} />
                             </Text>
                           </Button>
                           <Button
@@ -354,7 +334,7 @@ const ListProduct = () => {
                             p={1}
                             h={7}
                           >
-                            <Link to={'/checkout-product'}>
+                            <Link to={`/${store?.username}/${product.url}`}>
                               <Icon>
                                 <IoIosLink />
                               </Icon>
@@ -366,42 +346,6 @@ const ListProduct = () => {
                             product.id && (
                               <DialogVariants productId={product.id} />
                             )}
-                          <MenuRoot>
-                            <MenuTrigger asChild>
-                              <Button
-                                size="xs"
-                                rounded={'full'}
-                                bg="white"
-                                color={'black'}
-                                borderWidth={'1px'}
-                                borderColor={'black'}
-                                p={1}
-                                h={7}
-                              >
-                                <Icon>
-                                  <HiDotsHorizontal />
-                                </Icon>
-                              </Button>
-                            </MenuTrigger>
-                            <MenuContent>
-                              <MenuItem value="new-txt">
-                                <HStack>
-                                  <Icon size={'sm'} color={'black'}>
-                                    <MdModeEditOutline />
-                                  </Icon>
-                                  <Text>Edit Product</Text>
-                                </HStack>
-                              </MenuItem>
-                              <MenuItem value="new-file">
-                                <HStack>
-                                  <DialogDeleteProduct
-                                    productId={product.id || ''}
-                                    productName={product.name || ''}
-                                  />
-                                </HStack>
-                              </MenuItem>
-                            </MenuContent>
-                          </MenuRoot>
                         </HStack>
                         <Switch
                           colorScheme="blue"
@@ -567,7 +511,9 @@ const ListProduct = () => {
                               h={7}
                             >
                               <Text>
-                                <DialogUpdatePrice />
+                                <DialogUpdatePrice
+                                  productId={product.id || ''}
+                                />
                               </Text>
                             </Button>
                             <Button
@@ -580,7 +526,7 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Link to={'/checkout-product'}>
+                              <Link to={`/${store?.username}/${product.url}`}>
                                 <Icon>
                                   <IoIosLink />
                                 </Icon>
@@ -592,42 +538,6 @@ const ListProduct = () => {
                               product.id && (
                                 <DialogVariants productId={product.id} />
                               )}
-                            <MenuRoot>
-                              <MenuTrigger asChild>
-                                <Button
-                                  size="xs"
-                                  rounded={'full'}
-                                  bg="white"
-                                  color={'black'}
-                                  borderWidth={'1px'}
-                                  borderColor={'black'}
-                                  p={1}
-                                  h={7}
-                                >
-                                  <Icon>
-                                    <HiDotsHorizontal />
-                                  </Icon>
-                                </Button>
-                              </MenuTrigger>
-                              <MenuContent>
-                                <MenuItem value="new-txt">
-                                  <HStack>
-                                    <Icon size={'sm'} color={'black'}>
-                                      <MdModeEditOutline />
-                                    </Icon>
-                                    <Text>Edit Product</Text>
-                                  </HStack>
-                                </MenuItem>
-                                <MenuItem value="new-file">
-                                  <HStack>
-                                    <DialogDeleteProduct
-                                      productId={product.id || ''}
-                                      productName={product.name || ''}
-                                    />
-                                  </HStack>
-                                </MenuItem>
-                              </MenuContent>
-                            </MenuRoot>
                           </HStack>
                           <Switch
                             colorScheme="blue"
@@ -793,7 +703,9 @@ const ListProduct = () => {
                               h={7}
                             >
                               <Text>
-                                <DialogUpdatePrice />
+                                <DialogUpdatePrice
+                                  productId={product.id || ''}
+                                />
                               </Text>
                             </Button>
                             <Button
@@ -806,7 +718,7 @@ const ListProduct = () => {
                               p={1}
                               h={7}
                             >
-                              <Link to={'/checkout-product'}>
+                              <Link to={`/${store?.username}/${product.url}`}>
                                 <Icon>
                                   <IoIosLink />
                                 </Icon>
@@ -818,42 +730,6 @@ const ListProduct = () => {
                               product.id && (
                                 <DialogVariants productId={product.id} />
                               )}
-                            <MenuRoot>
-                              <MenuTrigger asChild>
-                                <Button
-                                  size="xs"
-                                  rounded={'full'}
-                                  bg="white"
-                                  color={'black'}
-                                  borderWidth={'1px'}
-                                  borderColor={'black'}
-                                  p={1}
-                                  h={7}
-                                >
-                                  <Icon>
-                                    <HiDotsHorizontal />
-                                  </Icon>
-                                </Button>
-                              </MenuTrigger>
-                              <MenuContent>
-                                <MenuItem value="new-txt">
-                                  <HStack>
-                                    <Icon size={'sm'} color={'black'}>
-                                      <MdModeEditOutline />
-                                    </Icon>
-                                    <Text>Edit Product</Text>
-                                  </HStack>
-                                </MenuItem>
-                                <MenuItem value="new-file">
-                                  <HStack>
-                                    <DialogDeleteProduct
-                                      productId={product.id || ''}
-                                      productName={product.name || ''}
-                                    />
-                                  </HStack>
-                                </MenuItem>
-                              </MenuContent>
-                            </MenuRoot>
                           </HStack>
                           <Switch
                             colorScheme="blue"

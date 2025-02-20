@@ -16,21 +16,22 @@ export interface Product {
   attachments: File[];
   variants?: Variant[];
   is_active?: boolean;
-  priceRange: { min: number; max: number };
+  priceRange?: { min: number; max: number };
 }
 
-// export interface Variant {
-//   id?: string;
-//   name: string;
-//   productId?: string;
-//   variantOptions: Variant_options[];
-// }
-
-// export interface Variant_options {
-//   name: string;
-//   values: Variant_option_values[];
-//   variantId: string;
-// }
+export interface Checkout_Product {
+  id: string
+  price: number;
+  quantity: number;
+  description: string;
+  weight: number;
+  width: number;
+  length: number;
+  height: number;
+  selectedOptions: string;
+  name: string;
+  attachments: string;
+}
 
 export interface Variant_option_values {
   id?: string;
@@ -69,4 +70,13 @@ export interface VariantOption {
   name: string;
   variantId: string;
   values: string[]; // Adjust based on your actual structure
+}
+
+// Contoh definisi ProductType
+export interface ProductType {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  variant_combinations?: Variant_option_values[];
 }

@@ -2,12 +2,15 @@ import { Box, Flex } from '@chakra-ui/react';
 import { Outlet, Navigate } from 'react-router';
 import Sidebar from '@/pages/sidebar';
 import Navbar from '@/pages/navbar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStore, useStoreState } from '@/hooks/authstore';
 import { currentStore } from '@/features/get-store';
+import Loading from '@/components/Loading/loading';
 const PrivateLayout = () => {
   const { token } = useAuthStore();
   const { store, setStore } = useStoreState();
+  const [loading, setLoading] = useState(true);
+
   console.log(store);
   useEffect(() => {
     const getCurrentStore = async () => {
@@ -15,6 +18,10 @@ const PrivateLayout = () => {
         try {
           const storedata = await currentStore(token);
           setStore(storedata);
+
+          setTimeout(() => {
+            setLoading(false);
+          }, 5000);
         } catch (err) {
           console.error('Error fetching store data:', err);
         }
@@ -27,6 +34,9 @@ const PrivateLayout = () => {
   }, [token, setStore]);
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+  if (loading) {
+    return <Loading />; // Menampilkan loading saat data sedang dimuat
   }
   return (
     <Box>

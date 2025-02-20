@@ -1,4 +1,6 @@
-import DialogShipmentCheckout from '@/components/dialog-shipment-checkout';
+import DialogShipmentCheckout, {
+  Courier,
+} from '@/components/dialog-shipment-checkout';
 import {
   AccordionItem,
   AccordionItemContent,
@@ -13,109 +15,152 @@ import {
   Flex,
   HStack,
   Image,
-  Input,
   Text,
   Textarea,
   VStack,
 } from '@chakra-ui/react';
 import axios from 'axios';
 // import { useState } from 'react';
-import { RiShoppingBag4Line } from 'react-icons/ri';
-import Cookies from 'js-cookie';
-import { useEffect, useState } from 'react';
+import { DialogDataBuyer } from '@/components/dialog-data-buyer';
+
+// import { currentStore } from '@/features/get-store';
+import { Checkout_Product } from '@/types/product-type';
+import { formatPrice } from '@/utils/format-price';
+
 import 'midtrans-snap';
+import { useEffect, useState } from 'react';
+import { RiShoppingBag4Line } from 'react-icons/ri';
 
 export default function CheckoutProduct() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone_number, setPhone_number] = useState('');
-  const [province, setProvince] = useState('');
-  const [city, setCity] = useState('');
-  const [district, setDistrict] = useState('');
-  const [sub_district, setSub_district] = useState('');
-  const [postal_code, setPostal_code] = useState('');
-  const [detail_address, setDetail_address] = useState('');
+  const [responseOrder, setResponseOrder] = useState<any>('');
+  const [email_user, setEmail_user] = useState<any>('');
+  const [selectedShipment, setSelectedShipment] = useState<Courier | null>(
+    null
+  );
+
+  const [product, setProduct] = useState<Checkout_Product | null>(null);
+
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://app.sandbox.midtrans.com/snap/snap.js';
-    script.setAttribute('data-client-key', 'SB-Mid-client-4omBGFxKlAqOqhRu'); // Replace with actual client key
-    document.body.appendChild(script);
+    const productData = localStorage.getItem('selectedProduct');
+    if (productData) {
+      setProduct(JSON.parse(productData)); // Set the product from localStorage
+    }
   }, []);
-  const token = Cookies.get('token');
+
+  const image = product?.attachments;
+  const productName = product?.name || '';
+  const price = product?.price || 0;
+  const quantity = product?.quantity || 1;
+  const weight = product?.weight || 0;
+  const variants = product?.selectedOptions;
+  const totalPrice = price * quantity;
+  const shipping = selectedShipment?.price || 0;
+  const serviceFee = (1 / 100) * totalPrice;
+  const subTotalPrice = totalPrice + shipping + serviceFee;
+
+  useEffect(() => {}, [product]);
+
+  const [paymentLink, setPaymentLink] = useState('');
+
+  // const store_response = currentStore(token || "");
+  // console.log("my response store",store_response);
+
+  async function fetch_store_location() {
+    if (!product) {
+      return;
+    }
+    const response = await axios.post(apiURL + '/stores/by-product', {
+      product_id: product.id,
+    });
+
+    console.log(response);
+    return response.data;
+  }
+  const stores = fetch_store_location();
+
+  console.log('local', localStorage.getItem('order_id_response'));
+
+  const handleShipmentSelection = (shipmentData: Courier | null) => {
+    setSelectedShipment(shipmentData);
+  };
 
   async function onSubmit(
     productName: string,
     price: number,
-    quantity: number
+    quantity: number,
+    shipping: number,
+    serviceFee: number
   ) {
     try {
-      const order_response = await axios.post(apiURL + '/order/add-order', {
-        origin_contact_name: 'jack',
-        origin_contact_phone: '029319321',
-        origin_contact_email: 'jack@mail.com',
-        origin_address: 'pajeet street',
-        origin_postal_code: '12240',
-        destination_contact_name: name,
-        destination_contact_phone: phone_number,
-        destination_contact_email: email,
-        destination_address: `${detail_address}, ${province}, ${district}, ${sub_district}, ${city}`,
-        destination_postal_code: postal_code,
-        courier_company: 'jne',
-        courier_type: 'reg',
+      const order_response = await axios.put(apiURL + '/order/update-order', {
+        orderid: localStorage.getItem('order_id_response'),
+        courier_company: selectedShipment?.courier_code,
+        courier_type: selectedShipment?.courier_service_name,
         delivery_type: 'now',
         order_note: 'please be Careful',
         items: [
           {
-            name: 'pajeet food',
-            description: 'cow is sacred saar',
+            name: productName,
+            description: product?.description,
             value: price,
             quantity: quantity,
-            height: 200,
-            length: 200,
-            weight: 200,
-            width: 200,
+
+            height: product?.height,
+            length: product?.length,
+            weight: weight,
+            width: product?.width,
           },
         ],
       });
 
-      // const service_charge = (price * quantity * 1) / 100;
+      // console.log("ini response order: ",order_response.data.data.destination)
 
-      // const invoice_response = await axios.post(
-      //   apiURL + '/invoice/create-invoice',
-      //   {
-      //     status: 'pending',
-      //     prices: price * quantity,
-      //     service_charge: service_charge,
-      //     receiver_city: city,
-      //     receiver_province: province,
-      //     receiver_subDistrict: sub_district,
-      //     receiver_district: district,
-      //     receiver_phone: phone_number,
-      //     receiver_name: name,
-      //     receiver_postalCode: postal_code,
-      //     receiver_detailAddress: detail_address,
-      //     receiver_email: email,
-      //     // cartsId: 'cdqdwir39232',
-      //     userId: 'cm71m960c0007tarc0pnj62eb',
-      //     order_id: order_response.data.orderId,
-      //     // paymentsId: 'joewjfiewjfiwf',
-      //     // courierId: 'wqeijeiqejei',
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `bearer ${token}`,
-      //       'Content-Type': 'application/json',
-      //     },
-      //   }
-      // );
+      async function fetch_user_email() {
+        const response = await axios.post(apiURL + '/order/get-email', {
+          id_order: order_response.data.orderId,
+        });
 
-      // const invoice_history_response = await axios.post(
-      //   apiURL + '/invoice-history/create-invoice-history',
-      //   {
-      //     invoice_id: invoice_response.data.invoice_created.id,
-      //   }
-      // );
-      // console.log('invoice_history created: ', invoice_history_response.data);
+        console.log(response);
+        return response.data;
+      }
+      const email_fetch = fetch_user_email();
+
+      console.log('Store ID:', (await stores).store_id?.id);
+
+      const invoice_response = await axios.post(
+        apiURL + '/invoice/create-invoice',
+        {
+          status: 'pending',
+          prices: Math.floor(price * quantity + shipping + serviceFee),
+          receiver_city: order_response.data.data.destination.city_name,
+          receiver_province: order_response.data.data.destination.province_name,
+          receiver_district: order_response.data.data.destination.district_name,
+          receiver_phone: order_response.data.data.destination.contact_phone,
+          receiver_name: order_response.data.data.destination.contact_name,
+          receiver_postalCode:
+            order_response.data.data.destination.postal_code.toString(),
+          receiver_detailAddress: order_response.data.data.destination.address,
+          receiver_email: (await email_fetch).data_response.destination_email,
+          storesId: (await stores).store_id.id,
+          order_id: order_response.data.data.id,
+        },
+        {
+          headers: {
+            // Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('invoice response: ', invoice_response);
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: invoice_response.data.invoice_created.id,
+        }
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
 
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',
@@ -124,42 +169,28 @@ export default function CheckoutProduct() {
           productName,
           price,
           quantity,
+          shipment: shipping,
+          service_charge: serviceFee,
         },
         {
           headers: {
-            Authorization: `bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
       );
 
-      const snapToken = response.data.token; // Expect snapToken from backend
+      // console.log("midtrans response: ", response);
+
+      const snapToken = response.data.token.token; // Expect snapToken from backend
+      const redirect_pay = response.data.token.redirect_url;
       console.log(snapToken);
-      if (window.snap) {
-        window.snap.pay(snapToken, {
-          onSuccess: async function (result) {
-            try {
-              console.log('Payment Success:', result);
-              alert('Payment successful!');
-            } catch (error) {
-              console.error('Error processing payment:', error);
-              // Handle error appropriately
-            }
-          },
-          onPending: function (result) {
-            console.log('Payment Pending:', result);
-            alert('Payment pending. Complete the payment to continue.');
-          },
-          onError: function (result) {
-            console.log('Payment Error:', result);
-            alert('Payment failed. Try again.');
-          },
-          onClose: function () {
-            alert('Payment window closed.');
-          },
-        });
+      console.log(redirect_pay);
+
+      if (redirect_pay) {
+        setPaymentLink(redirect_pay); // Store the link in state
+        alert('payment link created');
       } else {
-        alert('Midtrans SDK not loaded.');
+        alert('Failed to generate payment link.');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -171,85 +202,142 @@ export default function CheckoutProduct() {
       }
     }
   }
+  useEffect(() => {
+    const IwillHaveOrder = async () => {
+      const orderId = localStorage.getItem('order_id_response');
+
+      if (!orderId) {
+        console.error('Order ID is missing in localStorage.');
+        return;
+      }
+
+      try {
+        const getOrderResponse = await axios.get(apiURL + `/order/${orderId}`);
+        setResponseOrder(getOrderResponse.data.order);
+        return getOrderResponse.data.order;
+      } catch (error) {
+        console.error('Error retrieving the order:', error);
+      }
+    };
+
+    IwillHaveOrder();
+  }, []);
+
+  useEffect(() => {
+    const getEmail = async () => {
+      const orderId = localStorage.getItem('order_id_response');
+      try {
+        const response_email = await axios.post(
+          apiURL + `/order/get-email`,
+          {
+            id_order: orderId,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        // console.log(response_email);
+        setEmail_user(response_email.data);
+        return response_email.data;
+      } catch (error) {
+        console.log('error getting email.', error);
+      }
+    };
+
+    getEmail();
+  }, []);
+
+  // console.log("my email",email_user);
+
+  // console.log(responseOrder)
+
+  // console.log("mee: ",responseOrder.destination?.contact_name)
+
+  console.log('response order:', responseOrder);
+
+  const courierImages: { [key: string]: string } = {
+    gojek:
+      'https://cdn.antaranews.com/cache/1200x800/2020/10/03/Gojek-simbol.jpg',
+    grab: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/74/e0/4a/74e04a86-94bd-fc99-d853-836fcbfa00bf/GrabIcon-0-0-1x_U007emarketing-0-5-0-0-85-220.png/1200x630wa.png',
+    jne: 'https://asset.kompas.com/crops/b69bSXp1n7COYJrBlDdB5nFZDZ0=/87x58:785x523/1200x800/data/photo/2019/06/01/431914915.jpg',
+    jnt: 'https://upload.wikimedia.org/wikipedia/commons/3/35/Logo_J%26T_Merah_Square.jpg',
+    tiki: 'https://www.julo.co.id/sites/default/files/2024-10/franchise%20TIKI.webp',
+  };
+
   return (
     <Box p="0" m="0">
       <Box p="2" m="5px" bg="white">
         <Text fontSize="20px" fontWeight="600">
           Checkout Product
         </Text>
+
         <HStack mt="3" gap="10">
-          <Box
-            w="60%"
-            h="full"
-            borderWidth="1px"
-            borderColor="grey"
-            borderRadius="10px"
-          >
-            <Box p="3">
-              <Text>Shipping Information</Text>
-              <HStack w="full">
-                <VStack w="50%">
-                  <Field textAlign="left" w="full" required label="Nama">
-                    <Input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </Field>
-                </VStack>
-                <VStack w="50%">
-                  <Field textAlign="left" w="full" required label="Email">
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </Field>
-                </VStack>
+          <Box w="60%" h="full" spaceY={5}>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <HStack
+                w={'full'}
+                display={'flex'}
+                justifyContent={'space-between'}
+              >
+                <Text fontSize={'20px'} fontWeight="600">
+                  Buyer Informations
+                </Text>
+                <DialogDataBuyer />
               </HStack>
-              <VStack w="full">
-                <Field textAlign="left" w="full" required label="Phone Number">
-                  <Input
-                    type="number"
-                    value={phone_number}
-                    onChange={(e) => setPhone_number(e.target.value)}
+              <HStack>
+                <Text fontWeight={'500'}>
+                  {responseOrder.destination?.contact_name}
+                </Text>{' '}
+                |<Text>{responseOrder.destination?.contact_phone}</Text>
+              </HStack>
+              <Text>{email_user.data_response?.destination_email}</Text>
+              <Text>{responseOrder.destination?.address}</Text>
+              <Text>{responseOrder.destination?.postal_code}</Text>
+            </Box>
+
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <Text fontSize={'20px'} fontWeight="600">
+                Detail Shipment
+              </Text>
+              <HStack>
+                {selectedShipment && (
+                  <Image
+                    src={courierImages[selectedShipment.courier_code]}
+                    boxSize="50px"
+                    alt={`${selectedShipment.courier_service_name} logo`}
                   />
-                </Field>
-              </VStack>
-              <Field textAlign="left" w="full" required label="Province">
-                <Input
-                  value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                />
-              </Field>
-
-              <Field textAlign="left" w="full" required label="City">
-                <Input value={city} onChange={(e) => setCity(e.target.value)} />
-              </Field>
-
-              <Field textAlign="left" w="full" required label="District">
-                <Input
-                  value={district}
-                  onChange={(e) => setDistrict(e.target.value)}
-                />
-              </Field>
-              <Field textAlign="left" w="full" required label="Subdistrict">
-                <Input
-                  value={sub_district}
-                  onChange={(e) => setSub_district(e.target.value)}
-                />
-              </Field>
-              <Field textAlign="left" w="full" required label="Postal Code">
-                <Input
-                  type="number"
-                  value={postal_code}
-                  onChange={(e) => setPostal_code(e.target.value)}
-                />
-              </Field>
-              <Field textAlign="left" w="full" required label="Detail Address">
+                )}
+                {selectedShipment && (
+                  <HStack
+                    mt="4"
+                    display={'flex'}
+                    w={'full'}
+                    justifyContent={'space-between'}
+                  >
+                    <Box>
+                      <Text fontSize={'xl'}>
+                        {selectedShipment.courier_service_name}
+                      </Text>
+                      <Text>
+                        {selectedShipment.courier_code} (
+                        {selectedShipment.shipment_duration_range}{' '}
+                        {selectedShipment.shipment_duration_unit})
+                      </Text>
+                    </Box>
+                    <Text fontWeight={'500'} fontSize={'3xl'}>
+                      Rp {formatPrice(selectedShipment.price)}
+                    </Text>
+                  </HStack>
+                )}
+              </HStack>
+            </Box>
+            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+              <Field label="Notes">
                 <Textarea
-                  h="150px"
-                  value={detail_address}
-                  onChange={(e) => setDetail_address(e.target.value)}
+                  placeholder="Enter your request to product"
+                  h="80px"
                 />
               </Field>
             </Box>
@@ -279,24 +367,26 @@ export default function CheckoutProduct() {
                 <Image
                   height="130px"
                   width="100px"
-                  src="https://res.cloudinary.com/demo/image/upload/v1652345767/docs/demo_image2.jpg"
+                  src={image}
                   borderRadius="5px"
                 />
                 <VStack gap="1" align="flex-start">
                   <Text fontSize="14px" fontWeight="500">
-                    HAPE BAGUS BAGUS NIH SILAHKAN DIPILIH
+                    {productName}
                   </Text>
                   <HStack w="full">
-                    <Text>Variant 1</Text>
-                    <Text>|</Text>
-                    <Text>Variant 2</Text>
-                    <Text>|</Text>
-                    <Text>Variant 3</Text>
+                    <Text color={'blue.700'}>
+                      {variants?.length} Variants Selected
+                    </Text>
                   </HStack>
                   <Text fontSize="15px" fontWeight="700" w="full">
-                    Rp 7.500.000
+                    Rp {formatPrice(price)}
                   </Text>
-                  <DialogShipmentCheckout />
+                  <Text>Quantity: {quantity}</Text>
+                  <DialogShipmentCheckout
+                    selectedShipment={selectedShipment}
+                    onSelectShipment={handleShipmentSelection}
+                  />
                   {/* <Button>Select Shipment</Button> */}
                 </VStack>
               </HStack>
@@ -313,26 +403,26 @@ export default function CheckoutProduct() {
                   <AccordionItemTrigger p="2">
                     <Flex w="full" h="full" justify="space-between">
                       <Text>Subtotal</Text>
-                      <Text>Rp 7.500.000</Text>
+                      <Text>Rp {formatPrice(subTotalPrice)}</Text>
                     </Flex>
                   </AccordionItemTrigger>
                   <AccordionItemContent>
                     <Box w="full" h="full" p="2">
                       <Flex w="full" h="full" justify="space-between">
                         <Text>Item Price</Text>
-                        <Text>Rp 7.500.000</Text>
+                        <Text>Rp {formatPrice(totalPrice)}</Text>
                       </Flex>
                     </Box>
                     <Box w="full" h="full" p="2">
                       <Flex w="full" h="full" justify="space-between">
                         <Text>Shipping subtotal</Text>
-                        <Text>Rp 7.500.000</Text>
+                        <Text>Rp {formatPrice(shipping)}</Text>
                       </Flex>
                     </Box>
                     <Box w="full" h="full" p="2">
                       <Flex w="full" h="full" justify="space-between">
                         <Text>Buyer Service Fee(1%)</Text>
-                        <Text>Rp 7.500.000</Text>
+                        <Text>Rp {formatPrice(serviceFee)}</Text>
                       </Flex>
                     </Box>
                   </AccordionItemContent>
@@ -352,16 +442,25 @@ export default function CheckoutProduct() {
                 bgColor="#2400FE"
                 color="white"
                 onClick={() =>
-                  onSubmit(
-                    // Replace with dynamic order ID
-                    'hp murah', // Replace with dynamic product name
-                    800000, // Replace with dynamic price
-                    2 // Replace with dynamic quantity
-                  )
+                  onSubmit(productName, price, quantity, shipping, serviceFee)
                 }
               >
                 Checkout Now
               </Button>
+
+              {paymentLink && (
+                <Box mt="4" p="2" bg="gray.100" borderRadius="md">
+                  <Text fontWeight="bold">Payment Link:</Text>
+                  <a
+                    href={paymentLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'blue', textDecoration: 'underline' }}
+                  >
+                    Click Here to Pay
+                  </a>
+                </Box>
+              )}
             </Box>
           </Box>
         </HStack>

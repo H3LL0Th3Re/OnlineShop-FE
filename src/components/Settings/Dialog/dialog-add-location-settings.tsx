@@ -12,23 +12,31 @@ import {
 } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/hooks/authstore';
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMapEvents,
-} from 'react-leaflet';
+
 import {
   useMutation,
   UseMutationResult,
   useQueryClient,
 } from '@tanstack/react-query';
 import axios from 'axios';
+
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { FaLocationDot } from 'react-icons/fa6';
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
+
 import { apiURL } from '@/utils/api-url';
 // interface DialogAddLocationProps {
 //   onAddLocation: (newLocation: any) => void; // Tambahkan callback
 // }
+
 
 interface DropdownOption {
   label: string;
@@ -36,9 +44,10 @@ interface DropdownOption {
   postCode?: string;
 }
 
-// export default function DialogAddLocation({
-//   onAddLocation,
-// }: DialogAddLocationProps) {
+interface DataProps {
+  name: string;
+  code: string;
+}
 
 export default function DialogAddLocation() {
   const [position, setPosition] = useState<{ lat: number; lng: number } | null>(
@@ -48,7 +57,7 @@ export default function DialogAddLocation() {
   const [cities, setCities] = useState<DropdownOption[]>([]);
   const [districts, setDistricts] = useState<DropdownOption[]>([]);
   const [villages, setVillages] = useState<DropdownOption[]>([]);
-  const [postalCodes, setPostalCodes] = useState<DropdownOption[]>([]);
+  const [, setPostalCodes] = useState<DropdownOption[]>([]);
   const [locationName, setLocationName] = useState<string>('');
   const [locationAddress, setLocationAddress] = useState<string>('');
   const queryClient = useQueryClient();
@@ -62,10 +71,10 @@ export default function DialogAddLocation() {
   );
   const { token } = useAuthStore();
 
-  const getProvinceLabel = (value: string | null) => {
-    const province = provinces.find((prov) => prov.value === value);
-    return province ? province.label : null;
-  };
+  // const getProvinceLabel = (value: string | null) => {
+  //   const province = provinces.find((prov) => prov.value === value);
+  //   return province ? province.label : null;
+  // };
 
   const getLabelByValue = (options: DropdownOption[], value: string | null) => {
     const option = options.find((opt) => opt.value === value);
@@ -90,7 +99,7 @@ export default function DialogAddLocation() {
           }
           const data = await response.json();
           setProvinces(
-            data.data.map((prov: any) => ({
+            data.data.map((prov: DataProps) => ({
               label: prov.name,
               value: prov.code,
             }))
@@ -122,7 +131,7 @@ export default function DialogAddLocation() {
           // Memastikan data dikirim sesuai dengan format yang diinginkan
           if (data?.data) {
             setCities(
-              data.data.map((city: any) => ({
+              data.data.map((city: DataProps) => ({
                 label: city.name, // Menampilkan nama kota
                 value: city.code, // Menyimpan kode kota
               }))
@@ -160,7 +169,7 @@ export default function DialogAddLocation() {
           if (data?.data) {
             setDistricts(
               // Mengubah setCities menjadi setDistricts
-              data.data.map((district: any) => ({
+              data.data.map((district: DataProps) => ({
                 label: district.name, // Menampilkan nama kecamatan
                 value: district.code, // Menyimpan kode kecamatan
               }))
@@ -218,27 +227,46 @@ export default function DialogAddLocation() {
     }
   }, [selectedDistrict, token]);
 
-  function LocationMarker() {
-    const map = useMapEvents({
-      click() {
-        map.locate();
-      },
-      locationfound(e) {
-        setPosition(e.latlng); // Simpan posisi
-        console.log('Latitude:', e.latlng.lat, 'Longitude:', e.latlng.lng); // Log koordinat
-        map.flyTo(e.latlng, map.getZoom());
-      },
-    });
+  const handleGetLocation = () => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setPosition({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          console.log('Latitude:', position.coords.latitude);
+          console.log('Longitude:', position.coords.longitude);
+        },
+        (error) => {
+          console.error('Error getting location:', error.message);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+  // function LocationMarker() {
+  //   const map = useMapEvents({
+  //     click() {
+  //       map.locate();
+  //     },
+  //     locationfound(e) {
+  //       setPosition(e.latlng); // Simpan posisi
+  //       console.log('Latitude:', e.latlng.lat, 'Longitude:', e.latlng.lng); // Log koordinat
+  //       map.flyTo(e.latlng, map.getZoom());
+  //     },
+  //   });
 
-    return position === null ? null : (
-      <Marker position={position}>
-        <Popup>
-          Latitude: {position.lat} <br />
-          Longitude: {position.lng}
-        </Popup>
-      </Marker>
-    );
-  }
+  //   return position === null ? null : (
+  //     <Marker position={position}>
+  //       <Popup>
+  //         Latitude: {position.lat} <br />
+  //         Longitude: {position.lng}
+  //       </Popup>
+  //     </Marker>
+  //   );
+  // }
 
   interface LocationData {
     name: string;
@@ -506,13 +534,11 @@ export default function DialogAddLocation() {
               <Text fontWeight="600" fontSize="15px" mb="7px">
                 Pinpoint Lokasi*
               </Text>
+              <Button colorScheme="blue" onClick={handleGetLocation}>
+                <FaLocationDot size="15px" /> Get My Location
+              </Button>
 
-              <Box
-                borderRadius="7px"
-                h="400px"
-                w="full"
-                bg="blue"
-              >
+              {/* <Box borderRadius="7px" h="400px" w="full" bg="blue">
                 <MapContainer
                   center={{ lat: -6.2, lng: 106.8 }}
                   zoom={15}
@@ -521,10 +547,22 @@ export default function DialogAddLocation() {
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright"></a> '
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
+                  /> 
                   <LocationMarker />
                 </MapContainer>
-              </Box>
+              </Box> */}
+
+              {/* <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[51.505, -0.09]}>
+              <Popup>
+                A pretty CSS3 popup. <br /> Easily customizable.
+              </Popup>
+            </Marker>
+          </MapContainer> */}
 
               <Text fontWeight="400" fontSize="13px" mb="7px">
                 Tandai lokasi untuk mempermudah pemintaan pickup kurir{' '}

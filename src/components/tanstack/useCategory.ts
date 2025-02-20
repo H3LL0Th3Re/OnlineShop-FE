@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { CategoryDisplay } from '@/types/categories';
-import { getAllCategory } from '@/features/dashboard/services/category-services';
+import {
+  getAllCategory,
+  getCategoryByIdService,
+} from '@/features/dashboard/services/category-services';
 
 export const useCategories = (token: string) => {
   return useQuery({
@@ -30,5 +33,13 @@ export const useFilterCategories = (token: string) => {
     queryKey: ['Categories'],
     queryFn: () => getAllCategory.getAllCategories(token),
     select: (data) => data.categories,
+  });
+};
+
+export const useCategoryById = (categoryId: string) => {
+  return useQuery({
+    queryKey: ['category', categoryId],
+    queryFn: () => getCategoryByIdService(categoryId),
+    enabled: !!categoryId,
   });
 };
