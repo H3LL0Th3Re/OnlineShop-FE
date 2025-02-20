@@ -20,9 +20,14 @@ export interface Product {
 }
 
 export interface Checkout_Product {
+  id: string;
   price: number;
   quantity: number;
+  description: string;
   weight: number;
+  width: number;
+  length: number;
+  height: number;
   selectedOptions: string;
   name: string;
   attachments: string;
@@ -65,4 +70,13 @@ export interface VariantOption {
   name: string;
   variantId: string;
   values: string[]; // Adjust based on your actual structure
+}
+
+// Contoh definisi ProductType
+export interface ProductType {
+  id: string;
+  name: string;
+  price: number;
+  stock: number;
+  variant_combinations?: Variant_option_values[];
 }

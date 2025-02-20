@@ -77,7 +77,9 @@ export default function DetailProduct() {
     setQuantity(quantity + 1);
   };
   const decreaseQty = () => {
-    setQuantity(quantity - 1);
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
   };
 
   const nextImage = () => {
@@ -102,11 +104,19 @@ export default function DetailProduct() {
         {!product && <Loading />}
         {product && (
           <HStack w="full" h="full" gap="6" mt="20px">
-            <Box w="60%" h="full" position="sticky" top="0" left="0">
+            <Box
+              w="60%"
+              h="full"
+              position="sticky"
+              top="0"
+              left="0"
+              display={'flex'}
+              justifyContent={'center'}
+            >
               {imageUrls.length > 0 && (
                 <Image
                   h="full"
-                  width={'auto'}
+                  width={'500px'}
                   src={imageUrls[currentImageIndex]}
                   alt="Product Image"
                 />
@@ -274,17 +284,7 @@ export default function DetailProduct() {
                   </AccordionItemContent>
                 </AccordionItem>
               </AccordionRoot>
-              <HStack w="full" mt="15px">
-                <Button
-                  w="50%"
-                  p="7"
-                  borderWidth="2px"
-                  borderColor="black"
-                  bg="white"
-                  color="black"
-                >
-                  Add to Cart
-                </Button>
+              <HStack w="full" mt="15px" justify={'center'}>
                 <Button w="50%" p="7" bgColor="#5F2EEA" onClick={handleBuyNow}>
                   Buy it Now
                 </Button>

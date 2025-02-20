@@ -22,20 +22,22 @@ import {
 import axios from 'axios';
 // import { useState } from 'react';
 import { DialogDataBuyer } from '@/components/dialog-data-buyer';
-import { currentStore } from '@/features/get-store';
+
+// import { currentStore } from '@/features/get-store';
 import { Checkout_Product } from '@/types/product-type';
 import { formatPrice } from '@/utils/format-price';
-import Cookies from 'js-cookie';
+
 import 'midtrans-snap';
 import { useEffect, useState } from 'react';
 import { RiShoppingBag4Line } from 'react-icons/ri';
-// import { NumberDomain } from 'recharts/types/util/types';
 
 export default function CheckoutProduct() {
   const [responseOrder, setResponseOrder] = useState<any>('');
+  const [email_user, setEmail_user] = useState<any>('');
   const [selectedShipment, setSelectedShipment] = useState<Courier | null>(
     null
   );
+
   const [product, setProduct] = useState<Checkout_Product | null>(null);
 
   useEffect(() => {
@@ -60,9 +62,23 @@ export default function CheckoutProduct() {
 
   const [paymentLink, setPaymentLink] = useState('');
 
-  const token = Cookies.get('token');
-  const store_response = currentStore(token || '');
-  console.log('my response store', store_response);
+  // const store_response = currentStore(token || "");
+  // console.log("my response store",store_response);
+
+  async function fetch_store_location() {
+    if (!product) {
+      return;
+    }
+    const response = await axios.post(apiURL + '/stores/by-product', {
+      product_id: product.id,
+    });
+
+    console.log(response);
+    return response.data;
+  }
+  const stores = fetch_store_location();
+
+  console.log('local', localStorage.getItem('order_id_response'));
 
   const handleShipmentSelection = (shipmentData: Courier | null) => {
     setSelectedShipment(shipmentData);
@@ -76,8 +92,6 @@ export default function CheckoutProduct() {
     serviceFee: number
   ) {
     try {
-      // console.log("draft order id", localStorage.getItem("order_id_response"))
-
       const order_response = await axios.put(apiURL + '/order/update-order', {
         orderid: localStorage.getItem('order_id_response'),
         courier_company: selectedShipment?.courier_code,
@@ -87,24 +101,66 @@ export default function CheckoutProduct() {
         items: [
           {
             name: productName,
-            description: 'cow is sacred saar',
+            description: product?.description,
             value: price,
             quantity: quantity,
-            height: 0,
-            length: 0,
+
+            height: product?.height,
+            length: product?.length,
             weight: weight,
-            width: 0,
+            width: product?.width,
           },
         ],
       });
 
-      console.log('order:', order_response);
+      // console.log("ini response order: ",order_response.data.data.destination)
 
-      // if (formData) {
-      //   axios.post("http://localhost:3000/api/save-data", JSON.stringify(formData))
-      //     .then(response => console.log("Data sent successfully:", response.data))
-      //     .catch(error => console.error("Error sending data:", error));
-      // }
+      async function fetch_user_email() {
+        const response = await axios.post(apiURL + '/order/get-email', {
+          id_order: order_response.data.orderId,
+        });
+
+        console.log(response);
+        return response.data;
+      }
+      const email_fetch = fetch_user_email();
+
+      console.log('Store ID:', (await stores).store_id?.id);
+
+      const invoice_response = await axios.post(
+        apiURL + '/invoice/create-invoice',
+        {
+          status: 'pending',
+          prices: Math.floor(price * quantity + shipping + serviceFee),
+          receiver_city: order_response.data.data.destination.city_name,
+          receiver_province: order_response.data.data.destination.province_name,
+          receiver_district: order_response.data.data.destination.district_name,
+          receiver_phone: order_response.data.data.destination.contact_phone,
+          receiver_name: order_response.data.data.destination.contact_name,
+          receiver_postalCode:
+            order_response.data.data.destination.postal_code.toString(),
+          receiver_detailAddress: order_response.data.data.destination.address,
+          receiver_email: (await email_fetch).data_response.destination_email,
+          storesId: (await stores).store_id.id,
+          order_id: order_response.data.data.id,
+        },
+        {
+          headers: {
+            // Authorization: `bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log('invoice response: ', invoice_response);
+
+      const invoice_history_response = await axios.post(
+        apiURL + '/invoice-history/create-invoice-history',
+        {
+          invoice_id: invoice_response.data.invoice_created.id,
+        }
+      );
+      console.log('invoice_history created: ', invoice_history_response.data);
 
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',
@@ -118,11 +174,12 @@ export default function CheckoutProduct() {
         },
         {
           headers: {
-            Authorization: `bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
       );
+
+      // console.log("midtrans response: ", response);
 
       const snapToken = response.data.token.token; // Expect snapToken from backend
       const redirect_pay = response.data.token.redirect_url;
@@ -165,6 +222,39 @@ export default function CheckoutProduct() {
 
     IwillHaveOrder();
   }, []);
+
+  useEffect(() => {
+    const getEmail = async () => {
+      const orderId = localStorage.getItem('order_id_response');
+      try {
+        const response_email = await axios.post(
+          apiURL + `/order/get-email`,
+          {
+            id_order: orderId,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        // console.log(response_email);
+        setEmail_user(response_email.data);
+        return response_email.data;
+      } catch (error) {
+        console.log('error getting email.', error);
+      }
+    };
+
+    getEmail();
+  }, []);
+
+  // console.log("my email",email_user);
+
+  // console.log(responseOrder)
+
+  // console.log("mee: ",responseOrder.destination?.contact_name)
+
   console.log('response order:', responseOrder);
 
   const courierImages: { [key: string]: string } = {
@@ -182,7 +272,8 @@ export default function CheckoutProduct() {
         <Text fontSize="20px" fontWeight="600">
           Checkout Product
         </Text>
-        <HStack mt="3" gap="10" display={'flex'} alignItems={'flex-start'}>
+
+        <HStack mt="3" gap="10">
           <Box w="60%" h="full" spaceY={5}>
             <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
               <HStack
@@ -201,10 +292,11 @@ export default function CheckoutProduct() {
                 </Text>{' '}
                 |<Text>{responseOrder.destination?.contact_phone}</Text>
               </HStack>
-              <Text>{responseOrder.destination?.contact_email}</Text>
+              <Text>{email_user.data_response?.destination_email}</Text>
               <Text>{responseOrder.destination?.address}</Text>
               <Text>{responseOrder.destination?.postal_code}</Text>
             </Box>
+
             <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
               <Text fontSize={'20px'} fontWeight="600">
                 Detail Shipment
