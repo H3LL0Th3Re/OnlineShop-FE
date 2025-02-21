@@ -28,7 +28,7 @@ import { useAuthStore } from '@/hooks/authstore';
 import axios from 'axios';
 import { useFetchTransactionStore } from '@/components/tanstack/useTransactionList';
 import { formatDateString } from '@/utils/date-format';
-const apiURL = 'http://localhost:3000/api';
+import { apiURL } from '@/utils/api-url';
 
 interface StatWidgetProps {
   icon: React.ComponentType<LucideProps>;
