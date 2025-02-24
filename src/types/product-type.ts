@@ -20,7 +20,7 @@ export interface Product {
 }
 
 export interface Checkout_Product {
-  id: string
+  id: string;
   price: number;
   quantity: number;
   description: string;

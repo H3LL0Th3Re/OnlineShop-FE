@@ -10,6 +10,7 @@ import { Link } from 'react-router';
 import Swal from 'sweetalert2';
 import DialogAddLocation from './Dialog/dialog-add-location-settings';
 import DialogEditLocation from './Dialog/dialog-edit-location-settings';
+import { apiURL } from '@/utils/api-url';
 
 export default function LocationSetting() {
   const { token } = useAuthStore();
@@ -35,7 +36,7 @@ export default function LocationSetting() {
   });
 
   const fetchLocations = async (token: string) => {
-    const response = await axios.get('http://localhost:3000/api/locations', {
+    const response = await axios.get(apiURL + '/locations', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -44,7 +45,7 @@ export default function LocationSetting() {
   };
 
   const deleteLocation = async (id: string, token: string) => {
-    return await axios.delete(`http://localhost:3000/api/locations/${id}`, {
+    return await axios.delete(apiURL + `/locations/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
