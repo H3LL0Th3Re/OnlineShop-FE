@@ -73,7 +73,7 @@ export default function CheckoutProduct() {
       product_id: product.id,
     });
 
-    console.log(response);
+    // console.log(response);
     return response.data;
   }
   const stores = fetch_store_location();
@@ -120,12 +120,12 @@ export default function CheckoutProduct() {
           id_order: order_response.data.orderId,
         });
 
-        console.log(response);
+        // console.log(response);
         return response.data;
       }
       const email_fetch = fetch_user_email();
 
-      console.log('Store ID:', (await stores).store_id?.id);
+      // console.log('Store ID:', (await stores).store_id?.id);
 
       const invoice_response = await axios.post(
         apiURL + '/invoice/create-invoice',
@@ -255,7 +255,7 @@ export default function CheckoutProduct() {
 
   // console.log("mee: ",responseOrder.destination?.contact_name)
 
-  console.log('response order:', responseOrder);
+  // console.log('response order:', responseOrder);
 
   const courierImages: { [key: string]: string } = {
     gojek:
@@ -267,15 +267,15 @@ export default function CheckoutProduct() {
   };
 
   return (
-    <Box p="0" m="0">
-      <Box p="2" m="5px" bg="white">
+    <Box p="0" m="0" bg={'blackAlpha.100'} w={'full'} h={'100vh'}>
+      <Box p="5">
         <Text fontSize="20px" fontWeight="600">
           Checkout Product
         </Text>
 
-        <HStack mt="3" gap="10">
+        <HStack mt="3" gap="10" alignItems={'flex-start'}>
           <Box w="60%" h="full" spaceY={5}>
-            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+            <Box p={3} shadow={'sm'} bg={'white'} borderRadius="10px">
               <HStack
                 w={'full'}
                 display={'flex'}
@@ -297,7 +297,7 @@ export default function CheckoutProduct() {
               <Text>{responseOrder.destination?.postal_code}</Text>
             </Box>
 
-            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+            <Box p={3} shadow={'sm'} bg={'white'} borderRadius="10px">
               <Text fontSize={'20px'} fontWeight="600">
                 Detail Shipment
               </Text>
@@ -333,7 +333,7 @@ export default function CheckoutProduct() {
                 )}
               </HStack>
             </Box>
-            <Box p={3} borderWidth="1px" borderColor="grey" borderRadius="10px">
+            <Box p={3} shadow={'sm'} bg={'white'} borderRadius="10px">
               <Field label="Notes">
                 <Textarea
                   placeholder="Enter your request to product"
@@ -343,17 +343,18 @@ export default function CheckoutProduct() {
             </Box>
           </Box>
 
-          <Box
-            w="40%"
-            h="fit"
-            borderWidth="1px"
-            borderColor="black"
-            borderRadius="10px"
-          >
-            <Box bg="grey" borderRadius="10px" borderBottomRadius="0px">
-              <HStack p="3">
-                <RiShoppingBag4Line />
-                <Text>Order</Text>
+          <Box w="40%" h="fit" shadow={'sm'} bg={'white'} borderRadius="10px">
+            <Box>
+              <HStack
+                p="3"
+                m={'5px'}
+                borderBottomWidth={'1px'}
+                borderColor={'black'}
+              >
+                <RiShoppingBag4Line size={'40'} />
+                <Text fontSize={'2xl'} fontWeight={'500'}>
+                  Order
+                </Text>
               </HStack>
             </Box>
             <Box
@@ -428,14 +429,6 @@ export default function CheckoutProduct() {
                   </AccordionItemContent>
                 </AccordionItem>
               </AccordionRoot>
-            </Box>
-            <Box m="2px" p="2">
-              <Field label="Notes">
-                <Textarea
-                  placeholder="Enter your request to product"
-                  h="80px"
-                />
-              </Field>
             </Box>
             <Box p="2" w="full" display="flex" justifyContent="flex-end">
               <Button
