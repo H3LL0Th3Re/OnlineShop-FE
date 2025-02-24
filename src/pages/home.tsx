@@ -1,4 +1,13 @@
-import { Box, Grid, HStack, Image, Text, VStack } from '@chakra-ui/react';
+import {
+  Box,
+  Container,
+  Flex,
+  Grid,
+  HStack,
+  Image,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useQuery } from '@tanstack/react-query';
@@ -33,7 +42,40 @@ export function Home() {
   return (
     <Box>
       <Box position="sticky" top="0" right="0" overflow="auto" zIndex="2">
-        <NavbarBuyer />
+        <Box
+          py={10}
+          bgGradient="to-r"
+          gradientFrom="#CFEEFC"
+          gradientTo="#FAFAFA"
+          position="sticky"
+          top={0}
+          zIndex={1000}
+          shadow="sm"
+        >
+          <Container maxW="container.xl">
+            <Flex justify="space-between" align="center">
+              <Box w={'150px'}>
+                <Image src="/src/assets/Lakoe-Logo.png" alt="logo" />
+              </Box>
+
+              <HStack gap={8}>
+                <Text
+                  fontWeight="medium"
+                  cursor="pointer"
+                  _hover={{ color: 'brand.500' }}
+                >
+                  Home
+                </Text>
+                <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
+                  About Us
+                </Text>
+                <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
+                  Contact Us
+                </Text>
+              </HStack>
+            </Flex>
+          </Container>
+        </Box>
       </Box>
       <Box m="0" h="full" w="full" p="3">
         <Box bgColor="white" p="3" h="full" w="full">

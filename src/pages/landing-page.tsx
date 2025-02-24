@@ -66,9 +66,9 @@ function LandingPage() {
       >
         <Container maxW="container.xl">
           <Flex justify="space-between" align="center">
-            <Heading size="lg" color="brand.500">
-              LAKOE
-            </Heading>
+            <Box w={'150px'}>
+              <Image src="/src/assets/Lakoe-Logo.png" alt="logo" />
+            </Box>
 
             <HStack gap={8}>
               <Text
@@ -125,7 +125,7 @@ function LandingPage() {
                 _hover={{ transform: 'scale(1.05)' }}
                 _active={{ transform: 'scale(0.95)' }}
               >
-                Start Selling Now
+                <Link to={'/register'}>Start Selling Now</Link>
               </Button>
             </MotionBox>
 
