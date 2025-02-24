@@ -221,18 +221,22 @@ export const DialogDataBuyer = () => {
   const price = product?.price || 0;
   const quantity = product?.quantity || 1;
 
-  const store_response = currentStore(token || '');
-  console.log('my response store', store_response);
-  async function location_fetch() {
-    const location_response = await axios.get(apiURL + '/locations', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
+
+  // console.log('id produk', product_id);
+
+  // const store_response = currentStore(token, product_id);
+  // console.log("my response store", currentStore);
+  async function fetch_store_location() {
+    if (!product) {
+      return;
+    }
+    const response = await axios.post(apiURL + '/stores/by-product', {
+      product_id: product_id,
     });
 
-    console.log('lokasi store', location_response.data.location[0]);
-    return location_response.data.location[0];
+    // console.log(response);
+    return response.data;
+
   }
   const response_location = location_fetch();
 
@@ -282,6 +286,17 @@ export const DialogDataBuyer = () => {
     });
 
     localStorage.setItem('order_id_response', order_response.data.orderId);
+
+    console.log('response dari order bro', order_response.data);
+  }
+
+  async function user_store_fetch() {
+    const response = await axios.post(apiURL + '/user', {
+      storeId: (await stores).store_id.id,
+    });
+    // console.log('user res', response);
+    return response.data.user;
+
     console.log(JSON.stringify(order_response.data));
   }
 
@@ -289,12 +304,12 @@ export const DialogDataBuyer = () => {
   return (
     <DialogRoot lazyMount open={open} onOpenChange={(e) => setOpen(e.open)}>
       <DialogTrigger asChild>
-        <Button variant="outline">Open</Button>
+        <Button variant="outline">Add Info</Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Dialog Title</DialogTitle>
+          <DialogTitle>Add Informations</DialogTitle>
         </DialogHeader>
         <DialogBody>
           <Box p="3">
