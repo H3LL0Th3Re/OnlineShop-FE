@@ -7,6 +7,7 @@ import { useAuthStore } from '@/hooks/authstore';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import DialogTemplateMessage from '../components/Order/Dialog/dialog-template-message';
+import { apiURL } from '@/utils/api-url';
 
 interface Order {
   id: string;
@@ -43,7 +44,7 @@ export function Order() {
 
   // Fungsi untuk mengambil data Order
   const fetchOrders = async () => {
-    const response = await axios.get('http://localhost:3000/api/order', {
+    const response = await axios.get(apiURL + '/order', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
