@@ -24,7 +24,6 @@ import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { apiURL } from '@/utils/api-url';
 import { FaLocationDot } from 'react-icons/fa6';
 import { apiURL } from '@/utils/api-url';
 
@@ -274,9 +273,7 @@ export default function DialogAddLocation() {
   }
 
   const addLocation = async (data: LocationData) => {
-
     const response = await axios.post(apiURL + '/locations/create', data, {
-
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
