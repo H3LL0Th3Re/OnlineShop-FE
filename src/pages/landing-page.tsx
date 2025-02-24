@@ -67,7 +67,10 @@ function LandingPage() {
         <Container maxW="container.xl">
           <Flex justify="space-between" align="center">
             <Box w={'150px'}>
-              <Image src="/src/assets/Lakoe-Logo.png" alt="logo" />
+              <Image
+                src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1740373500/Lakoe_Logo_rxtafs.png"
+                alt="logo"
+              />
             </Box>
 
             <HStack gap={8}>
