@@ -12,7 +12,7 @@ import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { useQuery } from '@tanstack/react-query';
 import { getCategories } from '@/features/dashboard/get-categories';
-import NavbarBuyer from './navbarBuyer';
+// import NavbarBuyer from './navbarBuyer';
 import { useAllStore } from '@/components/tanstack/useStore';
 import { Link } from 'react-router';
 
