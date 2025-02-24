@@ -63,15 +63,12 @@ export const DialogDataBuyer = () => {
     const fetchProvinces = async () => {
       if (token) {
         try {
-          const response = await fetch(
-            `http://localhost:3000/api/locations/api/provinces`,
-            {
-              method: 'GET',
-              headers: {
-                Authorization: `Bearer ${token}`, // Menambahkan token ke header
-              },
-            }
-          );
+          const response = await fetch(`${apiURL}/locations/api/provinces`, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`, // Menambahkan token ke header
+            },
+          });
           if (!response.ok) {
             throw new Error('Failed to fetch provinces');
           }
@@ -96,7 +93,7 @@ export const DialogDataBuyer = () => {
       if (provinceCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/cities/${provinceCode}`,
+            `${apiURL}/locations/api/cities/${provinceCode}`,
             {
               method: 'GET',
               headers: {
@@ -133,7 +130,7 @@ export const DialogDataBuyer = () => {
       if (cityCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/districts/${cityCode}`,
+            `${apiURL}/locations/api/districts/${cityCode}`,
             {
               method: 'GET',
               headers: {
@@ -171,7 +168,7 @@ export const DialogDataBuyer = () => {
       if (districtCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/villages/${districtCode}`,
+            `${apiURL}/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
               headers: {
