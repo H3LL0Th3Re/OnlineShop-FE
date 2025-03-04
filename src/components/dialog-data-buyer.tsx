@@ -209,7 +209,7 @@ export const DialogDataBuyer = () => {
       product_id: product_id,
     });
 
-    // console.log(response);
+    console.log(response);
     return response.data;
   }
   const stores = fetch_store_location();
