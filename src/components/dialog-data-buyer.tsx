@@ -63,12 +63,14 @@ export const DialogDataBuyer = () => {
     const fetchProvinces = async () => {
       if (token) {
         try {
+
           const response = await fetch(`${apiURL}/locations/api/provinces`, {
             method: 'GET',
             headers: {
               Authorization: `Bearer ${token}`, // Menambahkan token ke header
             },
           });
+          
           if (!response.ok) {
             throw new Error('Failed to fetch provinces');
           }
@@ -93,7 +95,7 @@ export const DialogDataBuyer = () => {
       if (provinceCode && token) {
         try {
           const response = await fetch(
-            `${apiURL}/locations/api/cities/${provinceCode}`,
+            `http://localhost:3000/api/locations/api/cities/${provinceCode}`,
             {
               method: 'GET',
               headers: {
@@ -130,7 +132,7 @@ export const DialogDataBuyer = () => {
       if (cityCode && token) {
         try {
           const response = await fetch(
-            `${apiURL}/locations/api/districts/${cityCode}`,
+            `http://localhost:3000/api/locations/api/districts/${cityCode}`,
             {
               method: 'GET',
               headers: {
@@ -168,7 +170,7 @@ export const DialogDataBuyer = () => {
       if (districtCode && token) {
         try {
           const response = await fetch(
-            `${apiURL}/locations/api/villages/${districtCode}`,
+            `http://localhost:3000/api/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
               headers: {
@@ -261,7 +263,6 @@ export const DialogDataBuyer = () => {
       origin_contact_phone: (await stores).user.phone_number,
       origin_contact_email: (await stores).user.email,
       origin_address: `${(await stores).location_store[0].city_district}, ${(await stores).location_store[0].address}`,
-
       origin_postal_code: (await stores).location_store[0].postal_code,
       destination_contact_name: formData.name,
       destination_contact_phone: formData.phone_number,
@@ -287,6 +288,7 @@ export const DialogDataBuyer = () => {
     localStorage.setItem('order_id_response', order_response.data.orderId);
     console.log('response dari order bro', order_response.data);
   }
+
 
   // async function user_store_fetch() {
   //   const response = await axios.post(apiURL + '/user', {

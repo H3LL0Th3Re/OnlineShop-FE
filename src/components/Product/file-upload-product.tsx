@@ -1,8 +1,7 @@
 import { Box, Icon, Image, Input } from '@chakra-ui/react';
 import { useState } from 'react';
-import { FaRegFileImage } from 'react-icons/fa';
 import { CloseButton } from '../ui/close-button';
-
+import { IoImages } from 'react-icons/io5';
 interface FileUploadProductProps {
   onFileSelect: (files: File[]) => void;
 }
@@ -46,17 +45,18 @@ export const FileUploadProduct: React.FC<FileUploadProductProps> = ({
           <Box
             h="200px"
             w="200px"
-            borderWidth="3px"
+            border={'dotted'}
+            // borderWidth="3px"
             borderRadius="10px"
             display="flex"
             alignItems="center"
             justifyContent="center"
             cursor="pointer"
-            borderColor="gray.300"
+            borderColor="blackAlpha.600"
             bg="gray.100"
           >
             <Icon size={'xl'}>
-              <FaRegFileImage />
+              <IoImages />
             </Icon>
             <Input
               h="200px"
@@ -71,7 +71,7 @@ export const FileUploadProduct: React.FC<FileUploadProductProps> = ({
           </Box>
         </label>
       )}
-      <Box display="flex" flexWrap="wrap" mt={2}>
+      <Box display="flex" flexWrap="wrap">
         {previews.map((preview, index) => (
           <Box
             key={index}

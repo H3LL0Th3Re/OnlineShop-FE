@@ -23,7 +23,6 @@ import { ChevronRightIcon, ChevronLeftIcon } from 'lucide-react';
 import { Product, Variant, Variant_options } from '@/types/product-type';
 import { getProductForCheckout } from '@/features/dashboard/services/product';
 import Loading from '../Loading/loading';
-// import NavbarBuyer from '@/pages/navbarBuyer';
 
 export default function DetailProduct() {
   const { username, url } = useParams();
