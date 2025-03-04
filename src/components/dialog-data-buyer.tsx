@@ -61,45 +61,32 @@ export const DialogDataBuyer = () => {
 
   useEffect(() => {
     const fetchProvinces = async () => {
-      if (token) {
-        try {
-          const response = await fetch(`${apiURL}/locations/api/provinces`, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${token}`, // Menambahkan token ke header
-            },
-          });
-          if (!response.ok) {
-            throw new Error('Failed to fetch provinces');
-          }
-          const data = await response.json();
-          setProvinces(
-            data.data.map((prov: any) => ({
-              label: prov.name,
-              value: prov.code,
-            }))
-          );
-        } catch (error) {
-          console.error('Error fetching provinces:', error);
+      try {
+        const response = await fetch(`${apiURL}/locations/api/provinces`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch provinces');
         }
+        const data = await response.json();
+        setProvinces(
+          data.data.map((prov: any) => ({
+            label: prov.name,
+            value: prov.code,
+          }))
+        );
+      } catch (error) {
+        console.error('Error fetching provinces:', error);
       }
     };
     fetchProvinces();
-  }, [token]);
+  }, []);
 
   // Effect untuk mengambil data kota berdasarkan provinsi yang dipilih
   useEffect(() => {
     const fetchCities = async (provinceCode: string) => {
-      if (provinceCode && token) {
+      if (provinceCode) {
         try {
           const response = await fetch(
-            `${apiURL}/locations/api/cities/${provinceCode}`,
-            {
-              method: 'GET',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+            `${apiURL}/locations/api/cities/${provinceCode}`
           );
           const data = await response.json();
 
@@ -123,20 +110,14 @@ export const DialogDataBuyer = () => {
     if (formData.province) {
       fetchCities(formData.province);
     }
-  }, [formData.province, token]);
+  }, [formData.province]);
 
   useEffect(() => {
     const fetchDistricts = async (cityCode: string) => {
-      if (cityCode && token) {
+      if (cityCode) {
         try {
           const response = await fetch(
-            `${apiURL}/locations/api/districts/${cityCode}`,
-            {
-              method: 'GET',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+            `${apiURL}/locations/api/districts/${cityCode}`
           );
           const data = await response.json();
 
@@ -161,19 +142,16 @@ export const DialogDataBuyer = () => {
     if (formData.city) {
       fetchDistricts(formData.city);
     }
-  }, [formData.city, token]);
+  }, [formData.city]);
 
   useEffect(() => {
     const fetchVillages = async (districtCode: string) => {
-      if (districtCode && token) {
+      if (districtCode) {
         try {
           const response = await fetch(
             `${apiURL}/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
             }
           );
           const data = await response.json();
@@ -200,7 +178,7 @@ export const DialogDataBuyer = () => {
     if (formData.district) {
       fetchVillages(formData.district);
     }
-  }, [formData.district, token]);
+  }, [formData.district]);
 
   useEffect(() => {
     const productData = localStorage.getItem('selectedProduct');
