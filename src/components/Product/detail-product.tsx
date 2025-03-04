@@ -8,6 +8,8 @@ import {
 import {
   Box,
   Button,
+  Container,
+  Flex,
   Grid,
   HStack,
   Image,
@@ -21,7 +23,6 @@ import { ChevronRightIcon, ChevronLeftIcon } from 'lucide-react';
 import { Product, Variant, Variant_options } from '@/types/product-type';
 import { getProductForCheckout } from '@/features/dashboard/services/product';
 import Loading from '../Loading/loading';
-import NavbarBuyer from '@/pages/navbarBuyer';
 
 export default function DetailProduct() {
   const { username, url } = useParams();
@@ -98,7 +99,32 @@ export default function DetailProduct() {
 
   return (
     <Box bg="white" w="full" h="full">
-      <NavbarBuyer />
+      <Container maxW="container.xl">
+        <Flex justify="space-between" align="center">
+          <Box w={'150px'}>
+            <Image
+              src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1740373500/Lakoe_Logo_rxtafs.png"
+              alt="logo"
+            />
+          </Box>
+
+          <HStack gap={8}>
+            <Text
+              fontWeight="medium"
+              cursor="pointer"
+              _hover={{ color: 'brand.500' }}
+            >
+              Home
+            </Text>
+            <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
+              About Us
+            </Text>
+            <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
+              Contact Us
+            </Text>
+          </HStack>
+        </Flex>
+      </Container>
 
       <Box bg="white" w="full" h="full" m="0" p="3">
         {!product && <Loading />}

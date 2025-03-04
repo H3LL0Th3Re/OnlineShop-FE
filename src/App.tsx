@@ -77,11 +77,6 @@ function App() {
           Component: AddProduct,
           HydrateFallback: Fallback,
         },
-        // {
-        //   path: '/updated-product',
-        //   Component: UpdatedProduct,
-        //   HydrateFallback: Fallback,
-        // },
         {
           path: '/order',
           Component: Order,
