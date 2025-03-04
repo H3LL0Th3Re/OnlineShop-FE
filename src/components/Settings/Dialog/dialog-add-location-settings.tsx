@@ -24,6 +24,7 @@ import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { FaLocationDot } from 'react-icons/fa6';
+import { apiURL } from '@/utils/api-url';
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIcon2x,
