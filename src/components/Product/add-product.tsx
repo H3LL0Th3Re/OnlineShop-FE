@@ -24,6 +24,9 @@ import { useCreateVariantOptionValue } from '../tanstack/useVariantOptionValues'
 import { Variant, Variant_option_values } from '@/types/product-type';
 import cuid from 'cuid';
 import { IoClose } from 'react-icons/io5';
+import { currentStore } from '@/features/get-store';
+import { useQuery } from '@tanstack/react-query';
+import { Store } from '@/types/store';
 
 interface VariantOption {
   id: string;
@@ -36,6 +39,12 @@ function AddProduct() {
   const createVariantMutation = useCreateVariant(token || '');
   const createVariantOptionMutation = useCreateVariantOptions();
   const createVariantOptionValueMutation = useCreateVariantOptionValue();
+
+  const { data: store } = useQuery<Store, Error>({
+    queryKey: ['store'],
+    queryFn: () => currentStore(token || ''),
+    enabled: !!token,
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -459,11 +468,16 @@ function AddProduct() {
                 <Text fontWeight="600" fontSize="15px">
                   Product URL
                 </Text>
-                <Input
-                  placeholder="Enter your URL"
-                  onChange={handleChange}
-                  value={formData.url}
-                />
+                <Group>
+                  <InputAddon>
+                    Lakoe/{store?.name?.toLowerCase().replace(/\s+/g, '')}/
+                  </InputAddon>
+                  <Input
+                    placeholder="Enter your URL"
+                    onChange={handleChange}
+                    value={formData.url}
+                  />
+                </Group>
               </VStack>
               <VStack gap="5px" w={'full'} align="flex-start">
                 <Text fontWeight="600" fontSize="15px">
@@ -559,60 +573,68 @@ function AddProduct() {
                   w="full"
                   align="flex-start"
                 >
-                  <HStack>
+                  <HStack borderWidth={'1px'} p={1} rounded={'full'}>
                     <Text fontWeight="600" fontSize="15px">
                       Variant: {variant.name}
                     </Text>
-                    <Button
+                    <Box
                       onClick={() => handleRemoveVariant(variantIndex)}
-                      bgColor="#5F2EEA"
-                      size="xs"
+                      bg={'gray.400'}
+                      borderRadius={'full'}
+                      color={'white'}
+                      cursor={'pointer'}
                     >
-                      Remove
-                    </Button>
+                      <IoClose />
+                    </Box>
                   </HStack>
-                  <HStack>
-                    <Input
-                      placeholder="Enter option..."
-                      value={variantOptionInputs[variantIndex] || ''}
-                      onChange={(e) =>
-                        handleVariantOptionInputChange(
-                          variantIndex,
-                          e.target.value
-                        )
-                      }
-                    />
-                    <Button
-                      onClick={() => handleAddVariantOption(variantIndex)}
-                      bgColor="#5F2EEA"
+                  <HStack borderWidth={'1px'}>
+                    <HStack
+                      align="flex-start"
+                      display={'flex'}
+                      justifyContent={'center'}
+                      alignItems={'center'}
+                      pl={3}
                     >
-                      Add Option
-                    </Button>
-                  </HStack>
-                  <HStack
-                    align="flex-start"
-                    display={'flex'}
-                    justifyContent={'center'}
-                    alignItems={'center'}
-                  >
-                    {variantOptions[variantIndex]?.map((option) => (
-                      <HStack key={option.variantId}>
-                        <Text fontSize="14px">{option.name}</Text>
-                        <Button
-                          bg={'red'}
-                          borderRadius={'full'}
-                          size={'2xs'}
-                          onClick={() =>
-                            handleRemoveVariantOption(
-                              variantIndex,
-                              option.variantId
-                            )
-                          }
-                        >
-                          <IoClose />
-                        </Button>
-                      </HStack>
-                    ))}
+                      {variantOptions[variantIndex]?.map((option) => (
+                        <HStack key={option.variantId}>
+                          <Text fontSize="14px">{option.name}</Text>
+                          <Box
+                            bg={'gray.400'}
+                            borderRadius={'full'}
+                            color={'white'}
+                            cursor={'pointer'}
+                            onClick={() =>
+                              handleRemoveVariantOption(
+                                variantIndex,
+                                option.variantId
+                              )
+                            }
+                          >
+                            <IoClose />
+                          </Box>
+                        </HStack>
+                      ))}
+                    </HStack>
+                    <HStack>
+                      <Input
+                        border={'none'}
+                        outline={'none'}
+                        placeholder="Enter option..."
+                        value={variantOptionInputs[variantIndex] || ''}
+                        onChange={(e) =>
+                          handleVariantOptionInputChange(
+                            variantIndex,
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Button
+                        onClick={() => handleAddVariantOption(variantIndex)}
+                        bgColor="#5F2EEA"
+                      >
+                        Add Option
+                      </Button>
+                    </HStack>
                   </HStack>
                 </VStack>
               ))}

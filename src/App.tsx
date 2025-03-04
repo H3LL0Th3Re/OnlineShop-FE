@@ -10,7 +10,6 @@ import { Home } from './pages/home';
 import { Dashboard } from './pages/dashboard';
 import DetailProduct from './components/Product/detail-product';
 import PrivateLayout from './layouts/PrivateLayout';
-import { LandingPage } from './pages/landing-page';
 import CheckoutProduct from './pages/checkout-product';
 import AddProduct from './components/Product/add-product';
 import StoreProduct from './pages/store-product';
@@ -18,6 +17,7 @@ import { OrderDummy } from './pages/orderDummy';
 import { Order } from './pages/order';
 import previewStoreProduct from './pages/preview-store-product';
 import DashboardAdmin from './pages/dashboard-admin';
+import LandingPage from './pages/landing-page';
 
 // import UpdatedProduct from './components/Product/updated-product';
 function App() {

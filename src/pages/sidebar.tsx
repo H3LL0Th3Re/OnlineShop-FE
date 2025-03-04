@@ -1,4 +1,4 @@
-import { Flex, HStack, Spacer, Text } from '@chakra-ui/react';
+import { Box, Flex, HStack, Image, Spacer, Text } from '@chakra-ui/react';
 import { FiBox } from 'react-icons/fi';
 import { RiDashboardHorizontalLine } from 'react-icons/ri';
 import { TbSettings, TbSmartHome } from 'react-icons/tb';
@@ -22,9 +22,12 @@ const Sidebar = () => {
       h="full"
     >
       <Flex gap="4" direction={'column'} w={'80%'} h="full">
-        <Text color="#5F2EEA" fontWeight="900" fontSize="25px" mb="0">
-          LAKOE APP
-        </Text>
+        <Box w={'150px'}>
+          <Image
+            src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1740373500/Lakoe_Logo_rxtafs.png"
+            alt="logo"
+          />
+        </Box>
         {users?.role_id.id === findAdmin?.id && (
           <>
             <Link to="/dashboard-admin">
