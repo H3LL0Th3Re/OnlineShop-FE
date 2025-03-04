@@ -19,12 +19,10 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import axios from 'axios';
-
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { apiURL } from '@/utils/api-url';
 import { FaLocationDot } from 'react-icons/fa6';
 
 L.Icon.Default.mergeOptions({

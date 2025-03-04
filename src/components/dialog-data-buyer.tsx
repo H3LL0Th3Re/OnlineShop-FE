@@ -63,15 +63,14 @@ export const DialogDataBuyer = () => {
     const fetchProvinces = async () => {
       if (token) {
         try {
-          const response = await fetch(
-            `http://localhost:3000/api/locations/api/provinces`,
-            {
-              method: 'GET',
-              headers: {
-                Authorization: `Bearer ${token}`, // Menambahkan token ke header
-              },
-            }
-          );
+
+          const response = await fetch(`${apiURL}/locations/api/provinces`, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${token}`, // Menambahkan token ke header
+            },
+          });
+          
           if (!response.ok) {
             throw new Error('Failed to fetch provinces');
           }
@@ -260,11 +259,10 @@ export const DialogDataBuyer = () => {
     // console.log("Destination name:", (await response_user));
 
     const order_response = await axios.post(apiURL + '/order/add-order', {
-      origin_contact_name: (await storeUser_fetch).fullname,
-      origin_contact_phone: (await storeUser_fetch).phone_number,
-      origin_contact_email: (await storeUser_fetch).email,
+      origin_contact_name: (await stores).user.fullname,
+      origin_contact_phone: (await stores).user.phone_number,
+      origin_contact_email: (await stores).user.email,
       origin_address: `${(await stores).location_store[0].city_district}, ${(await stores).location_store[0].address}`,
-
       origin_postal_code: (await stores).location_store[0].postal_code,
       destination_contact_name: formData.name,
       destination_contact_phone: formData.phone_number,
@@ -291,14 +289,15 @@ export const DialogDataBuyer = () => {
     console.log('response dari order bro', order_response.data);
   }
 
-  async function user_store_fetch() {
-    const response = await axios.post(apiURL + '/user', {
-      storeId: (await stores).store_id.id,
-    });
-    // console.log('user res', response);
-    return response.data.user;
-  }
-  const storeUser_fetch = user_store_fetch();
+
+  // async function user_store_fetch() {
+  //   const response = await axios.post(apiURL + '/user', {
+  //     storeId: (await stores).store_id.id,
+  //   });
+  //   // console.log('user res', response);
+  //   return response.data.user;
+  // }
+  // const storeUser_fetch = user_store_fetch();
 
   // async function user_fetch(){
   //   const user_response = await axios.get(apiURL + '/user', {

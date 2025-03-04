@@ -128,7 +128,7 @@ function LandingPage() {
                 _hover={{ transform: 'scale(1.05)' }}
                 _active={{ transform: 'scale(0.95)' }}
               >
-                Start Selling Now
+                <Link to={'/register'}>Start Selling Now</Link>
               </Button>
             </MotionBox>
 
