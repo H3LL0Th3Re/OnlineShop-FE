@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Box, Flex, HStack, Text } from '@chakra-ui/react';
+import { Box, Flex, HStack, Image } from '@chakra-ui/react';
 import { Link } from 'react-router';
 
 export default function NavbarBuyer() {
@@ -11,21 +11,14 @@ export default function NavbarBuyer() {
       alignItems="center"
       w="full"
       justifyContent="center"
-      bgGradient="to-r"
-      gradientFrom="red.300"
-      gradientTo="blue.500"
+      bg={'white'}
     >
       <Flex w="full" justify="space-between" alignItems="center">
-        <Box>
-          <Text
-            color="#5F2EEA"
-            fontWeight="900"
-            fontSize="25px"
-            mb="0"
-            onClick={() => (window.location.href = '/home')}
-          >
-            LAKOE APP
-          </Text>
+        <Box w={'150px'} onClick={() => (window.location.href = '/home')}>
+          <Image
+            src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1740373500/Lakoe_Logo_rxtafs.png"
+            alt="logo"
+          />
         </Box>
 
         <Box>
@@ -41,7 +34,6 @@ export default function NavbarBuyer() {
             </Box>
           </HStack>
         </Box>
-
         <Box>
           <Button bg={'#5F2EEA'} rounded={'full'}>
             <Link to={'/register'}>Become a Seller</Link>

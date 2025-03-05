@@ -99,37 +99,55 @@ export default function DetailProduct() {
 
   return (
     <Box bg="white" w="full" h="full">
-      <Container maxW="container.xl">
-        <Flex justify="space-between" align="center">
-          <Box w={'150px'}>
-            <Image
-              src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1740373500/Lakoe_Logo_rxtafs.png"
-              alt="logo"
-            />
-          </Box>
+      <Box position="sticky" top="0" right="0" overflow="auto" zIndex="2">
+        <Box
+          py={2}
+          bg={'white'}
+          position="sticky"
+          top={0}
+          zIndex={1000}
+          shadow="sm"
+        >
+          <Container maxW="container.xl">
+            <Flex justify="space-between" align="center">
+              <Box w={'150px'}>
+                <Image
+                  src="https://res.cloudinary.com/dbavdkhmz/image/upload/v1740373500/Lakoe_Logo_rxtafs.png"
+                  alt="logo"
+                />
+              </Box>
 
-          <HStack gap={8}>
-            <Text
-              fontWeight="medium"
-              cursor="pointer"
-              _hover={{ color: 'brand.500' }}
-            >
-              Home
-            </Text>
-            <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
-              About Us
-            </Text>
-            <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
-              Contact Us
-            </Text>
-          </HStack>
-        </Flex>
-      </Container>
+              <HStack gap={8}>
+                <Text
+                  fontWeight="medium"
+                  cursor="pointer"
+                  _hover={{ color: 'brand.500' }}
+                >
+                  Home
+                </Text>
+                <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
+                  About Us
+                </Text>
+                <Text cursor="pointer" _hover={{ color: 'brand.500' }}>
+                  Contact Us
+                </Text>
+              </HStack>
+            </Flex>
+          </Container>
+        </Box>
+      </Box>
 
-      <Box bg="white" w="full" h="full" m="0" p="3">
+      <Box bg="white" w="full" h="full" m="0" pr="5">
         {!product && <Loading />}
         {product && (
-          <HStack w="full" h="full" gap="6" mt="20px">
+          <HStack
+            w="full"
+            h="full"
+            gap="6"
+            mt="20px"
+            display={'flex'}
+            align={'flex-start'}
+          >
             <Box
               w="60%"
               h="full"
@@ -170,12 +188,12 @@ export default function DetailProduct() {
                 </>
               )}
             </Box>
-            <VStack w="40%" height="90vh" p="3">
+            <VStack w="40%" height="auto" p="3" shadow={'xl'}>
               <VStack
                 w="full"
                 borderBottomWidth="1px"
                 borderColor="black"
-                p="2"
+                p="0"
               >
                 <Text fontSize="30px" fontWeight="700">
                   {product.name}
@@ -190,7 +208,7 @@ export default function DetailProduct() {
                     <div>
                       {product.priceRange &&
                       product.priceRange.min !== undefined
-                        ? `${formatPrice(product.priceRange.min)} - ${formatPrice(product.priceRange.max)}`
+                        ? `Rp ${formatPrice(product.priceRange.min)} - Rp ${formatPrice(product.priceRange.max)}`
                         : 'No price available'}
                     </div>
                   )}
@@ -253,7 +271,7 @@ export default function DetailProduct() {
                   +
                 </Button>
               </HStack>
-              <AccordionRoot collapsible defaultValue={['specification']}>
+              {/* <AccordionRoot collapsible defaultValue={['specification']}>
                 <AccordionItem value="specification">
                   <AccordionItemTrigger>
                     Product Specification
@@ -296,7 +314,7 @@ export default function DetailProduct() {
                     </HStack>
                   </AccordionItemContent>
                 </AccordionItem>
-              </AccordionRoot>
+              </AccordionRoot> */}
 
               <AccordionRoot collapsible defaultValue={['specification']}>
                 <AccordionItem value="specification">

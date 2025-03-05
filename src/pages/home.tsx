@@ -43,10 +43,8 @@ export function Home() {
     <Box>
       <Box position="sticky" top="0" right="0" overflow="auto" zIndex="2">
         <Box
-          py={10}
-          bgGradient="to-r"
-          gradientFrom="#CFEEFC"
-          gradientTo="#FAFAFA"
+          py={5}
+          bg={'white'}
           position="sticky"
           top={0}
           zIndex={1000}
