@@ -126,6 +126,7 @@ export default function CheckoutProduct() {
       const email_fetch = fetch_user_email();
 
       // console.log('Store ID:', (await stores).store_id?.id);
+      // console.log("before invoice");
 
       const invoice_response = await axios.post(
         apiURL + '/invoice/create-invoice',
@@ -141,7 +142,7 @@ export default function CheckoutProduct() {
             order_response.data.data.destination.postal_code.toString(),
           receiver_detailAddress: order_response.data.data.destination.address,
           receiver_email: (await email_fetch).data_response.destination_email,
-          storesId: (await stores).store_id.id,
+          storesId: (await stores).store.id,
           order_id: order_response.data.data.id,
         },
         {
@@ -151,7 +152,7 @@ export default function CheckoutProduct() {
           },
         }
       );
-
+      // console.log("after invoice");
       console.log('invoice response: ', invoice_response);
 
       const invoice_history_response = await axios.post(
@@ -161,6 +162,12 @@ export default function CheckoutProduct() {
         }
       );
       console.log('invoice_history created: ', invoice_history_response.data);
+      // console.log(order_response.data.orderId);
+      // console.log(productName);
+      // console.log(price);
+      // console.log(quantity);
+      // console.log(shipping);
+      // console.log(serviceFee);
 
       const response = await axios.post(
         apiURL + '/transaction/create-transaction',

@@ -111,8 +111,8 @@ export const DialogDataBuyer = () => {
       fetchCities(formData.province);
     }
   }, [formData.province]);
-    
- useEffect(() => {
+
+  useEffect(() => {
     const fetchDistricts = async (cityCode: string) => {
       if (cityCode) {
         try {
@@ -144,13 +144,12 @@ export const DialogDataBuyer = () => {
     }
   }, [formData.city]);
 
-
   useEffect(() => {
     const fetchVillages = async (districtCode: string) => {
       if (districtCode) {
         try {
           const response = await fetch(
-            `${apiURL}/api/locations/api/villages/${districtCode}`,
+            `${apiURL}/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
             }
@@ -234,7 +233,7 @@ export const DialogDataBuyer = () => {
   ) {
     console.log('Form Data Before Sending:', formData);
     // console.log("Destination name:", (await response_user));
-
+    // console.log((await stores));
     const order_response = await axios.post(apiURL + '/order/add-order', {
       origin_contact_name: (await stores).user.fullname,
       origin_contact_phone: (await stores).user.phone_number,
@@ -265,7 +264,6 @@ export const DialogDataBuyer = () => {
     localStorage.setItem('order_id_response', order_response.data.orderId);
     console.log('response dari order bro', order_response.data);
   }
-
 
   // async function user_store_fetch() {
   //   const response = await axios.post(apiURL + '/user', {
