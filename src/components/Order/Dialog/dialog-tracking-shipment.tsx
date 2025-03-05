@@ -22,7 +22,7 @@ import {
   TimelineRoot,
   TimelineTitle,
 } from '../../ui/timeline';
-import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
+import { LuPackage } from 'react-icons/lu';
 import { detailOrder } from '@/types/detailOrder';
 
 interface TrackingShipmentProps {
