@@ -27,7 +27,7 @@ import {
   TimelineRoot,
   TimelineTitle,
 } from '@/components/ui/timeline';
-import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
+import { LuPackage } from 'react-icons/lu';
 import { useParams } from 'react-router';
 import axios from 'axios';
 import { apiURL } from '@/utils/api-url';
@@ -93,14 +93,14 @@ import { detailOrder } from '@/types/detailOrder';
 //   },
 // ];
 
-interface Order {
-  id: number;
-  status: string;
-  invoice: string;
-  productName: string;
-  productImage: string;
-  quantity: number;
-}
+// interface Order {
+//   id: number;
+//   status: string;
+//   invoice: string;
+//   productName: string;
+//   productImage: string;
+//   quantity: number;
+// }
 
 export function DetailOrder() {
   const { orderId } = useParams();
@@ -196,7 +196,7 @@ export function DetailOrder() {
             <Collapsible.Content>
               <Box ml={10} padding="4" borderWidth="1px" rounded={'md'}>
                 <TimelineRoot maxW="400px">
-                  {order?.courier.history.map((history, index) => (
+                  {order?.courier.history.map((history) => ( //remove "index" if not used
                     <TimelineItem>
                       <TimelineConnector>
                         <LuPackage />
