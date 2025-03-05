@@ -29,7 +29,69 @@ import {
 } from '@/components/ui/timeline';
 import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
 import { useParams } from 'react-router';
+import axios from 'axios';
+import { apiURL } from '@/utils/api-url';
 // import { getStatusColor } from '../../pages/order';
+import Cookies from 'js-cookie';
+import { useQuery } from '@tanstack/react-query';
+import { detailOrder } from '@/types/detailOrder';
+
+// const orders: Order[] = [
+//   {
+//     id: 1,
+//     status: 'Belum Dibayar',
+//     invoice: 'INV/20230809/MPL/00000289',
+//     productName: 'KAOS BASIC COTTON KENARI',
+//     productImage:
+//       'https://ecs7.tokopedia.net/img/product-1/2015/8/30/574846/574846_bc62bae2-ce97-489d-bfcc-4c14ec8d7ec1.jpg',
+//     quantity: 1,
+//   },
+//   {
+//     id: 2,
+//     status: 'Pesanan Baru',
+//     invoice: 'INV/20230809/MPL/00000345',
+//     productName: 'HOODIE OVERSIZE UNISEX',
+//     productImage:
+//       'https://patience-pno.com/cdn/shop/files/4b330d93b1504f2489eb8689d8d48457.png?v=1726327535',
+//     quantity: 2,
+//   },
+//   {
+//     id: 3,
+//     status: 'Siap Dikirim',
+//     invoice: 'INV/20230809/MPL/00000412',
+//     productName: 'TAS SELEMPANG CASUAL',
+//     productImage:
+//       'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//catalog-image/MTA-74073081/fourtyfour_fourtyfour_airfox_2-0_-_tas_selempang_pria_wanita_casual_fourtyfour_airfox_2-0-_slingbag_casual_pria_wanita_fourtyfour_airfox_2-0_full02_pfujrz85.jpg',
+//     quantity: 1,
+//   },
+//   {
+//     id: 4,
+//     status: 'Dalam Pengiriman',
+//     invoice: 'INV/20230809/MPL/00000501',
+//     productName: 'SEPATU SNEAKERS PRIA',
+//     productImage:
+//       'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1H6fQs2LSN-mg4s7FnLRPSuiukA1bVg9iTw&s',
+//     quantity: 1,
+//   },
+//   {
+//     id: 5,
+//     status: 'Pesanan Selesai',
+//     invoice: 'INV/20230809/MPL/00000678',
+//     productName: 'JAKET PARKA PRIA',
+//     productImage:
+//       'https://admincerdas.s3.ap-southeast-1.amazonaws.com/20200725/w768_1595652429_414897705--1591464448-BKR107-armykombinasi-OneSize2.jpeg',
+//     quantity: 1,
+//   },
+//   {
+//     id: 6,
+//     status: 'Dibatalkan',
+//     invoice: 'INV/20230809/MPL/00000779',
+//     productName: 'JAKET PARKA PRIA',
+//     productImage:
+//       'https://admincerdas.s3.ap-southeast-1.amazonaws.com/20200725/w768_1595652429_414897705--1591464448-BKR107-armykombinasi-OneSize2.jpeg',
+//     quantity: 1,
+//   },
+// ];
 
 interface Order {
   id: number;
@@ -40,68 +102,40 @@ interface Order {
   quantity: number;
 }
 
-const orders: Order[] = [
-  {
-    id: 1,
-    status: 'Belum Dibayar',
-    invoice: 'INV/20230809/MPL/00000289',
-    productName: 'KAOS BASIC COTTON KENARI',
-    productImage:
-      'https://ecs7.tokopedia.net/img/product-1/2015/8/30/574846/574846_bc62bae2-ce97-489d-bfcc-4c14ec8d7ec1.jpg',
-    quantity: 1,
-  },
-  {
-    id: 2,
-    status: 'Pesanan Baru',
-    invoice: 'INV/20230809/MPL/00000345',
-    productName: 'HOODIE OVERSIZE UNISEX',
-    productImage:
-      'https://patience-pno.com/cdn/shop/files/4b330d93b1504f2489eb8689d8d48457.png?v=1726327535',
-    quantity: 2,
-  },
-  {
-    id: 3,
-    status: 'Siap Dikirim',
-    invoice: 'INV/20230809/MPL/00000412',
-    productName: 'TAS SELEMPANG CASUAL',
-    productImage:
-      'https://www.static-src.com/wcsstore/Indraprastha/images/catalog/full//catalog-image/MTA-74073081/fourtyfour_fourtyfour_airfox_2-0_-_tas_selempang_pria_wanita_casual_fourtyfour_airfox_2-0-_slingbag_casual_pria_wanita_fourtyfour_airfox_2-0_full02_pfujrz85.jpg',
-    quantity: 1,
-  },
-  {
-    id: 4,
-    status: 'Dalam Pengiriman',
-    invoice: 'INV/20230809/MPL/00000501',
-    productName: 'SEPATU SNEAKERS PRIA',
-    productImage:
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1H6fQs2LSN-mg4s7FnLRPSuiukA1bVg9iTw&s',
-    quantity: 1,
-  },
-  {
-    id: 5,
-    status: 'Pesanan Selesai',
-    invoice: 'INV/20230809/MPL/00000678',
-    productName: 'JAKET PARKA PRIA',
-    productImage:
-      'https://admincerdas.s3.ap-southeast-1.amazonaws.com/20200725/w768_1595652429_414897705--1591464448-BKR107-armykombinasi-OneSize2.jpeg',
-    quantity: 1,
-  },
-  {
-    id: 6,
-    status: 'Dibatalkan',
-    invoice: 'INV/20230809/MPL/00000779',
-    productName: 'JAKET PARKA PRIA',
-    productImage:
-      'https://admincerdas.s3.ap-southeast-1.amazonaws.com/20200725/w768_1595652429_414897705--1591464448-BKR107-armykombinasi-OneSize2.jpeg',
-    quantity: 1,
-  },
-];
-
 export function DetailOrder() {
   const { orderId } = useParams();
   const orderIdNumber = orderId ? parseInt(orderId, 10) : NaN;
+  const token = Cookies.get('token');
 
-  const order = orders.find((order) => order.id === orderIdNumber);
+  const fetchDetailOrder = async (token: string) => {
+    if (isNaN(orderIdNumber)) throw new Error('Invalid order ID');
+
+    const response = await axios.get(`${apiURL}/order/${orderIdNumber}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return response.data.data;
+  };
+
+  // const fetchDetailOrder = async (token:string) => {
+  //   const response = await axios.get(apiURL + `/order/${orderId}`, {
+  //     headers: {
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   });
+
+  //   return response.data.data;
+  // }
+
+  const { data: order } = useQuery<detailOrder>({
+    queryKey: ['order'],
+    queryFn: () => fetchDetailOrder(token!),
+    enabled: !!token,
+  });
+
+  // const order = orders.find((order) => order.id === orderIdNumber);
 
   return (
     <Box>
@@ -162,41 +196,21 @@ export function DetailOrder() {
             <Collapsible.Content>
               <Box ml={10} padding="4" borderWidth="1px" rounded={'md'}>
                 <TimelineRoot maxW="400px">
-                  <TimelineItem>
-                    <TimelineConnector>
-                      <LuShip />
-                    </TimelineConnector>
-                    <TimelineContent>
-                      <TimelineTitle>Product Shipped</TimelineTitle>
-                      <TimelineDescription>13th May 2021</TimelineDescription>
-                    </TimelineContent>
-                  </TimelineItem>
-
-                  <TimelineItem>
-                    <TimelineConnector>
-                      <LuCheck />
-                    </TimelineConnector>
-                    <TimelineContent>
-                      <TimelineTitle textStyle="sm">
-                        Order Confirmed
-                      </TimelineTitle>
-                      <TimelineDescription>18th May 2021</TimelineDescription>
-                    </TimelineContent>
-                  </TimelineItem>
-
-                  <TimelineItem>
-                    <TimelineConnector>
-                      <LuPackage />
-                    </TimelineConnector>
-                    <TimelineContent>
-                      <TimelineTitle textStyle="sm">
-                        Order Delivered
-                      </TimelineTitle>
-                      <TimelineDescription>
-                        20th May 2021, 10:30am
-                      </TimelineDescription>
-                    </TimelineContent>
-                  </TimelineItem>
+                  {order?.courier.history.map((history, index) => (
+                    <TimelineItem>
+                      <TimelineConnector>
+                        <LuPackage />
+                      </TimelineConnector>
+                      <TimelineContent>
+                        <TimelineTitle textStyle="sm">
+                          {history.status}
+                        </TimelineTitle>
+                        <TimelineDescription>
+                          {history.updated_at}
+                        </TimelineDescription>
+                      </TimelineContent>
+                    </TimelineItem>
+                  ))}
                 </TimelineRoot>
               </Box>
             </Collapsible.Content>
@@ -211,7 +225,7 @@ export function DetailOrder() {
               <Text fontWeight={'medium'}>Tanggal</Text>
             </Flex>
             <Box>
-              <Text>29 Januari 2025-19:43WIB</Text>
+              <Text>{order?.delivery.datetime}</Text>
             </Box>
           </Flex>
           <Flex justify={'space-between'}>
@@ -225,7 +239,7 @@ export function DetailOrder() {
               <Icon size={'md'} color={'grey.300'}>
                 <FaRegCopy />
               </Icon>
-              <Text>{order?.invoice}</Text>
+              <Text>{order?.invoice_id}</Text>
             </Flex>
           </Flex>
           <Flex justify={'space-between'}>
@@ -239,7 +253,7 @@ export function DetailOrder() {
               <Icon size={'md'} color={'green.600'}>
                 <IoLogoWhatsapp />
               </Icon>
-              <Text>Bambang Pamungkas</Text>
+              <Text>{order?.destination.contact_name}</Text>
             </Flex>
           </Flex>
         </Box>
@@ -254,20 +268,20 @@ export function DetailOrder() {
             <Box bg={'black'} rounded="sm">
               <Image
                 src={order?.productImage}
-                alt={order?.productName}
+                alt={order?.items[0].name}
                 w={'14'}
               />
             </Box>
             <Flex pl={5} justify={'space-between'} w={'full'}>
               <Box>
-                <Text fontWeight="bold">{order?.productName}</Text>
+                <Text fontWeight="bold">{order?.items[0].name}</Text>
                 <Text fontSize="sm" color="gray.600">
-                  {order?.quantity} x Rp180.000
+                  {order?.items[0].value}
                 </Text>
               </Box>
               <Flex direction={'column'} align={'end'}>
                 <Text color="gray.600">Total Belanja</Text>
-                <Text>Rp180.000</Text>
+                <Text>{order?.items[0].value}</Text>
               </Flex>
             </Flex>
           </Flex>
@@ -284,14 +298,14 @@ export function DetailOrder() {
               {/* <Button bg={'blue.600'} rounded={'full'} fontWeight="semibold">
                   Lacak Pengiriman
                 </Button> */}
-              <TrackingShipment />
+              <TrackingShipment order={order} />
             </Box>
           </Flex>
           <Flex>
             <Text pl={9} color={'grey'} w={'56'}>
               Kurir
             </Text>
-            <Text fontWeight={'medium'}>J&T-Regular</Text>
+            <Text fontWeight={'medium'}>{order?.courier.company}</Text>
           </Flex>
           <Flex>
             <Text pl={9} color={'grey'} w={'56'}>
@@ -304,11 +318,9 @@ export function DetailOrder() {
               Alamat
             </Text>
             <Box>
-              <Text>
-                Jl. Ki Hajar Dewantoro, Kec. Ciputat, Kota Tangerang Selatan
-              </Text>
-              <Text color={'gray.600'}>082288291120</Text>
-              <Text color={'gray.600'}>Bambang Pamungkas</Text>
+              <Text>{order?.destination.address}</Text>
+              <Text color={'gray.600'}>{order?.destination.contact_phone}</Text>
+              <Text color={'gray.600'}>{order?.destination.contact_name}</Text>
             </Box>
           </Flex>
         </Box>
@@ -323,30 +335,34 @@ export function DetailOrder() {
             <Text color={'gray.600'} pl={9}>
               Total Harga (1 Barang)
             </Text>
-            <Text>Rp180.000</Text>
+            <Text>{order?.items[0].value}</Text>
           </Flex>
           <Flex gap={2} justify={'space-between'}>
             <Text color={'gray.600'} pl={9}>
               Total Ongkos Kirim (10Kg)
             </Text>
-            <Text>Rp10.000</Text>
+            <Text>{order?.courier.shipment_fee}</Text>
           </Flex>
           <Flex gap={2} justify={'space-between'}>
             <Text color={'gray.600'} pl={9}>
               Diskon
             </Text>
-            <Text>Rp0</Text>
+            <Text>0</Text>
           </Flex>
           <Flex gap={2} justify={'space-between'}>
             <Text color={'gray.600'} pl={9}>
               Biaya Layanan
             </Text>
-            <Text>Rp0</Text>
+            <Text>{(order?.items?.[0]?.value ?? 0) / 0.01}</Text>
           </Flex>
           <Box pl={9}>
             <Flex gap={2} justify={'space-between'} borderTopWidth={'1px'}>
               <Text fontWeight={'medium'}>Total Penjualan</Text>
-              <Text>Rp190.000</Text>
+              <Text>
+                {(order?.items?.[0]?.value ?? 0) +
+                  (order?.items?.[0]?.value ?? 0) / 0.01 +
+                  (order?.courier?.shipment_fee ?? 0)}
+              </Text>
             </Flex>
           </Box>
         </Box>
