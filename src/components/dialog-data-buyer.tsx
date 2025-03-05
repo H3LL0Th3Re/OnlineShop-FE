@@ -24,7 +24,7 @@ import { useEffect, useState } from 'react';
 import { Field } from '@/components/ui/field';
 
 import axios from 'axios';
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 import { apiURL } from '@/utils/api-url';
 import { Checkout_Product } from '@/types/product-type';
 
