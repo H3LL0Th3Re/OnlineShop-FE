@@ -29,7 +29,7 @@ import { apiURL } from '@/utils/api-url';
 import { Checkout_Product } from '@/types/product-type';
 
 export const DialogDataBuyer = () => {
-  const token = Cookies.get('token');
+  // const token = Cookies.get('token');
   const [product, setProduct] = useState<Checkout_Product | null>(null);
   const [formData, setFormData] = useState({
     name: '',
