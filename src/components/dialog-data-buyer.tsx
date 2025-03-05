@@ -150,7 +150,7 @@ export const DialogDataBuyer = () => {
       if (districtCode) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/villages/${districtCode}`,
+            `${apiURL}/api/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
             }
