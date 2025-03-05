@@ -23,8 +23,13 @@ import {
   TimelineTitle,
 } from '../../ui/timeline';
 import { LuCheck, LuPackage, LuShip } from 'react-icons/lu';
+import { detailOrder } from '@/types/detailOrder';
 
-export function TrackingShipment() {
+interface TrackingShipmentProps {
+  order: detailOrder | undefined;
+}
+
+export function TrackingShipment({ order }: TrackingShipmentProps) {
   const [open, setOpen] = useState(false);
   return (
     <DialogRoot lazyMount open={open} onOpenChange={(e) => setOpen(e.open)}>
@@ -43,66 +48,48 @@ export function TrackingShipment() {
             <Box spaceY={3}>
               <Box>
                 <Text>Kurir</Text>
-                <Text fontWeight={'medium'}>J&T-Regular</Text>
+                <Text fontWeight={'medium'}>{order?.courier.company}</Text>
               </Box>
               <Box>
                 <Text>No. Resi</Text>
-                <Text fontWeight={'medium'}>JT6268865922</Text>
+                <Text fontWeight={'medium'}>{order?.courier.waybill_id}</Text>
               </Box>
               <Box>
                 <Text>Pengirim</Text>
-                <Text fontWeight={'medium'}>Bakulan Store</Text>
+                <Text fontWeight={'medium'}>{order?.origin.contact_name}</Text>
               </Box>
             </Box>
             <Box>
               <Box>
                 <Text>Penerima</Text>
-                <Text fontWeight={'medium'}>Bambang Pamungkas</Text>
+                <Text fontWeight={'medium'}>
+                  {order?.destination.contact_name}
+                </Text>
                 <Flex>
-                  <Text>Jl. Ki Hajar Dewantoro,</Text>
-                  <Text>Kec. Ciputat</Text>
+                  <Text>{order?.destination.address}</Text>
                 </Flex>
-                <Text>Kota Tangerang Selatan</Text>
               </Box>
             </Box>
           </Flex>
           <Flex gap={2} pt={2}>
             <Text>Status:</Text>
-            <Text fontWeight={'medium'}>Dalam Proses Pengiriman</Text>
+            <Text fontWeight={'medium'}>{order?.status}</Text>
           </Flex>
           <Box borderWidth={'1px'} p={2} rounded={'md'}>
             <TimelineRoot maxW="400px">
-              <TimelineItem>
-                <TimelineConnector>
-                  <LuShip />
-                </TimelineConnector>
-                <TimelineContent>
-                  <TimelineTitle>Product Shipped</TimelineTitle>
-                  <TimelineDescription>13th May 2021</TimelineDescription>
-                </TimelineContent>
-              </TimelineItem>
-
-              <TimelineItem>
-                <TimelineConnector>
-                  <LuCheck />
-                </TimelineConnector>
-                <TimelineContent>
-                  <TimelineTitle textStyle="sm">Order Confirmed</TimelineTitle>
-                  <TimelineDescription>18th May 2021</TimelineDescription>
-                </TimelineContent>
-              </TimelineItem>
-
-              <TimelineItem>
-                <TimelineConnector>
-                  <LuPackage />
-                </TimelineConnector>
-                <TimelineContent>
-                  <TimelineTitle textStyle="sm">Order Delivered</TimelineTitle>
-                  <TimelineDescription>
-                    20th May 2021, 10:30am
-                  </TimelineDescription>
-                </TimelineContent>
-              </TimelineItem>
+              {order?.courier.history.map((history, index) => (
+                <TimelineItem key={index}>
+                  <TimelineConnector>
+                    <LuPackage />
+                  </TimelineConnector>
+                  <TimelineContent>
+                    <TimelineTitle>{history.status}</TimelineTitle>
+                    <TimelineDescription>
+                      {history.updated_at}
+                    </TimelineDescription>
+                  </TimelineContent>
+                </TimelineItem>
+              ))}
             </TimelineRoot>
           </Box>
         </DialogBody>
