@@ -70,7 +70,7 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
       if (token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/provinces`,
+            `${apiURL}/locations/api/provinces`,
             {
               method: 'GET',
               headers: {
@@ -102,7 +102,7 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
       if (provinceCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/cities/${provinceCode}`,
+            `${apiURL}/locations/api/cities/${provinceCode}`,
             {
               method: 'GET',
               headers: {
@@ -139,7 +139,7 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
       if (cityCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/districts/${cityCode}`,
+            `${apiURL}/locations/api/districts/${cityCode}`,
             {
               method: 'GET',
               headers: {
@@ -177,7 +177,7 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
       if (districtCode && token) {
         try {
           const response = await fetch(
-            `http://localhost:3000/api/locations/api/villages/${districtCode}`,
+            `${apiURL}/locations/api/villages/${districtCode}`,
             {
               method: 'GET',
               headers: {
@@ -266,7 +266,7 @@ const DialogEditLocation: React.FC<DialogEditLocationProps> = ({
 
   const updateLocation = async (data: LocationData) => {
     const response = await axios.put(
-      `http://localhost:3000/api/locations/${locationId}`,
+      `${apiURL}/locations/${locationId}`,
       data,
       {
         headers: {
