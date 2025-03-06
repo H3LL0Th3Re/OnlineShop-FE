@@ -245,7 +245,7 @@ export const DialogDataBuyer = () => {
       destination_contact_email: formData.email,
       destination_address: `${formData.detail_address}, ${getLabelByValue(provinces, formData.province)}, ${getLabelByValue(districts, formData.district)}, ${getLabelByValue(villages, formData.sub_district)}, ${getLabelByValue(cities, formData.city)}`,
       destination_postal_code: formData.postal_code,
-
+      storeId: (await stores).store.id,
       delivery_type: 'now',
       items: [
         {
