@@ -20,7 +20,7 @@ import {
 import axios from 'axios';
 import { MdEditLocationAlt } from 'react-icons/md';
 import { FaLocationDot } from 'react-icons/fa6';
-
+import { apiURL } from '@/utils/api-url';
 interface DropdownOption {
   label: string;
   value: string;
